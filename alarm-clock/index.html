@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔔 鬧鐘 APP</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f1a;
+      --card:      #1a1a2e;
+      --card2:     #16213e;
+      --accent:    #e94560;
+      --accent2:   #0f3460;
+      --text:      #eaeaea;
+      --muted:     #888;
+      --green:     #2ecc71;
+      --yellow:    #f39c12;
+      --radius:    16px;
+      --shadow:    0 8px 32px rgba(0,0,0,.45);
+    }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* ── Digital Clock ── */
+    .clock-wrap {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 40px;
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .clock-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(233,69,96,.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    #clock {
+      font-size: clamp(3rem, 12vw, 5.5rem);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 4px;
+      color: var(--text);
+      text-shadow: 0 0 32px rgba(233,69,96,.4);
+    }
+
+    #date {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: .95rem;
+      letter-spacing: 1px;
+    }
+
+    /* ── Add Alarm Form ── */
+    .add-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px 24px;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 24px;
+    }
+    .add-section h2 { font-size: 1rem; color: var(--muted); margin-bottom: 14px; letter-spacing: 1px; }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+    .form-group label { font-size: .8rem; color: var(--muted); }
+    .form-group input, .form-group select {
+      background: var(--bg);
+      border: 1px solid #2a2a3e;
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    .form-group input[type="time"] { font-size: 1.15rem; letter-spacing: 2px; }
+
+    /* repeat chips */
+    .repeat-wrap { margin-top: 12px; }
+    .repeat-wrap label { font-size: .8rem; color: var(--muted); display: block; margin-bottom: 6px; }
+    .day-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .day-chip {
+      background: var(--bg);
+      border: 1px solid #2a2a3e;
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .78rem;
+      padding: 4px 12px;
+      transition: all .15s;
+      user-select: none;
+    }
+    .day-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+    .btn-add {
+      margin-top: 16px;
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px;
+      letter-spacing: 1px;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn-add:hover { opacity: .88; }
+    .btn-add:active { transform: scale(.97); }
+
+    /* ── Alarm List ── */
+    .list-section {
+      width: 100%;
+      max-width: 480px;
+    }
+    .list-section h2 { font-size: 1rem; color: var(--muted); margin-bottom: 12px; letter-spacing: 1px; }
+
+    .alarm-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .alarm-card {
+      background: var(--card2);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.3);
+      transition: opacity .3s;
+    }
+    .alarm-card.off { opacity: .45; }
+
+    .alarm-time {
+      font-size: 2rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      min-width: 90px;
+    }
+    .alarm-info { flex: 1; }
+    .alarm-label { font-size: .9rem; color: var(--text); }
+    .alarm-meta  { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #2a2a3e;
+      border-radius: 999px;
+      transition: background .2s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      left: 3px;
+      top: 3px;
+      transition: transform .2s;
+    }
+    .toggle input:checked + .slider { background: var(--green); }
+    .toggle input:checked + .slider::before { transform: translateX(20px); }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 4px;
+      transition: color .15s;
+    }
+    .btn-del:hover { color: var(--accent); }
+
+    .empty-msg {
+      text-align: center;
+      color: var(--muted);
+      padding: 32px 0;
+      font-size: .95rem;
+    }
+
+    /* ── Ringing Overlay ── */
+    #ring-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      text-align: center;
+      padding: 24px;
+    }
+    #ring-overlay.show { display: flex; }
+
+    .ring-icon {
+      font-size: 5rem;
+      animation: ring-shake 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes ring-shake {
+      from { transform: rotate(-15deg) scale(1); }
+      to   { transform: rotate( 15deg) scale(1.1); }
+    }
+
+    .ring-time  { font-size: 3.5rem; font-weight: 700; letter-spacing: 4px; }
+    .ring-label { font-size: 1.2rem; color: var(--muted); }
+    .ring-snooze-info { font-size: .85rem; color: var(--yellow); }
+
+    .ring-btns { display: flex; gap: 16px; margin-top: 8px; }
+
+    .btn-stop, .btn-snooze {
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 32px;
+      transition: opacity .2s, transform .1s;
+      letter-spacing: 1px;
+    }
+    .btn-stop   { background: var(--accent); color: #fff; }
+    .btn-snooze { background: var(--yellow);  color: #000; }
+    .btn-stop:hover, .btn-snooze:hover { opacity: .85; }
+    .btn-stop:active, .btn-snooze:active { transform: scale(.96); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #2ecc71;
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: .95rem;
+      opacity: 0;
+      transition: all .3s;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<h1>⏰ 鬧鐘</h1>
+
+<!-- Digital Clock -->
+<div class="clock-wrap">
+  <div id="clock">00:00:00</div>
+  <div id="date">載入中…</div>
+</div>
+
+<!-- Add Alarm -->
+<div class="add-section">
+  <h2>➕ 新增鬧鐘</h2>
+  <div class="form-row">
+    <div class="form-group" style="flex:2">
+      <label>時間</label>
+      <input type="time" id="inp-time" value="07:00" />
+    </div>
+    <div class="form-group" style="flex:3">
+      <label>標籤（選填）</label>
+      <input type="text" id="inp-label" placeholder="例：起床、吃藥…" maxlength="20" />
+    </div>
+  </div>
+
+  <div class="repeat-wrap">
+    <label>重複</label>
+    <div class="day-chips" id="day-chips">
+      <span class="day-chip" data-d="0">日</span>
+      <span class="day-chip" data-d="1">一</span>
+      <span class="day-chip" data-d="2">二</span>
+      <span class="day-chip" data-d="3">三</span>
+      <span class="day-chip" data-d="4">四</span>
+      <span class="day-chip" data-d="5">五</span>
+      <span class="day-chip" data-d="6">六</span>
+    </div>
+  </div>
+
+  <button class="btn-add" id="btn-add">新增鬧鐘</button>
+</div>
+
+<!-- Alarm List -->
+<div class="list-section">
+  <h2>📋 我的鬧鐘</h2>
+  <div class="alarm-list" id="alarm-list">
+    <div class="empty-msg">尚未設定任何鬧鐘</div>
+  </div>
+</div>
+
+<!-- Ringing Overlay -->
+<div id="ring-overlay">
+  <div class="ring-icon">🔔</div>
+  <div class="ring-time"  id="ring-time">--:--</div>
+  <div class="ring-label" id="ring-label">鬧鐘響了！</div>
+  <div class="ring-snooze-info" id="ring-snooze-info"></div>
+  <div class="ring-btns">
+    <button class="btn-snooze" id="btn-snooze">貪睡 5 分鐘 😴</button>
+    <button class="btn-stop"   id="btn-stop">關閉</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+const SNOOZE_MIN = 5;
+const DAY_NAMES  = ['日','一','二','三','四','五','六'];
+const WEEKDAY_LABELS = { '12345':'週一至五', '1234567':'每天', '67':'週末' };
+
+let alarms = loadAlarms();
+let ringAudio   = null;   // AudioContext oscillator
+let currentRing = null;   // alarm obj currently ringing
+let snoozeTimer = null;
+let snoozeCount = 0;
+
+/* ═══════════════════════════════════════════
+   CLOCK
+═══════════════════════════════════════════ */
+const clockEl = document.getElementById('clock');
+const dateEl  = document.getElementById('date');
+
+const WEEK_TW = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+const MONTH_TW = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function tickClock(){
+  const now = new Date();
+  const H = pad(now.getHours()), M = pad(now.getMinutes()), S = pad(now.getSeconds());
+  clockEl.textContent = `${H}:${M}:${S}`;
+  dateEl.textContent  = `${now.getFullYear()} 年 ${MONTH_TW[now.getMonth()]} 月 ${now.getDate()} 日　${WEEK_TW[now.getDay()]}`;
+  checkAlarms(now);
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ═══════════════════════════════════════════
+   CHECK ALARMS
+═══════════════════════════════════════════ */
+let lastTriggered = {}; // alarmId → 'YYYY-MM-DD HH:MM'
+
+function checkAlarms(now){
+  if(currentRing) return; // already ringing
+
+  const HH = pad(now.getHours()), MM = pad(now.getMinutes());
+  const curTime  = `${HH}:${MM}`;
+  const curDay   = now.getDay(); // 0=Sun
+  const todayKey = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+
+  for(const a of alarms){
+    if(!a.enabled) continue;
+    if(a.time !== curTime) continue;
+    // repeat check
+    if(a.days.length > 0 && !a.days.includes(String(curDay))) continue;
+    // prevent double trigger in same minute
+    const key = `${todayKey} ${curTime}`;
+    if(lastTriggered[a.id] === key) continue;
+
+    lastTriggered[a.id] = key;
+    triggerAlarm(a);
+    break;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TRIGGER / RING
+═══════════════════════════════════════════ */
+function triggerAlarm(alarm){
+  currentRing = alarm;
+  snoozeCount = 0;
+  showRingOverlay(alarm);
+  playBeep();
+}
+
+function showRingOverlay(alarm){
+  document.getElementById('ring-time').textContent  = alarm.time;
+  document.getElementById('ring-label').textContent = alarm.label || '鬧鐘響了！';
+  document.getElementById('ring-snooze-info').textContent =
+    snoozeCount > 0 ? `已貪睡 ${snoozeCount} 次` : '';
+  document.getElementById('ring-overlay').classList.add('show');
+}
+
+function stopRinging(){
+  stopBeep();
+  document.getElementById('ring-overlay').classList.remove('show');
+  currentRing = null;
+  snoozeCount = 0;
+  clearSnooze();
+}
+
+/* Snooze */
+document.getElementById('btn-snooze').addEventListener('click', () => {
+  stopBeep();
+  document.getElementById('ring-overlay').classList.remove('show');
+  snoozeCount++;
+  const alarm = currentRing;
+  currentRing = null; // allow re-trigger
+
+  showToast(`貪睡 ${SNOOZE_MIN} 分鐘 😴`);
+
+  clearSnooze();
+  snoozeTimer = setTimeout(() => {
+    currentRing = null;
+    // update lastTriggered so re-trigger works
+    const now = new Date(Date.now() + SNOOZE_MIN * 60000);
+    const key = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${alarm.time}`;
+    delete lastTriggered[alarm.id];
+    // Force trigger after snooze
+    currentRing = null;
+    snoozeCount = (alarm._snoozeCount || 0) + 1;
+    alarm._snoozeCount = snoozeCount;
+    currentRing = alarm;
+    showRingOverlay(alarm);
+    playBeep();
+  }, SNOOZE_MIN * 60 * 1000);
+});
+
+document.getElementById('btn-stop').addEventListener('click', stopRinging);
+
+function clearSnooze(){ if(snoozeTimer){ clearTimeout(snoozeTimer); snoozeTimer = null; } }
+
+/* ═══════════════════════════════════════════
+   WEB AUDIO BEEP
+═══════════════════════════════════════════ */
+let audioCtx = null;
+let beepInterval = null;
+
+function playBeep(){
+  stopBeep();
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let count = 0;
+  function doBeep(){
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = count % 2 === 0 ? 880 : 660;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.35);
+    count++;
+  }
+  doBeep();
+  beepInterval = setInterval(doBeep, 600);
+}
+
+function stopBeep(){
+  if(beepInterval){ clearInterval(beepInterval); beepInterval = null; }
+}
+
+/* ═══════════════════════════════════════════
+   UI – DAY CHIPS
+═══════════════════════════════════════════ */
+const chipEls = document.querySelectorAll('.day-chip');
+chipEls.forEach(chip => chip.addEventListener('click', () => chip.classList.toggle('on')));
+
+function getSelectedDays(){
+  return [...chipEls].filter(c => c.classList.contains('on')).map(c => c.dataset.d);
+}
+
+function repeatLabel(days){
+  if(!days || days.length === 0) return '一次';
+  if(days.length === 7) return '每天';
+  const key = [...days].sort().join('');
+  return WEEKDAY_LABELS[key] || days.map(d => DAY_NAMES[d]).join('、');
+}
+
+/* ═══════════════════════════════════════════
+   ADD ALARM
+═══════════════════════════════════════════ */
+document.getElementById('btn-add').addEventListener('click', () => {
+  const time  = document.getElementById('inp-time').value;
+  const label = document.getElementById('inp-label').value.trim();
+  const days  = getSelectedDays();
+
+  if(!time){ showToast('請選擇時間！', 'error'); return; }
+
+  const alarm = { id: Date.now().toString(), time, label, days, enabled: true };
+  alarms.push(alarm);
+  saveAlarms();
+  renderList();
+  document.getElementById('inp-label').value = '';
+  chipEls.forEach(c => c.classList.remove('on'));
+  showToast('✅ 鬧鐘新增成功！');
+});
+
+/* ═══════════════════════════════════════════
+   RENDER LIST
+═══════════════════════════════════════════ */
+function renderList(){
+  const listEl = document.getElementById('alarm-list');
+  if(alarms.length === 0){
+    listEl.innerHTML = '<div class="empty-msg">尚未設定任何鬧鐘</div>';
+    return;
+  }
+
+  // sort by time
+  const sorted = [...alarms].sort((a,b) => a.time.localeCompare(b.time));
+
+  listEl.innerHTML = sorted.map(a => `
+    <div class="alarm-card ${a.enabled ? '' : 'off'}" data-id="${a.id}">
+      <div class="alarm-time">${a.time}</div>
+      <div class="alarm-info">
+        <div class="alarm-label">${a.label || '鬧鐘'}</div>
+        <div class="alarm-meta">${repeatLabel(a.days)}</div>
+      </div>
+      <label class="toggle" title="${a.enabled ? '已啟用' : '已停用'}">
+        <input type="checkbox" class="chk-toggle" data-id="${a.id}" ${a.enabled ? 'checked' : ''} />
+        <span class="slider"></span>
+      </label>
+      <button class="btn-del" data-id="${a.id}" title="刪除">🗑</button>
+    </div>
+  `).join('');
+
+  listEl.querySelectorAll('.chk-toggle').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const a = alarms.find(x => x.id === chk.dataset.id);
+      if(a){ a.enabled = chk.checked; saveAlarms(); renderList(); }
+    });
+  });
+
+  listEl.querySelectorAll('.btn-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      alarms = alarms.filter(x => x.id !== btn.dataset.id);
+      saveAlarms();
+      renderList();
+      showToast('🗑 鬧鐘已刪除');
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════
+   PERSISTENCE
+═══════════════════════════════════════════ */
+function saveAlarms(){ localStorage.setItem('alarms_v1', JSON.stringify(alarms)); }
+function loadAlarms(){
+  try { return JSON.parse(localStorage.getItem('alarms_v1')) || []; }
+  catch { return []; }
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, type){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = type === 'error' ? '#e94560' : '#2ecc71';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ── Init ── */
+renderList();
+</script>
+</body>
+</html>
