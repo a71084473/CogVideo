@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毛孩之家｜流浪動物領養平台</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== 導覽列 ===== -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a class="logo" href="#home" data-nav="home">🐾 毛孩之家</a>
+    <nav class="nav-links">
+      <a href="#home" data-nav="home" class="active">首頁</a>
+      <a href="#stories" data-nav="stories">領養故事牆</a>
+      <a href="#certificate" data-nav="certificate">領養證書</a>
+      <a href="#shop" data-nav="shop">紀念品訂製</a>
+      <a href="#journey" data-nav="journey">我的領養旅程</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ===== 首頁 ===== -->
+<section id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-text">
+      <h1>給浪浪一個家，<br>讓愛不再流浪 🏠</h1>
+      <p>每一次領養，都是一段新生命旅程的開始。<br>從相遇、領養證書、紀念品到長期關懷，我們陪你走完全程。</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" data-nav="stories">看看領養故事 →</button>
+        <button class="btn btn-outline" data-nav="certificate">產生我的領養證書</button>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-pet">🐕</div>
+      <div class="hero-pet">🐈</div>
+      <div class="hero-pet">🐇</div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><strong id="stat-adopted">0</strong><span>成功領養</span></div>
+    <div class="stat"><strong id="stat-waiting">0</strong><span>等待中的毛孩</span></div>
+    <div class="stat"><strong id="stat-likes">0</strong><span>累積祝福</span></div>
+  </div>
+
+  <h2 class="section-title">等待領養的毛孩</h2>
+  <div id="waiting-grid" class="card-grid"></div>
+</section>
+
+<!-- ===== 功能 3：領養故事牆 ===== -->
+<section id="page-stories" class="page">
+  <h2 class="section-title">領養故事牆 💛</h2>
+  <p class="section-sub">最新成功領養動態，留下你的祝福吧！</p>
+
+  <div class="filter-bar">
+    <select id="filter-species">
+      <option value="">全部種類</option>
+      <option value="狗">狗</option>
+      <option value="貓">貓</option>
+      <option value="兔">兔</option>
+    </select>
+    <select id="filter-region">
+      <option value="">全部地區</option>
+      <option value="台北">台北</option>
+      <option value="台中">台中</option>
+      <option value="高雄">高雄</option>
+      <option value="花蓮">花蓮</option>
+    </select>
+    <select id="filter-sort">
+      <option value="newest">最新領養</option>
+      <option value="oldest">最早領養</option>
+      <option value="likes">最多祝福</option>
+    </select>
+  </div>
+
+  <div id="story-wall" class="story-grid"></div>
+</section>
+
+<!-- ===== 功能 1：即時領養證書系統 ===== -->
+<section id="page-certificate" class="page">
+  <h2 class="section-title">即時領養證書 📜</h2>
+  <p class="section-sub">領養成功後，立即生成專屬電子證書，下載或分享你們的故事。</p>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>證書資料</h3>
+      <label>選擇毛孩
+        <select id="cert-animal"></select>
+      </label>
+      <label>或上傳毛孩照片
+        <input type="file" id="cert-photo" accept="image/*">
+      </label>
+      <label>毛孩名字
+        <input type="text" id="cert-pet-name" placeholder="例如：小白" maxlength="12">
+      </label>
+      <label>領養人名字
+        <input type="text" id="cert-owner-name" placeholder="例如：王小明" maxlength="16">
+      </label>
+      <label>領養日期
+        <input type="date" id="cert-date">
+      </label>
+      <button class="btn btn-primary" id="cert-generate">✨ 生成證書</button>
+
+      <div id="cert-actions" class="cert-actions hidden">
+        <a class="btn btn-outline" id="cert-download" download="adoption-certificate.png">⬇ 下載證書</a>
+        <div class="share-row">
+          <button class="share-btn fb" data-share="facebook" title="分享到 Facebook">f</button>
+          <button class="share-btn ig" data-share="instagram" title="分享到 Instagram">IG</button>
+          <button class="share-btn line" data-share="line" title="分享到 LINE">LINE</button>
+        </div>
+        <p class="hint">小提醒：Instagram 不支援網頁直接分享，將為你下載圖片並複製貼文文字。</p>
+      </div>
+    </div>
+
+    <div class="panel cert-preview-panel">
+      <h3>證書預覽</h3>
+      <canvas id="cert-canvas" width="900" height="640"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 功能 2：個性化紀念品訂製 ===== -->
+<section id="page-shop" class="page">
+  <h2 class="section-title">個性化紀念品訂製 🎁</h2>
+  <p class="section-sub">把毛孩的模樣帶在身邊——即時預覽、客製祝福語、一站完成結帳。</p>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>訂製選項</h3>
+      <label>商品類型
+        <select id="shop-product">
+          <option value="mug" data-price="350">馬克杯 — NT$350</option>
+          <option value="tag" data-price="180">寵物吊牌 — NT$180</option>
+          <option value="tshirt" data-price="490">T 恤 — NT$490</option>
+        </select>
+      </label>
+      <label>選擇毛孩
+        <select id="shop-animal"></select>
+      </label>
+      <label>或上傳毛孩照片
+        <input type="file" id="shop-photo" accept="image/*">
+      </label>
+      <label>毛孩名字
+        <input type="text" id="shop-pet-name" placeholder="印在商品上的名字" maxlength="12">
+      </label>
+      <label>祝福語（選填）
+        <input type="text" id="shop-message" placeholder="例如：永遠的家人 ❤" maxlength="20">
+      </label>
+      <label>數量
+        <input type="number" id="shop-qty" min="1" max="20" value="1">
+      </label>
+      <div class="price-row">小計：<strong id="shop-price">NT$350</strong></div>
+      <button class="btn btn-primary" id="shop-checkout">🛒 前往結帳</button>
+    </div>
+
+    <div class="panel">
+      <h3>即時預覽</h3>
+      <canvas id="shop-canvas" width="720" height="560"></canvas>
+    </div>
+  </div>
+
+  <h3 class="section-title small">我的訂單與物流追蹤 🚚</h3>
+  <div id="order-list" class="order-list">
+    <p class="empty-hint">尚無訂單，快訂製一份專屬紀念品吧！</p>
+  </div>
+</section>
+
+<!-- ===== 功能 4：領養人長期關懷模組 ===== -->
+<section id="page-journey" class="page">
+  <h2 class="section-title">我的領養旅程 🌱</h2>
+  <p class="section-sub">領養不是終點，而是陪伴的起點。我們會在第 1、3、6 個月寄送關懷提醒。</p>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>關懷提醒排程 ⏰</h3>
+      <div id="reminder-list"></div>
+      <h3 style="margin-top:24px">近況問卷 📋</h3>
+      <form id="survey-form">
+        <label>毛孩目前的健康狀況？
+          <select id="survey-health">
+            <option>非常好</option><option>良好</option><option>普通</option><option>需要協助</option>
+          </select>
+        </label>
+        <label>毛孩適應新家的程度？
+          <select id="survey-adapt">
+            <option>完全融入</option><option>漸入佳境</option><option>還在適應</option><option>遇到困難</option>
+          </select>
+        </label>
+        <label>想對我們說的話（選填）
+          <textarea id="survey-note" rows="3" placeholder="分享你們的近況..."></textarea>
+        </label>
+        <button class="btn btn-primary" type="submit">送出問卷</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h3>我的徽章 🏅</h3>
+      <div id="badge-grid" class="badge-grid"></div>
+      <h3 style="margin-top:24px">旅程時間線 🗓</h3>
+      <div id="timeline" class="timeline"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>🐾 毛孩之家 — 領養代替購買 · 本頁面為功能設計原型（Demo）</p>
+</footer>
+
+<!-- 結帳彈窗 -->
+<div id="checkout-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>結帳 💳</h3>
+    <div id="checkout-summary" class="checkout-summary"></div>
+    <label>收件人姓名 <input type="text" id="ck-name" placeholder="王小明"></label>
+    <label>收件地址 <input type="text" id="ck-address" placeholder="台北市…"></label>
+    <label>付款方式
+      <select id="ck-payment">
+        <option>信用卡</option><option>LINE Pay</option><option>貨到付款</option>
+      </select>
+    </label>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="ck-cancel">取消</button>
+      <button class="btn btn-primary" id="ck-confirm">確認付款</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/stories.js"></script>
+<script src="js/certificate.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/journey.js"></script>
+</body>
+</html>
