@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小蜜蜂 BEE INVADERS</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    color: #0f0;
+  }
+  #wrap { position: relative; }
+  canvas {
+    display: block;
+    image-rendering: pixelated;
+    border: 2px solid #333;
+    background: #000;
+  }
+  /* CRT 掃描線效果 */
+  #wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.25) 3px
+    );
+  }
+  #hint {
+    margin-top: 10px;
+    color: #555;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="game" width="480" height="640"></canvas></div>
+<div id="hint">← → 移動 ｜ 空白鍵 射擊 ｜ P 暫停 ｜ ENTER 開始</div>
+<script>
+'use strict';
+const cvs = document.getElementById('game');
+const ctx = cvs.getContext('2d');
+const W = cvs.width, H = cvs.height;
+
+// ---------- 音效（WebAudio 合成，免外部檔案） ----------
+let actx = null;
+function beep(freq, dur, type = 'square', vol = 0.08, slide = 0) {
+  if (!actx) return;
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, actx.currentTime);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), actx.currentTime + dur);
+  g.gain.setValueAtTime(vol, actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+  o.connect(g).connect(actx.destination);
+  o.start();
+  o.stop(actx.currentTime + dur);
+}
+const sfx = {
+  shoot:   () => beep(880, 0.08, 'square', 0.05, -500),
+  hit:     () => beep(220, 0.15, 'sawtooth', 0.08, -150),
+  dive:    () => beep(440, 0.25, 'triangle', 0.05, -300),
+  die:     () => beep(120, 0.5, 'sawtooth', 0.12, -80),
+  wave:    () => { beep(523, 0.1); setTimeout(() => beep(659, 0.1), 110); setTimeout(() => beep(784, 0.15), 220); },
+};
+
+// ---------- 像素圖案（每格 3px） ----------
+const PX = 3;
+function drawSprite(pattern, colors, x, y, frame = 0) {
+  const rows = pattern[frame % pattern.length];
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < rows[r].length; c++) {
+      const ch = rows[r][c];
+      if (ch !== '.') {
+        ctx.fillStyle = colors[ch];
+        ctx.fillRect(x + c * PX, y + r * PX, PX, PX);
+      }
+    }
+  }
+}
+
+// 蜜蜂（兩格翅膀動畫）
+const BEE = [
+  ['..1..1..',
+   '.111111.',
+   '12211221',
+   '11111111',
+   '.1.11.1.',
+   '2..11..2'],
+  ['2.1..1.2',
+   '.111111.',
+   '12211221',
+   '11111111',
+   '.1.11.1.',
+   '...11...'],
+];
+const BEE_COLORS    = { '1': '#ffd000', '2': '#ff7800' };
+const BOSS_COLORS   = { '1': '#ff4060', '2': '#ff90b0' };
+const DRONE_COLORS  = { '1': '#40c0ff', '2': '#a0e8ff' };
+
+// 玩家戰機
+const SHIP = [
+  ['...11...',
+   '...11...',
+   '.111111.',
+   '11122111',
+   '11122111',
+   '1.1221.1'],
+];
+const SHIP_COLORS = { '1': '#30ff60', '2': '#ffffff' };
+
+const SPR_W = 8 * PX, SPR_H = 6 * PX;
+
+// ---------- 遊戲狀態 ----------
+const ST = { TITLE: 0, PLAY: 1, DEAD: 2, OVER: 3, WAVE: 4 };
+let state = ST.TITLE;
+let score = 0, hiScore = +(localStorage.getItem('beeHiScore') || 0);
+let lives = 3, wave = 1;
+let stateTimer = 0;
+let paused = false;
+
+const player = { x: W / 2 - SPR_W / 2, y: H - 70, speed: 4.2, cooldown: 0 };
+let bullets = [];      // 玩家子彈
+let enemyBullets = [];
+let enemies = [];
+let particles = [];
+let stars = [];
+let frame = 0;
+
+// 星空背景
+for (let i = 0; i < 70; i++) {
+  stars.push({ x: Math.random() * W, y: Math.random() * H, s: Math.random() * 1.5 + 0.4 });
+}
+
+// ---------- 蜂群編隊 ----------
+const COLS = 8, ROWS = 5;
+const FORM_X = 60, FORM_Y = 70, GAP_X = 46, GAP_Y = 38;
+let formOffset = 0, formDir = 1;
+
+function spawnWave() {
+  enemies = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const kind = r === 0 ? 'boss' : (r <= 2 ? 'bee' : 'drone');
+      enemies.push({
+        row: r, col: c,
+        kind,
+        colors: kind === 'boss' ? BOSS_COLORS : (kind === 'bee' ? BEE_COLORS : DRONE_COLORS),
+        score: kind === 'boss' ? 150 : (kind === 'bee' ? 80 : 50),
+        diving: false,
+        t: 0,
+        x: 0, y: 0,
+        path: null,
+      });
+    }
+  }
+  formOffset = 0; formDir = 1;
+}
+
+function formationPos(e) {
+  return {
+    x: FORM_X + e.col * GAP_X + formOffset,
+    y: FORM_Y + e.row * GAP_Y + Math.sin(frame / 40 + e.col * 0.6) * 3,
+  };
+}
+
+// 俯衝路徑：三次貝茲曲線往玩家方向衝
+function startDive(e) {
+  const p = formationPos(e);
+  const targetX = player.x + (Math.random() - 0.5) * 120;
+  e.diving = true;
+  e.t = 0;
+  e.path = {
+    p0: { x: p.x, y: p.y },
+    p1: { x: p.x + (Math.random() < 0.5 ? -150 : 150), y: p.y + 120 },
+    p2: { x: targetX + (Math.random() - 0.5) * 100, y: H * 0.6 },
+    p3: { x: targetX, y: H + 60 },
+  };
+  sfx.dive();
+}
+
+function bezier(p, t) {
+  const u = 1 - t;
+  return {
+    x: u*u*u*p.p0.x + 3*u*u*t*p.p1.x + 3*u*t*t*p.p2.x + t*t*t*p.p3.x,
+    y: u*u*u*p.p0.y + 3*u*u*t*p.p1.y + 3*u*t*t*p.p2.y + t*t*t*p.p3.y,
+  };
+}
+
+// ---------- 輸入 ----------
+const keys = {};
+addEventListener('keydown', e => {
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
+  keys[e.key] = true;
+  if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); }
+  if (e.key === 'Enter' && (state === ST.TITLE || state === ST.OVER)) startGame();
+  if ((e.key === 'p' || e.key === 'P') && state === ST.PLAY) paused = !paused;
+});
+addEventListener('keyup', e => { keys[e.key] = false; });
+
+function startGame() {
+  score = 0; lives = 3; wave = 1;
+  bullets = []; enemyBullets = []; particles = [];
+  player.x = W / 2 - SPR_W / 2;
+  spawnWave();
+  state = ST.WAVE;
+  stateTimer = 90;
+  sfx.wave();
+}
+
+// ---------- 爆炸粒子 ----------
+function explode(x, y, color, n = 14) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const sp = Math.random() * 3 + 1;
+    particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 30 + Math.random() * 15, color });
+  }
+}
+
+// ---------- 更新 ----------
+function update() {
+  frame++;
+  // 星空捲動
+  for (const s of stars) {
+    s.y += s.s;
+    if (s.y > H) { s.y = 0; s.x = Math.random() * W; }
+  }
+
+  if (state === ST.WAVE) {
+    if (--stateTimer <= 0) state = ST.PLAY;
+    return;
+  }
+  if (state === ST.DEAD) {
+    if (--stateTimer <= 0) {
+      if (lives <= 0) {
+        state = ST.OVER;
+        if (score > hiScore) { hiScore = score; localStorage.setItem('beeHiScore', hiScore); }
+      } else {
+        player.x = W / 2 - SPR_W / 2;
+        enemyBullets = [];
+        state = ST.PLAY;
+      }
+    }
+    updateBits();
+    return;
+  }
+  if (state !== ST.PLAY || paused) return;
+
+  // 玩家移動 / 射擊
+  if (keys['ArrowLeft'] || keys['a'])  player.x -= player.speed;
+  if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
+  player.x = Math.max(8, Math.min(W - SPR_W - 8, player.x));
+  if (player.cooldown > 0) player.cooldown--;
+  if (keys[' '] && player.cooldown === 0 && bullets.length < 3) {
+    bullets.push({ x: player.x + SPR_W / 2 - 1.5, y: player.y - 6 });
+    player.cooldown = 14;
+    sfx.shoot();
+  }
+
+  // 編隊左右移動（隨關卡加速）
+  const formSpeed = 0.6 + wave * 0.15;
+  formOffset += formDir * formSpeed;
+  if (formOffset > 50 || formOffset < -50) formDir *= -1;
+
+  // 敵人位置 / 俯衝
+  const diveChance = Math.min(0.012, 0.003 + wave * 0.0015);
+  const maxDivers = Math.min(4, 1 + Math.floor(wave / 2));
+  let divers = enemies.filter(e => e.diving).length;
+
+  for (const e of enemies) {
+    if (e.diving) {
+      e.t += 0.006 + wave * 0.0008;
+      const p = bezier(e.path, Math.min(e.t, 1));
+      e.x = p.x; e.y = p.y;
+      // 俯衝中開火
+      if (Math.random() < 0.02 && e.y < player.y - 80) {
+        enemyBullets.push({ x: e.x + SPR_W / 2, y: e.y + SPR_H, vy: 3.5 + wave * 0.2 });
+      }
+      if (e.t >= 1) { e.diving = false; e.path = null; } // 飛出底部後回編隊
+    } else {
+      const p = formationPos(e);
+      e.x = p.x; e.y = p.y;
+      if (divers < maxDivers && Math.random() < diveChance / enemies.length * 8) {
+        startDive(e);
+        divers++;
+      }
+    }
+  }
+
+  // 編隊偶爾直接開火
+  if (Math.random() < 0.01 + wave * 0.002 && enemies.length) {
+    const shooter = enemies[Math.floor(Math.random() * enemies.length)];
+    if (!shooter.diving) {
+      enemyBullets.push({ x: shooter.x + SPR_W / 2, y: shooter.y + SPR_H, vy: 2.8 + wave * 0.15 });
+    }
+  }
+
+  // 玩家子彈
+  for (const b of bullets) b.y -= 9;
+  bullets = bullets.filter(b => b.y > -10);
+
+  // 子彈 vs 敵人
+  for (const b of bullets) {
+    for (const e of enemies) {
+      if (b.dead || b.x + 3 < e.x || b.x > e.x + SPR_W || b.y + 8 < e.y || b.y > e.y + SPR_H) continue;
+      b.dead = true;
+      e.dead = true;
+      const pts = e.diving ? e.score * 2 : e.score; // 打中俯衝中的雙倍
+      score += pts;
+      explode(e.x + SPR_W / 2, e.y + SPR_H / 2, e.colors['1']);
+      sfx.hit();
+    }
+  }
+  bullets = bullets.filter(b => !b.dead);
+  enemies = enemies.filter(e => !e.dead);
+
+  // 敵彈
+  for (const b of enemyBullets) b.y += b.vy;
+  enemyBullets = enemyBullets.filter(b => b.y < H + 10);
+
+  // 玩家被擊中（敵彈或俯衝相撞）
+  const px = player.x, py = player.y;
+  let hit = enemyBullets.some(b => b.x > px + 3 && b.x < px + SPR_W - 3 && b.y > py && b.y < py + SPR_H);
+  if (!hit) {
+    hit = enemies.some(e => e.diving &&
+      e.x < px + SPR_W - 4 && e.x + SPR_W > px + 4 &&
+      e.y < py + SPR_H - 2 && e.y + SPR_H > py + 2);
+  }
+  if (hit) {
+    lives--;
+    explode(px + SPR_W / 2, py + SPR_H / 2, '#30ff60', 26);
+    sfx.die();
+    state = ST.DEAD;
+    stateTimer = 80;
+  }
+
+  // 過關
+  if (enemies.length === 0) {
+    wave++;
+    spawnWave();
+    bullets = []; enemyBullets = [];
+    state = ST.WAVE;
+    stateTimer = 90;
+    sfx.wave();
+  }
+
+  updateBits();
+}
+
+function updateBits() {
+  for (const p of particles) { p.x += p.vx; p.y += p.vy; p.life--; }
+  particles = particles.filter(p => p.life > 0);
+}
+
+// ---------- 繪製 ----------
+function pixelText(txt, x, y, size, color, center = false) {
+  ctx.fillStyle = color;
+  ctx.font = `bold ${size}px 'Courier New', monospace`;
+  ctx.textAlign = center ? 'center' : 'left';
+  ctx.fillText(txt, x, y);
+}
+
+function draw() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  // 星空
+  for (const s of stars) {
+    ctx.fillStyle = s.s > 1.2 ? '#aaa' : '#444';
+    ctx.fillRect(s.x, s.y, 2, 2);
+  }
+
+  if (state === ST.TITLE) {
+    drawTitle();
+    return;
+  }
+
+  // HUD
+  pixelText('SCORE', 14, 22, 13, '#888');
+  pixelText(String(score).padStart(6, '0'), 14, 40, 16, '#fff');
+  pixelText('HI-SCORE', W / 2, 22, 13, '#888', true);
+  pixelText(String(Math.max(score, hiScore)).padStart(6, '0'), W / 2, 40, 16, '#f44', true);
+  pixelText('WAVE ' + wave, W - 14 - 70, 22, 13, '#888');
+  // 命數
+  for (let i = 0; i < lives - 1; i++) {
+    drawSprite(SHIP, SHIP_COLORS, W - 40 - i * 30, 28);
+  }
+
+  // 敵人
+  const wing = Math.floor(frame / 12) % 2;
+  for (const e of enemies) drawSprite(BEE, e.colors, e.x, e.y, e.diving ? frame % 2 : wing);
+
+  // 玩家（死亡爆炸期間不畫）
+  if (state !== ST.DEAD) drawSprite(SHIP, SHIP_COLORS, player.x, player.y);
+
+  // 子彈
+  ctx.fillStyle = '#fff';
+  for (const b of bullets) ctx.fillRect(b.x, b.y, 3, 9);
+  ctx.fillStyle = '#ff5050';
+  for (const b of enemyBullets) ctx.fillRect(b.x - 1.5, b.y, 3, 8);
+
+  // 粒子
+  for (const p of particles) {
+    ctx.globalAlpha = Math.min(1, p.life / 20);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, 3, 3);
+  }
+  ctx.globalAlpha = 1;
+
+  if (state === ST.WAVE) {
+    pixelText('WAVE ' + wave, W / 2, H / 2 - 10, 30, '#ffd000', true);
+    pixelText('READY!', W / 2, H / 2 + 28, 18, '#30ff60', true);
+  }
+  if (state === ST.OVER) {
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(0, 0, W, H);
+    pixelText('GAME OVER', W / 2, H / 2 - 20, 36, '#ff4060', true);
+    pixelText('SCORE: ' + score, W / 2, H / 2 + 20, 18, '#fff', true);
+    if (score >= hiScore && score > 0) pixelText('★ NEW HI-SCORE! ★', W / 2, H / 2 + 50, 16, '#ffd000', true);
+    if (frame % 60 < 40) pixelText('PRESS ENTER', W / 2, H / 2 + 95, 16, '#30ff60', true);
+  }
+  if (paused && state === ST.PLAY) {
+    pixelText('PAUSED', W / 2, H / 2, 30, '#fff', true);
+  }
+}
+
+function drawTitle() {
+  const wing = Math.floor(frame / 12) % 2;
+  // 標題蜜蜂裝飾
+  drawSprite(BEE, BEE_COLORS, W / 2 - 90, 140 + Math.sin(frame / 30) * 8, wing);
+  drawSprite(BEE, BOSS_COLORS, W / 2 + 66, 140 + Math.cos(frame / 30) * 8, wing);
+  drawSprite(BEE, DRONE_COLORS, W / 2 - 12, 110 + Math.sin(frame / 25 + 1) * 8, wing);
+
+  pixelText('小 蜜 蜂', W / 2, 230, 52, '#ffd000', true);
+  pixelText('B E E   I N V A D E R S', W / 2, 268, 18, '#ff7800', true);
+
+  pixelText('HI-SCORE  ' + String(hiScore).padStart(6, '0'), W / 2, 330, 16, '#f44', true);
+
+  pixelText('★ 蜜蜂 50  蜂兵 80  蜂后 150 ★', W / 2, 390, 14, '#888', true);
+  pixelText('擊中俯衝中的敵人 分數加倍!', W / 2, 415, 14, '#888', true);
+
+  if (frame % 60 < 40) pixelText('PRESS ENTER TO START', W / 2, 500, 18, '#30ff60', true);
+  pixelText('← → 移動   SPACE 射擊   P 暫停', W / 2, 560, 13, '#555', true);
+}
+
+// ---------- 主迴圈 ----------
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
