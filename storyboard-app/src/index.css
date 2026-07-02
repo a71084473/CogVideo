@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 紙感底色：極淡的顆粒，維持黑白灰基調 */
+body {
+  @apply bg-paper antialiased;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+::selection {
+  background: #1a1a1a;
+  color: #fafaf8;
+}
