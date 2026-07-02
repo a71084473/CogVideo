@@ -3,6 +3,12 @@
 一個極簡、黑白線框、文藝感的前端原型：使用者輸入（或說出）一段故事，
 介面把它拆成「起、承、轉、合」四格電影分鏡表。
 
+支援兩種生成模式：
+
+- **Claude 真實生成**：在介面中設定 Anthropic API key 後，
+  由 `claude-opus-4-8` 依你的故事內容真實拆解出四格分鏡。
+- **Mock 示範模式**：未設定 key 時，以三組預寫分鏡輪替示範完整流程。
+
 > 這不是把故事變成插畫的工具。畫面中**不會出現主角、臉或身體**——
 > 只用房間、街道、窗、雨、海、走廊、門、光影與建築輪廓等背景場景，
 > 暗示故事的情緒。
@@ -12,6 +18,7 @@
 - React 18 + TypeScript
 - Vite 5
 - Tailwind CSS 3
+- `@anthropic-ai/sdk`（瀏覽器直連 Claude API）
 
 ## 快速開始
 
@@ -43,12 +50,26 @@ npm run preview  # 預覽 build 結果
 6. **複製分鏡表**：把四格分鏡整理成純文字複製到剪貼簿，
    可直接貼進企劃書或筆記。
 
+## Claude API 串接
+
+`src/lib/generateStoryboard.ts` 使用官方 `@anthropic-ai/sdk` 直接從瀏覽器
+呼叫 Claude（`claude-opus-4-8`），並以 **structured outputs**
+（`output_config.format` + JSON Schema）強制回傳符合 `Storyboard` 型別的
+四格分鏡。系統提示詞明確禁止畫面描述出現人物，只允許背景、物件與光影，
+並要求從八種線框場景（`SceneType`）中挑選最貼切的一種。
+
+- 在介面底部「設定 API Key」輸入你的 Anthropic API key（`sk-ant-...`）。
+- 金鑰只存在瀏覽器 localStorage，不經過任何伺服器；
+  SDK 以 `dangerouslyAllowBrowser: true` 直連。
+  **正式產品請改用後端代理保護金鑰。**
+- 「重新生成」會要求 Claude 採用不同的詮釋角度，得到另一種拆解。
+- 錯誤（無效金鑰、rate limit、網路、內容拒絕）都會以線框警示條顯示。
+
 ## Mock 資料
 
 `src/data/mockStoryboards.ts` 內含三組完整分鏡表
 （《雨停之前》《往海的方向》《搬家那天》）與一段模擬語音逐字稿。
-真實產品只需把 `App.tsx` 中的 `generate()` 換成 AI API 呼叫，
-回傳符合 `Storyboard` 型別的資料即可。
+未設定 API key 時作為示範模式使用；聲音輸入的語音轉文字目前仍為模擬流程。
 
 ## 專案結構
 
@@ -61,11 +82,14 @@ storyboard-app/
 │   ├── App.tsx               # 流程狀態（輸入 → 生成中 → 結果）
 │   ├── index.css             # Tailwind 進入點與紙感底紋
 │   ├── types.ts              # Stage / Storyboard / 狀態機型別
+│   ├── lib/
+│   │   └── generateStoryboard.ts # Claude API 呼叫與 structured outputs
 │   ├── data/
 │   │   └── mockStoryboards.ts
 │   └── components/
 │       ├── Hero.tsx           # 首頁 Hero 區
 │       ├── StoryInput.tsx     # 文字／聲音切換、錄音模擬、生成按鈕
+│       ├── ApiKeySettings.tsx # Anthropic API key 設定（localStorage）
 │       ├── StoryboardResult.tsx # 結果區、重新生成、複製分鏡表
 │       ├── StoryboardCard.tsx # 單張分鏡卡片
 │       └── SceneSketch.tsx    # 8 種黑白線框背景場景 SVG

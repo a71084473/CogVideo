@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { InputMode, RecordingState } from '../types'
 import { mockTranscript } from '../data/mockStoryboards'
 
@@ -7,13 +7,24 @@ interface Props {
   onStoryChange: (v: string) => void
   onGenerate: () => void
   generating: boolean
+  usingRealApi: boolean
+  error: string | null
+  settings?: ReactNode
 }
 
 /**
  * 故事輸入區：文字 / 聲音 兩種模式。
  * 聲音模式是純前端模擬：錄音中 → 停止 → 轉文字中 → 把 mock 逐字稿填進故事。
  */
-export default function StoryInput({ story, onStoryChange, onGenerate, generating }: Props) {
+export default function StoryInput({
+  story,
+  onStoryChange,
+  onGenerate,
+  generating,
+  usingRealApi,
+  error,
+  settings,
+}: Props) {
   const [mode, setMode] = useState<InputMode>('text')
   const [recState, setRecState] = useState<RecordingState>('idle')
   const [seconds, setSeconds] = useState(0)
@@ -166,12 +177,26 @@ export default function StoryInput({ story, onStoryChange, onGenerate, generatin
             disabled={!canGenerate}
             className="border border-ink bg-ink px-10 py-3 text-sm tracking-widest2 text-paper transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-faint"
           >
-            {generating ? '正在拆解故事……' : '生成分鏡'}
+            {generating
+              ? usingRealApi
+                ? 'Claude 正在拆解故事……'
+                : '正在拆解故事……'
+              : '生成分鏡'}
           </button>
           <p className="text-xs text-faint">
-            原型使用 mock 資料模擬生成結果，尚未串接 AI。
+            {usingRealApi
+              ? '由 Claude 依你的故事真實生成起承轉合。'
+              : '尚未設定 API key，將以 mock 資料示範流程。'}
           </p>
         </div>
+
+        {error && (
+          <p role="alert" className="mt-4 border border-ink px-4 py-3 text-sm text-ink">
+            ⚠ {error}
+          </p>
+        )}
+
+        {settings}
       </div>
     </section>
   )

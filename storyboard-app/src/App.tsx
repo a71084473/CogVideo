@@ -2,29 +2,51 @@ import { useCallback, useRef, useState } from 'react'
 import Hero from './components/Hero'
 import StoryInput from './components/StoryInput'
 import StoryboardResult from './components/StoryboardResult'
+import ApiKeySettings from './components/ApiKeySettings'
 import { mockStoryboards } from './data/mockStoryboards'
+import { generateStoryboardFromStory } from './lib/generateStoryboard'
 import type { Storyboard } from './types'
+
+const API_KEY_STORAGE = 'storyboard-anthropic-api-key'
 
 export default function App() {
   const [story, setStory] = useState('')
   const [generating, setGenerating] = useState(false)
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null)
-  const variantRef = useRef(0)
+  const [error, setError] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem(API_KEY_STORAGE) ?? '')
+  const attemptRef = useRef(0)
 
-  /** 模擬呼叫 AI：延遲後輪替回傳一組 mock 分鏡 */
-  const generate = useCallback(() => {
+  const saveApiKey = useCallback((key: string) => {
+    setApiKey(key)
+    if (key) localStorage.setItem(API_KEY_STORAGE, key)
+    else localStorage.removeItem(API_KEY_STORAGE)
+  }, [])
+
+  /** 有 API key 時呼叫 Claude 真實拆解；沒有時輪替 mock 分鏡 */
+  const generate = useCallback(async () => {
     setGenerating(true)
-    window.setTimeout(() => {
-      const next = mockStoryboards[variantRef.current % mockStoryboards.length]
-      variantRef.current += 1
+    setError(null)
+    try {
+      let next: Storyboard
+      if (apiKey) {
+        next = await generateStoryboardFromStory(story, apiKey, attemptRef.current)
+      } else {
+        await new Promise((r) => window.setTimeout(r, 1400))
+        next = mockStoryboards[attemptRef.current % mockStoryboards.length]
+      }
+      attemptRef.current += 1
       setStoryboard(next)
-      setGenerating(false)
       // 生成後把畫面帶到結果區
       window.setTimeout(() => {
         document.getElementById('result')?.scrollIntoView({ behavior: 'smooth' })
       }, 80)
-    }, 1400)
-  }, [])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '生成失敗，請再試一次。')
+    } finally {
+      setGenerating(false)
+    }
+  }, [apiKey, story])
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -34,6 +56,9 @@ export default function App() {
         onStoryChange={setStory}
         onGenerate={generate}
         generating={generating}
+        usingRealApi={Boolean(apiKey)}
+        error={error}
+        settings={<ApiKeySettings apiKey={apiKey} onApiKeyChange={saveApiKey} />}
       />
       {storyboard && (
         <StoryboardResult
