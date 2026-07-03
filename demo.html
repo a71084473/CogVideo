@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Story Frame Lab Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      :root {
+        color: #171717;
+        background: #f7f7f4;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+      }
+
+      @keyframes slideUpFade {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-slide-up-fade {
+        animation: slideUpFade 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useMemo, useState } = React;
+
+      const exampleSpeech = '我走進老家的房間，窗邊的椅子仍然面向午後的光，走廊盡頭傳來雨聲，像是某個還沒說完的告別。';
+      const svgClass = 'h-full w-full text-neutral-950';
+      const stroke = 'currentColor';
+      const commonProps = {
+        fill: 'none',
+        stroke,
+        strokeWidth: '1.8',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+      };
+
+      function generateStoryboard(storyText) {
+        const normalized = storyText.trim().replace(/\s+/g, ' ');
+        const storyHint = normalized.length > 42 ? `${normalized.slice(0, 42)}…` : normalized || '一段尚未命名的私人故事';
+
+        return [
+          {
+            stage: '起',
+            title: '起｜回到熟悉的房間',
+            description: `故事從一個安靜空間展開，記憶像光線一樣落在桌面上：${storyHint}`,
+            visualPrompt: 'black and white storyboard wireframe, empty room, window, desk, chair, no character, no face',
+          },
+          {
+            stage: '承',
+            title: '承｜走廊裡的停頓',
+            description: '情緒被拉長，門與相框暗示過去的關係，空間保留尚未說出口的重量。',
+            visualPrompt: 'black and white storyboard wireframe, hallway, doors, wall frames, quiet atmosphere, no people',
+          },
+          {
+            stage: '轉',
+            title: '轉｜雨中的轉角',
+            description: '外部世界突然介入，雨線、路燈與遠方建築形成衝突出現前的壓迫感。',
+            visualPrompt: 'black and white storyboard wireframe, rainy street, street lamp, distant buildings, cinematic tension, no protagonist',
+          },
+          {
+            stage: '合',
+            title: '合｜窗邊留下的餘光',
+            description: '故事收束在安靜窗邊，空椅子與斜落光線留下開放式餘韻。',
+            visualPrompt: 'black and white storyboard wireframe, quiet window, light beams, empty chair, soft ending, background only',
+          },
+        ];
+      }
+
+      function RoomScene() {
+        return (
+          <svg viewBox="0 0 360 220" className={svgClass} role="img" aria-label="空房間、窗戶、桌子與椅子的黑白線框分鏡">
+            <rect x="28" y="22" width="304" height="176" rx="4" {...commonProps} />
+            <path d="M28 164h304M72 164V48h94v116M72 91h94M119 48v116" {...commonProps} />
+            <path d="M202 135h92M214 135v38M282 135v38M218 173h60" {...commonProps} />
+            <path d="M97 178v-35h44v35M91 178h56M103 143l-8-16h52l-8 16" {...commonProps} />
+            <path d="M190 52h95M190 68h73M190 84h96" stroke={stroke} strokeWidth="1" strokeLinecap="round" />
+          </svg>
+        );
+      }
+
+      function HallwayScene() {
+        return (
+          <svg viewBox="0 0 360 220" className={svgClass} role="img" aria-label="走廊、門與牆上相框的黑白線框分鏡">
+            <path d="M42 30h276v166H42zM97 196l32-166M263 196 231 30M129 30h102v166H129z" {...commonProps} />
+            <path d="M74 82h35v48H74zM252 70h45v68h-45zM151 72h58v124h-58z" {...commonProps} />
+            <path d="M197 137h3M151 106h58M173 72v124M67 154h226M91 48h31M238 49h34" {...commonProps} />
+            <path d="M58 44h52M54 58h42M267 159h35M250 174h51" stroke={stroke} strokeWidth="1" strokeLinecap="round" />
+          </svg>
+        );
+      }
+
+      function StreetScene() {
+        return (
+          <svg viewBox="0 0 360 220" className={svgClass} role="img" aria-label="雨中街道、路燈與遠方建築的黑白線框分鏡">
+            <path d="M24 158h312M55 158 26 196M305 158l30 38M82 196h196" {...commonProps} />
+            <path d="M72 72h52v86H72zM124 96h47v62h-47zM229 83h59v75h-59zM288 111h34v47h-34z" {...commonProps} />
+            <path d="M194 158V61M178 61h32M184 73c7-15 20-15 27 0" {...commonProps} />
+            <path d="M47 35 34 62M92 28 78 58M143 35l-13 29M239 31l-16 34M301 37l-13 30M214 95l-12 26M323 81l-13 28M164 124l-10 20" stroke={stroke} strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M84 92h12M105 112h10M241 104h12M267 123h9M139 118h13" stroke={stroke} strokeWidth="1" strokeLinecap="round" />
+          </svg>
+        );
+      }
+
+      function WindowScene() {
+        return (
+          <svg viewBox="0 0 360 220" className={svgClass} role="img" aria-label="安靜窗邊、光線與空椅子的黑白線框分鏡">
+            <path d="M34 34h292v154H34zM82 52h112v98H82zM138 52v98M82 101h112" {...commonProps} />
+            <path d="M194 52 292 188M170 101l79 87M82 150l52 38" stroke={stroke} strokeWidth="1" strokeLinecap="round" />
+            <path d="M231 171v-42h50v42M222 171h68M238 129l-9-18h60l-8 18M242 171v23M276 171v23" {...commonProps} />
+            <path d="M62 188h250M213 73h70M223 91h54M48 62h18M48 80h18" {...commonProps} />
+          </svg>
+        );
+      }
+
+      const sceneByStage = {
+        起: RoomScene,
+        承: HallwayScene,
+        轉: StreetScene,
+        合: WindowScene,
+      };
+
+      function StoryboardCard({ frame, index }) {
+        const Scene = sceneByStage[frame.stage];
+
+        return (
+          <article
+            className="animate-slide-up-fade group rounded-[2rem] border border-neutral-200 bg-white/90 p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+            style={{ animationDelay: `${index * 110}ms` }}
+          >
+            <div className="aspect-[16/10] overflow-hidden rounded-[1.5rem] border border-neutral-900/15 bg-white p-3">
+              <Scene />
+            </div>
+            <div className="px-2 pb-2 pt-5">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="text-lg font-semibold tracking-tight text-neutral-950">{frame.title}</h3>
+                <span className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-600">{frame.stage}</span>
+              </div>
+              <p className="text-sm leading-6 text-neutral-600">{frame.description}</p>
+              <p className="mt-4 border-t border-dashed border-neutral-200 pt-3 text-xs leading-5 text-neutral-400">Prompt：{frame.visualPrompt}</p>
+            </div>
+          </article>
+        );
+      }
+
+      function App() {
+        const [storyText, setStoryText] = useState('');
+        const [frames, setFrames] = useState([]);
+        const [isListening, setIsListening] = useState(false);
+        const [isGenerating, setIsGenerating] = useState(false);
+        const [error, setError] = useState('');
+        const canGenerate = useMemo(() => storyText.trim().length > 0, [storyText]);
+
+        const handleVoiceInput = () => {
+          setError('');
+          setIsListening(true);
+
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+          if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'zh-TW';
+            recognition.interimResults = false;
+            recognition.onresult = (event) => {
+              const transcript = event.results?.[0]?.[0]?.transcript;
+              if (transcript) setStoryText((current) => `${current}${current ? '\n' : ''}${transcript}`);
+            };
+            recognition.onerror = () => setStoryText((current) => current || exampleSpeech);
+            recognition.onend = () => setIsListening(false);
+            recognition.start();
+            return;
+          }
+
+          window.setTimeout(() => {
+            setStoryText((current) => current || exampleSpeech);
+            setIsListening(false);
+          }, 1400);
+        };
+
+        const handleGenerate = () => {
+          if (!canGenerate) {
+            setError('請先輸入或錄製你的故事。');
+            return;
+          }
+
+          setError('');
+          setIsGenerating(true);
+          setFrames([]);
+
+          window.setTimeout(() => {
+            setFrames(generateStoryboard(storyText));
+            setIsGenerating(false);
+          }, 900);
+        };
+
+        return (
+          <main className="min-h-screen bg-[#f7f7f4] text-neutral-950">
+            <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-6 sm:px-8 lg:px-10">
+              <header className="flex items-center justify-between border-b border-neutral-200 pb-5">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-2xl border border-neutral-900 bg-neutral-950 text-white shadow-sm">
+                    <span className="text-lg">✦</span>
+                  </div>
+                  <span className="text-base font-semibold tracking-tight">Story Frame Lab</span>
+                </div>
+                <nav className="hidden text-sm text-neutral-500 sm:block">Voice / Text / Storyboard</nav>
+              </header>
+
+              <section className="grid flex-1 place-items-center py-14 lg:py-20">
+                <div className="w-full max-w-5xl text-center">
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-neutral-500 shadow-sm">
+                    <span>✦</span> Background-only AI storyboard prototype
+                  </div>
+                  <h1 className="mx-auto max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-neutral-950 sm:text-6xl lg:text-7xl">
+                    把你的故事，轉成沒有主角的黑白分鏡
+                  </h1>
+                  <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-neutral-600 sm:text-lg">
+                    用聲音或文字輸入故事，系統會依照起、承、轉、合，生成只保留背景與情緒的 storyboard wireframe。
+                  </p>
+
+                  <div className="mx-auto mt-10 max-w-3xl rounded-[2rem] border border-neutral-200 bg-white/85 p-3 text-left shadow-xl shadow-neutral-200/70 backdrop-blur">
+                    <textarea
+                      className="min-h-56 w-full resize-none rounded-[1.5rem] border border-neutral-200 bg-neutral-50/70 p-6 text-base leading-7 text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-950 focus:bg-white"
+                      value={storyText}
+                      onChange={(event) => setStoryText(event.target.value)}
+                      placeholder="輸入你的故事，例如：有一天，我回到老家，發現房間裡的東西都還停留在小時候……"
+                    />
+
+                    <div className="flex flex-col gap-3 p-2 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        onClick={handleVoiceInput}
+                        disabled={isListening}
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-neutral-300 bg-white px-5 py-3 text-sm font-medium text-neutral-700 transition hover:border-neutral-950 hover:text-neutral-950 disabled:cursor-wait disabled:bg-neutral-100"
+                      >
+                        <span aria-hidden="true">🎙</span> {isListening ? '正在聆聽中…' : '語音輸入'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleGenerate}
+                        disabled={isGenerating}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-neutral-950 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-neutral-900/15 transition hover:-translate-y-0.5 hover:bg-neutral-800 disabled:cursor-wait disabled:bg-neutral-500"
+                      >
+                        <span aria-hidden="true">✦</span> {isGenerating ? '正在拆解故事結構…' : '生成分鏡'}
+                      </button>
+                    </div>
+
+                    {error && <p className="px-4 pb-3 text-sm font-medium text-neutral-900">{error}</p>}
+                  </div>
+                </div>
+              </section>
+
+              {(isGenerating || frames.length > 0) && (
+                <section className="pb-16">
+                  <div className="mb-6 flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium uppercase tracking-[0.22em] text-neutral-400">Storyboard Output</p>
+                      <h2 className="mt-2 text-2xl font-semibold tracking-tight">起、承、轉、合</h2>
+                    </div>
+                    {isGenerating && <p className="text-sm text-neutral-500">正在拆解故事結構…</p>}
+                  </div>
+                  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+                    {frames.map((frame, index) => (
+                      <StoryboardCard key={frame.stage} frame={frame} index={index} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <footer className="border-t border-neutral-200 py-6 text-center text-sm text-neutral-400">
+                Background-only storyboard prototype
+              </footer>
+            </div>
+          </main>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>
