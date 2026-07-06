@@ -1,0 +1,1286 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拾光分鏡・把故事變成四幕風景</title>
+</head>
+<body>
+<style>
+  :root {
+    --paper: #f2f0ea;
+    --paper-2: #eceae2;
+    --card: #f7f5f0;
+    --ink: #2b2a25;
+    --ink-soft: #56534b;
+    --ink-faint: #8b867b;
+    --line: #d8d4c9;
+    --line-strong: #b8b3a5;
+    --indigo: #44596b;
+    --indigo-soft: #6c8093;
+    --seal: #a8462f;
+    --draw: #33322c;
+    --frame-bg: #faf9f5;
+    --shadow: 0 1px 0 rgba(43, 42, 37, 0.04), 0 10px 30px -18px rgba(43, 42, 37, 0.25);
+    --serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", "Times New Roman", serif;
+    --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #191a17;
+      --paper-2: #151613;
+      --card: #201f1b;
+      --ink: #e9e5d9;
+      --ink-soft: #b5b0a2;
+      --ink-faint: #7d786c;
+      --line: #37352e;
+      --line-strong: #4a473e;
+      --indigo: #93aabb;
+      --indigo-soft: #6c8093;
+      --seal: #c96a4f;
+      --draw: #d9d5c8;
+      --frame-bg: #23221d;
+      --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 12px 30px -18px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #191a17;
+    --paper-2: #151613;
+    --card: #201f1b;
+    --ink: #e9e5d9;
+    --ink-soft: #b5b0a2;
+    --ink-faint: #7d786c;
+    --line: #37352e;
+    --line-strong: #4a473e;
+    --indigo: #93aabb;
+    --indigo-soft: #6c8093;
+    --seal: #c96a4f;
+    --draw: #d9d5c8;
+    --frame-bg: #23221d;
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 12px 30px -18px rgba(0, 0, 0, 0.6);
+  }
+  :root[data-theme="light"] {
+    --paper: #f2f0ea;
+    --paper-2: #eceae2;
+    --card: #f7f5f0;
+    --ink: #2b2a25;
+    --ink-soft: #56534b;
+    --ink-faint: #8b867b;
+    --line: #d8d4c9;
+    --line-strong: #b8b3a5;
+    --indigo: #44596b;
+    --indigo-soft: #6c8093;
+    --seal: #a8462f;
+    --draw: #33322c;
+    --frame-bg: #faf9f5;
+    --shadow: 0 1px 0 rgba(43, 42, 37, 0.04), 0 10px 30px -18px rgba(43, 42, 37, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.9;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .side-rail {
+    position: fixed;
+    top: 50%;
+    right: 26px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--ink-faint);
+    user-select: none;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .side-rail .rail-div {
+    width: 1px;
+    height: 22px;
+    background: var(--line-strong);
+    margin: 4px 0;
+  }
+  @media (max-width: 900px) { .side-rail { display: none; } }
+
+  .page {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 28px 90px;
+  }
+
+  /* ── Header ─────────────────────────── */
+  header.masthead {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 84px 0 64px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.38em;
+    color: var(--indigo);
+    text-transform: uppercase;
+    margin: 0 0 26px;
+  }
+  h1.title {
+    font-size: clamp(38px, 6vw, 58px);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+  .title .dot { color: var(--seal); }
+  .lede {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 34em;
+    margin: 0 0 18px;
+  }
+  .thesis {
+    font-size: 15px;
+    color: var(--ink-faint);
+    border-left: 2px solid var(--line-strong);
+    padding-left: 16px;
+    margin: 28px 0 0;
+    max-width: 32em;
+  }
+  .seal-mark {
+    position: absolute;
+    top: 92px;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid var(--seal);
+    border-radius: 3px;
+    color: var(--seal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
+    transform: rotate(3deg);
+    opacity: 0.9;
+  }
+
+  /* ── Sections ───────────────────────── */
+  .section-head {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-top: 58px;
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+  }
+  .section-no {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--indigo);
+  }
+  .section-head h2 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    margin: 0;
+  }
+  .section-head .hint {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-left: auto;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Story input ────────────────────── */
+  .story-desk {
+    max-width: 720px;
+    margin: 26px auto 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 34px 36px 30px;
+  }
+  textarea#story {
+    width: 100%;
+    min-height: 220px;
+    resize: vertical;
+    border: none;
+    outline: none;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0, transparent 37px, var(--line) 37px, var(--line) 38px);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 38px;
+    letter-spacing: 0.04em;
+    padding: 0;
+  }
+  textarea#story::placeholder { color: var(--ink-faint); }
+  textarea#story:focus-visible { box-shadow: 0 2px 0 var(--indigo); }
+
+  .desk-tools {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-family: var(--sans);
+  }
+
+  .rec-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 12px 22px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .rec-btn:hover { border-color: var(--ink-soft); }
+  .rec-btn:focus-visible, .go-btn:focus-visible, .ghost-btn:focus-visible, .chip:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 3px;
+  }
+  .rec-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--seal);
+    flex: none;
+  }
+  .rec-btn[data-state="recording"] {
+    border-color: var(--seal);
+    color: var(--seal);
+  }
+  .rec-btn[data-state="recording"] .rec-dot { animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.45); opacity: 0.45; }
+  }
+
+  .wave {
+    display: none;
+    align-items: flex-end;
+    gap: 3px;
+    height: 26px;
+  }
+  .wave.on { display: inline-flex; }
+  .wave i {
+    width: 3px;
+    background: var(--seal);
+    border-radius: 2px;
+    animation: wave 0.9s ease-in-out infinite;
+  }
+  .wave i:nth-child(1) { height: 10px; animation-delay: 0s; }
+  .wave i:nth-child(2) { height: 20px; animation-delay: 0.15s; }
+  .wave i:nth-child(3) { height: 14px; animation-delay: 0.3s; }
+  .wave i:nth-child(4) { height: 24px; animation-delay: 0.1s; }
+  .wave i:nth-child(5) { height: 12px; animation-delay: 0.25s; }
+  .wave i:nth-child(6) { height: 18px; animation-delay: 0.4s; }
+  @keyframes wave { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+
+  .rec-status {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
+    min-height: 1.5em;
+  }
+  .rec-status .timer { font-variant-numeric: tabular-nums; color: var(--seal); }
+
+  .samples {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .samples-label { font-size: 12.5px; color: var(--ink-faint); letter-spacing: 0.08em; }
+  .chip {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .chip:hover { border-color: var(--indigo-soft); color: var(--indigo); }
+
+  .go-row {
+    max-width: 720px;
+    margin: 34px auto 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .go-btn {
+    font-family: var(--sans);
+    font-size: 16px;
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+    color: var(--paper);
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 17px 44px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .go-btn:hover { opacity: 0.86; }
+  .go-btn:active { transform: translateY(1px); }
+  .go-btn[disabled] { opacity: 0.5; cursor: wait; }
+  .go-note {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+  .go-note.warn { color: var(--seal); }
+
+  /* ── Storyboard ─────────────────────── */
+  #board { display: none; }
+  #board.show { display: block; }
+
+  .board-rule {
+    max-width: 720px;
+    margin: 70px auto 0;
+    border: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .board-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+  }
+  @media (max-width: 1080px) { .board-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .board-grid { grid-template-columns: 1fr; } }
+
+  .frame-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 18px 18px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .frame-card.in { opacity: 1; transform: none; }
+
+  .frame-preview {
+    position: relative;
+    background: var(--frame-bg);
+    border: 1px solid var(--line-strong);
+  }
+  .frame-preview canvas { display: block; width: 100%; height: auto; }
+  .frame-preview .tick {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-color: var(--ink-faint);
+    border-style: solid;
+    border-width: 0;
+  }
+  .tick.tl { top: 4px; left: 4px; border-top-width: 1px; border-left-width: 1px; }
+  .tick.tr { top: 4px; right: 4px; border-top-width: 1px; border-right-width: 1px; }
+  .tick.bl { bottom: 4px; left: 4px; border-bottom-width: 1px; border-left-width: 1px; }
+  .tick.br { bottom: 4px; right: 4px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  .frame-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .stage-glyph {
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--indigo);
+    line-height: 1;
+  }
+  .stage-meta { display: flex; flex-direction: column; gap: 2px; }
+  .stage-act {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .stage-name { font-size: 15px; color: var(--ink-soft); letter-spacing: 0.1em; white-space: nowrap; }
+  .stage-shot {
+    margin-left: auto;
+    align-self: flex-start;
+    font-family: var(--sans);
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.12em;
+    text-align: right;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  .frame-summary {
+    font-size: 16.5px;
+    line-height: 1.85;
+    margin: 14px 0 0;
+    min-height: 3.6em;
+    letter-spacing: 0.03em;
+    text-wrap: balance;
+  }
+
+  .frame-field {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .field-label {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.3em;
+    color: var(--indigo);
+    margin-bottom: 6px;
+  }
+  .field-body {
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+  .mood-pill {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--indigo);
+    border: 1px solid var(--indigo-soft);
+    border-radius: 999px;
+    padding: 5px 16px;
+  }
+
+  .board-foot {
+    max-width: 720px;
+    margin: 46px auto 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .ghost-btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    padding: 13px 30px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .ghost-btn:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .board-note {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+
+  footer.colophon {
+    max-width: 720px;
+    margin: 90px auto 0;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rec-btn[data-state="recording"] .rec-dot, .wave i { animation: none; }
+    .frame-card { transition: none; }
+  }
+</style>
+
+<div class="side-rail" aria-hidden="true"><span>記</span><span>憶</span><span class="rail-div"></span><span>是</span><span>最</span><span>溫</span><span>柔</span><span>的</span><span>分</span><span>鏡</span></div>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Memory Storyboard — 記憶分鏡計畫</p>
+    <h1 class="title">拾光分鏡<span class="dot">。</span></h1>
+    <p class="lede">請長輩說一段往事,我們把它慢慢鋪成「起、承、轉、合」四幕電影分鏡——像翻開一本安靜的腳本。</p>
+    <p class="thesis">畫面裡不會出現任何人物。只有海、老屋、稻田與燈火——讓看的人,自己走回故事裡。</p>
+    <div class="seal-mark" aria-hidden="true">憶</div>
+  </header>
+
+  <!-- ── 01 說故事 ── -->
+  <section aria-labelledby="h-story">
+    <div class="section-head">
+      <span class="section-no">壹</span>
+      <h2 id="h-story">說一段故事</h2>
+      <span class="hint">用寫的,或用說的,都可以</span>
+    </div>
+
+    <div class="story-desk">
+      <label for="story" class="field-label" style="margin-bottom:14px;">故事原稿</label>
+      <textarea id="story" placeholder="說一段你想被記住的故事……&#10;例如:小時候住的地方、一趟遠行、一頓飯、一個人。"></textarea>
+
+      <div class="desk-tools">
+        <button class="rec-btn" id="recBtn" data-state="idle" aria-live="polite">
+          <span class="rec-dot" aria-hidden="true"></span>
+          <span id="recLabel">按此開始錄音</span>
+        </button>
+        <span class="wave" id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="rec-status" id="recStatus"></span>
+        <span class="samples">
+          <span class="samples-label">或聽聽別人的故事:</span>
+          <button class="chip" data-sample="0">討海人家</button>
+          <button class="chip" data-sample="1">北上的火車</button>
+          <button class="chip" data-sample="2">屋後的稻田</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="go-row">
+      <button class="go-btn" id="goBtn">生成分鏡</button>
+      <span class="go-note" id="goNote">系統會把故事整理成四幕,不會更動您的原文。</span>
+    </div>
+  </section>
+
+  <!-- ── 02 分鏡表 ── -->
+  <section id="board" aria-labelledby="h-board">
+    <hr class="board-rule" />
+    <div class="section-head">
+      <span class="section-no">貳</span>
+      <h2 id="h-board">四幕分鏡表</h2>
+      <span class="hint">起・承・轉・合 — 只以背景敘事</span>
+    </div>
+    <div class="board-grid" id="boardGrid"></div>
+    <div class="board-foot">
+      <button class="ghost-btn" id="againBtn">回到故事,再說一次</button>
+      <span class="board-note">每一格皆為黑白線稿場景,畫面中不出現人物、臉孔或身影。</span>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <span>拾光分鏡 — 給失智長輩與家人的記憶練習</span>
+    <span>示範版本・語音轉文字為模擬流程</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── 資料:四幕定義 ─────────────────── */
+  var STAGES = [
+    { glyph: "起", act: "第一幕 · ACT I", name: "故事的開端", shot: "遠景・定場鏡頭" },
+    { glyph: "承", act: "第二幕 · ACT II", name: "日子的延續", shot: "中景・日常鏡頭" },
+    { glyph: "轉", act: "第三幕 · ACT III", name: "命運的轉折", shot: "近景・風雨鏡頭" },
+    { glyph: "合", act: "第四幕 · ACT IV", name: "記憶的歸處", shot: "遠景・暮色鏡頭" }
+  ];
+
+  var DEFAULT_MOODS = ["寧靜,帶著期待", "溫暖而熱鬧", "沉默,微微不安", "釋然,安穩落地"];
+
+  var EMOTIONS = [
+    { kw: ["笑", "開心", "快樂", "高興", "歡喜"], mood: "明亮的喜悅" },
+    { kw: ["哭", "難過", "傷心", "眼淚", "捨不得"], mood: "低迴的不捨" },
+    { kw: ["想念", "懷念", "想家", "思念"], mood: "綿長的思念" },
+    { kw: ["怕", "颱風", "戰", "逃", "大水", "生病"], mood: "屏息的不安" },
+    { kw: ["溫暖", "愛", "照顧", "陪"], mood: "貼近的溫暖" },
+    { kw: ["努力", "打拚", "認真", "重新"], mood: "沉穩的堅持" }
+  ];
+
+  /* ── 資料:場景庫(僅背景,無人物)──── */
+  var SCENES = [
+    { key: "sea", kw: ["海", "浪", "沙灘", "漁", "船", "港", "討海", "澎湖"],
+      desc: [
+        "遼闊的海平線在晨光裡醒來,浪一層層推上沙灘,礁石上還留著昨夜的濕氣。",
+        "港邊的小船隨波輕晃,漁網與浮球掛在竹架上,防波堤沿著海岸伸向遠方。",
+        "烏雲自外海壓近,浪頭變得又急又高,燈塔的光在雨霧裡忽明忽滅。",
+        "夕陽沉入海面,最後一道金光鋪在退潮的沙灘上,一艘船安靜地泊回港內。"
+      ] },
+    { key: "mountain", kw: ["山", "森林", "霧", "溪", "竹林", "茶園"],
+      desc: [
+        "層層山稜浮在薄霧之上,溪水從石縫間流下,山路才剛剛開始。",
+        "半山腰的小徑旁,松樹與竹叢夾道,遠處梯田一階一階疊上山坡。",
+        "霧氣忽然濃了起來,山的稜線只剩淡淡一痕,風把樹搖得沙沙作響。",
+        "暮色裡山影沉靜,一彎月亮掛在稜線上,山腳的燈火一盞一盞亮起。"
+      ] },
+    { key: "field", kw: ["田", "稻", "農", "菜園", "果園", "牛", "犁", "割稻", "田埂"],
+      desc: [
+        "清晨的稻田一望無際,田埂筆直延伸,遠山還罩著薄薄的霧。",
+        "稻浪隨風起伏,電線桿沿著田邊排成一列,水圳的水聲細細地流。",
+        "大雨過後的田面積著水,倒映著灰雲,幾株稻子歪斜地泡在水裡。",
+        "黃昏把整片田染成金色,收割後的田裡留著整齊的稻茬,炊煙從遠處農舍升起。"
+      ] },
+    { key: "house", kw: ["家", "老屋", "三合院", "厝", "院子", "灶", "眷村", "老家"],
+      desc: [
+        "紅瓦老屋立在晨光裡,木門半掩,院子的地面掃得乾乾淨淨。",
+        "屋簷下掛著竹篩與蓑衣,窗櫺透出飯菜的熱氣,老樹的影子落在牆上。",
+        "風雨拍打著木窗,屋內一盞燈晃動,門前的水窪映著閃電的光。",
+        "夜深了,老屋只留一扇亮著的窗,月光靜靜落在瓦片與曬穀場上。"
+      ] },
+    { key: "train", kw: ["火車", "車站", "鐵路", "月台", "北上", "車票", "行李"],
+      desc: [
+        "清晨的月台空無一物,鐵軌筆直伸向遠方,站牌在風裡微微發亮。",
+        "鐵道兩旁的電線桿一根根往後退,城市的輪廓在車窗外慢慢浮現。",
+        "雨點打在月台的遮雨棚上,號誌燈轉紅,鐵軌在雨裡泛著冷光。",
+        "暮色中的小站亮起燈,末班車的鐵軌延向山的那頭,站牌下空著一張長椅。"
+      ] },
+    { key: "temple", kw: ["廟", "拜拜", "香", "神明", "燈籠", "過年", "媽祖", "元宵"],
+      desc: [
+        "廟埕在晨光中鋪展,飛簷翹向天空,石階上還沒有腳步聲。",
+        "紅燈籠一排排掛滿廟前,香爐的煙緩緩上升,供桌鋪著紅布。",
+        "風把燈籠吹得搖晃,香灰打著旋,廟簷的鈴鐺急急作響。",
+        "夜裡的廟埕安靜下來,燈籠的光暈染紅了石板,香煙細細地飄向月亮。"
+      ] },
+    { key: "market", kw: ["市場", "街", "店", "麵攤", "夜市", "叫賣", "裁縫", "生意"],
+      desc: [
+        "清早的街道剛剛醒來,騎樓下的攤架還蓋著布,招牌在晨光裡靜靜排開。",
+        "布棚一頂接一頂,竹籃與木凳擺滿街邊,蒸籠的白煙飄過窄窄的巷口。",
+        "驟雨掃過街道,棚布被風掀起一角,積水映著搖晃的招牌。",
+        "入夜的街上亮起一串燈泡,收攤後的長街空蕩而溫柔,燈光落在濕濕的石板上。"
+      ] },
+    { key: "school", kw: ["學校", "教室", "黑板", "操場", "上學", "老師", "同學", "讀書"],
+      desc: [
+        "清晨的操場空空的,旗桿立在正中央,教室的窗一扇扇還關著。",
+        "教室外的走廊灑進陽光,窗台上擺著盆栽,黑板上還留著半題算式。",
+        "風雨把操場淋成一面鏡子,樹被吹得彎腰,教室的燈在雨裡亮著。",
+        "放學後的黃昏,鞦韆還在輕輕晃,夕陽把教室的影子拉得很長。"
+      ] },
+    { key: "night", kw: ["月", "星", "夜", "螢火蟲", "乘涼", "夏夜"],
+      desc: [
+        "夜色剛剛落下,屋瓦的輪廓連成一線,第一顆星星亮了起來。",
+        "庭院裡竹椅斜倚著牆,蒲扇擱在桌上,月光把地面照得發白。",
+        "雲遮住了月亮,巷子暗了一半,只剩一盞路燈固執地亮著。",
+        "雲散開後滿天星斗,螢火蟲在草叢間明明滅滅,整條巷子睡著了。"
+      ] },
+    { key: "room", kw: [],
+      desc: [
+        "晨光穿過紗簾,落在木桌與茶杯上,收音機安靜地立在窗邊。",
+        "牆上掛著幾個相框,鐘擺規律地走,桌上的茶還冒著細細的煙。",
+        "窗外落起雨來,雨點順著玻璃滑下,屋裡的燈把影子拉長。",
+        "黃昏把整個房間染成琥珀色,窗簾輕輕鼓動,茶涼了,鐘還在走。"
+      ] }
+  ];
+
+  /* ── 範例故事 ───────────────────────── */
+  var SAMPLES = [
+    "我十歲以前住在南方澳,阿爸是討海人。每天天還沒亮,我就跟著阿母到港邊等船回來。有一年颱風,船三天沒有消息,全家人守在廟裡不敢睡。後來船回來了,阿爸曬得黑黑的,笑著說:海不會虧待認真的人。",
+    "民國五十幾年,我一個人坐火車北上,到台北做裁縫學徒。月台上,阿母塞給我一包滷蛋,叫我要好好照顧自己。頭幾年日子很苦,常常想家想到睡不著。後來我開了自己的裁縫店,做的第一件旗袍,就是寄回家給阿母的。",
+    "以前我們家在嘉義種田,屋後就是一大片稻田。農忙的時候,全村的人互相幫忙割稻,中午就坐在田埂上吃飯配菜脯。有一年大水把稻子全淹了,阿公蹲在田邊抽菸,一句話也沒說。隔年春天,他還是牽著牛,把每一畦田重新犁過。"
+  ];
+
+  /* ── 工具 ───────────────────────────── */
+  function $(id) { return document.getElementById(id); }
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function splitSentences(text) {
+    var parts = text.replace(/\s+/g, " ").split(/(?<=[。!?!?;;])|\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (parts.length === 0) return [];
+    return parts;
+  }
+
+  function groupIntoActs(sentences) {
+    var n = sentences.length;
+    var acts = [[], [], [], []];
+    if (n === 0) return acts;
+    for (var i = 0; i < n; i++) {
+      var idx = Math.min(3, Math.floor(i * 4 / n));
+      acts[idx].push(sentences[i]);
+    }
+    // 若某幕為空,借用前一幕最後一句
+    for (var a = 0; a < 4; a++) {
+      if (acts[a].length === 0) {
+        for (var b = a - 1; b >= 0; b--) {
+          if (acts[b].length > 0) { acts[a].push(acts[b][acts[b].length - 1]); break; }
+        }
+      }
+    }
+    return acts;
+  }
+
+  function detectScene(text) {
+    var best = null, bestScore = 0;
+    for (var i = 0; i < SCENES.length; i++) {
+      var score = 0;
+      for (var k = 0; k < SCENES[i].kw.length; k++) {
+        var kw = SCENES[i].kw[k];
+        var pos = -1, count = 0;
+        while ((pos = text.indexOf(kw, pos + 1)) !== -1) count++;
+        score += count;
+      }
+      if (score > bestScore) { bestScore = score; best = SCENES[i]; }
+    }
+    return best; // null 表示沒偵測到
+  }
+
+  function detectMood(text, actIndex) {
+    for (var i = 0; i < EMOTIONS.length; i++) {
+      for (var k = 0; k < EMOTIONS[i].kw.length; k++) {
+        if (text.indexOf(EMOTIONS[i].kw[k]) !== -1) return EMOTIONS[i].mood;
+      }
+    }
+    return DEFAULT_MOODS[actIndex];
+  }
+
+  function summarize(sentences) {
+    if (sentences.length === 0) return "(這一段還空著,等故事補上。)";
+    var s = sentences.reduce(function (a, b) { return b.length > a.length ? b : a; }, sentences[0]);
+    s = s.replace(/[。!?!?;;]$/, "");
+    if (s.length > 34) s = s.slice(0, 33) + "……";
+    return s + "。";
+  }
+
+  /* ── 黑白線稿引擎 ───────────────────── */
+  function makeRng(seed) {
+    return function () {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+  }
+
+  function Sketch(canvas, seed) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var W = 480, H = 300;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    var ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    var draw = getComputedStyle(document.body).getPropertyValue("color");
+    var ink = getComputedStyle(document.documentElement).getPropertyValue("--draw").trim() || draw;
+    ctx.strokeStyle = ink;
+    ctx.fillStyle = ink;
+    ctx.lineWidth = 1.1;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    this.ctx = ctx; this.W = W; this.H = H;
+    this.rnd = makeRng(seed);
+  }
+  Sketch.prototype.jline = function (x1, y1, x2, y2, jit) {
+    var ctx = this.ctx, rnd = this.rnd;
+    jit = jit == null ? 1.2 : jit;
+    var seg = Math.max(2, Math.floor(Math.hypot(x2 - x1, y2 - y1) / 18));
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    for (var i = 1; i <= seg; i++) {
+      var t = i / seg;
+      var x = x1 + (x2 - x1) * t + (rnd() - 0.5) * jit;
+      var y = y1 + (y2 - y1) * t + (rnd() - 0.5) * jit;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  };
+  Sketch.prototype.jpath = function (pts, close) {
+    var ctx = this.ctx, rnd = this.rnd;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) {
+      ctx.lineTo(pts[i][0] + (rnd() - 0.5) * 1.4, pts[i][1] + (rnd() - 0.5) * 1.4);
+    }
+    if (close) ctx.closePath();
+    ctx.stroke();
+  };
+  Sketch.prototype.arc = function (cx, cy, r, a1, a2) {
+    var ctx = this.ctx;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, a1, a2);
+    ctx.stroke();
+  };
+  Sketch.prototype.cloud = function (cx, cy, s) {
+    this.arc(cx - s * 0.8, cy, s * 0.45, Math.PI, Math.PI * 2);
+    this.arc(cx, cy - s * 0.18, s * 0.6, Math.PI, Math.PI * 2);
+    this.arc(cx + s * 0.85, cy, s * 0.42, Math.PI, Math.PI * 2);
+    this.jline(cx - s * 1.25, cy, cx + s * 1.27, cy, 0.8);
+  };
+  Sketch.prototype.birds = function (cx, cy, n) {
+    for (var i = 0; i < n; i++) {
+      var x = cx + (this.rnd() - 0.5) * 90, y = cy + (this.rnd() - 0.5) * 30, w = 5 + this.rnd() * 4;
+      this.arc(x - w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85);
+      this.arc(x + w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85);
+    }
+  };
+  Sketch.prototype.sun = function (cx, cy, r, half) {
+    var ctx = this.ctx;
+    ctx.beginPath();
+    if (half) { ctx.arc(cx, cy, r, Math.PI, Math.PI * 2); } else { ctx.arc(cx, cy, r, 0, Math.PI * 2); }
+    ctx.stroke();
+  };
+  Sketch.prototype.rain = function (x, y, w, h, n) {
+    for (var i = 0; i < n; i++) {
+      var rx = x + this.rnd() * w, ry = y + this.rnd() * h;
+      this.jline(rx, ry, rx - 4, ry + 11, 0.4);
+    }
+  };
+  Sketch.prototype.smoke = function (x, y, n) {
+    for (var i = 0; i < n; i++) {
+      this.arc(x + (i % 2 === 0 ? 3 : -3), y - i * 12, 5 + i * 1.5, Math.PI * 0.2, Math.PI * 1.1);
+    }
+  };
+  Sketch.prototype.tree = function (x, y, s) {
+    this.jline(x, y, x, y - s * 0.8);
+    this.jline(x, y - s * 0.45, x - s * 0.3, y - s * 0.7);
+    this.jline(x, y - s * 0.55, x + s * 0.28, y - s * 0.85);
+    this.arc(x - s * 0.15, y - s * 0.95, s * 0.35, 0, Math.PI * 2);
+    this.arc(x + s * 0.22, y - s * 0.8, s * 0.26, 0, Math.PI * 2);
+  };
+  Sketch.prototype.hills = function (baseY, amp) {
+    var pts = [];
+    for (var x = -10; x <= this.W + 10; x += 34) {
+      pts.push([x, baseY - Math.abs(Math.sin(x * 0.011)) * amp - this.rnd() * 6]);
+    }
+    this.jpath(pts);
+  };
+
+  /* 幕別天候:0 晨雲 1 飛鳥 2 風雨 3 暮色 */
+  function weather(s, act, horizonY, outdoor) {
+    if (!outdoor) return;
+    if (act === 0) { s.cloud(s.W * 0.72, 52, 22); s.cloud(s.W * 0.3, 74, 14); }
+    if (act === 1) { s.birds(s.W * 0.68, 58, 3); s.cloud(s.W * 0.26, 52, 16); }
+    if (act === 2) { s.cloud(s.W * 0.5, 46, 26); s.cloud(s.W * 0.78, 62, 18); s.rain(20, 30, s.W - 40, horizonY - 60, 26); }
+    if (act === 3) { s.sun(s.W * 0.74, horizonY, 26, true); s.birds(s.W * 0.32, 64, 2); }
+  }
+
+  var DRAWERS = {
+    sea: function (s, act) {
+      var hy = s.H * 0.52;
+      s.jline(0, hy, s.W, hy, 0.8);
+      for (var r = 0; r < 5; r++) {
+        var y = hy + 18 + r * 22;
+        for (var x = 20 + r * 14; x < s.W - 20; x += 52) {
+          s.arc(x, y, 13, Math.PI * 0.1, Math.PI * 0.9);
+        }
+      }
+      s.jpath([[s.W * 0.1, hy], [s.W * 0.16, hy - 10], [s.W * 0.23, hy]]);
+      var bx = s.W * 0.68, by = hy - 4;
+      s.jpath([[bx - 26, by], [bx + 26, by], [bx + 18, by + 9], [bx - 18, by + 9]], true);
+      s.jline(bx, by, bx, by - 30);
+      s.jpath([[bx, by - 30], [bx + 20, by - 8], [bx, by - 8]], true);
+      weather(s, act, hy, true);
+    },
+    mountain: function (s, act) {
+      s.jpath([[0, 150], [70, 92], [150, 138], [230, 70], [330, 132], [420, 88], [s.W, 128]]);
+      s.jpath([[0, 190], [110, 150], [220, 182], [340, 146], [s.W, 178]]);
+      s.jline(30, 168, 120, 168, 0.5); s.jline(250, 158, 360, 158, 0.5);
+      for (var i = 0; i < 4; i++) {
+        var x = 60 + i * 110, y = s.H - 34 - (i % 2) * 10;
+        s.jline(x, y, x, y - 40);
+        s.jpath([[x - 16, y - 12], [x, y - 46], [x + 16, y - 12]]);
+        s.jpath([[x - 11, y - 26], [x, y - 52], [x + 11, y - 26]]);
+      }
+      s.jpath([[s.W * 0.42, s.H - 8], [s.W * 0.5, s.H - 40], [s.W * 0.46, s.H - 70], [s.W * 0.52, s.H - 96]]);
+      weather(s, act, 120, true);
+    },
+    field: function (s, act) {
+      var hy = s.H * 0.4;
+      s.hills(hy, 26);
+      var vx = s.W * 0.5;
+      for (var i = 0; i < 5; i++) {
+        var t = i / 4;
+        s.jline(vx - 8 - t * 250, s.H, vx - 2 - t * 26, hy + 8, 0.8);
+        s.jline(vx + 8 + t * 250, s.H, vx + 2 + t * 26, hy + 8, 0.8);
+      }
+      for (var r = 0; r < 4; r++) {
+        var y = hy + 26 + r * (18 + r * 8);
+        s.jline(30 - r * 6, y, s.W - 30 + r * 6, y, 1.6);
+      }
+      for (var p = 0; p < 3; p++) {
+        var px = s.W * (0.18 + p * 0.3), py = hy + 14;
+        s.jline(px, py, px, py - 34);
+        s.jline(px - 9, py - 28, px + 9, py - 28);
+      }
+      var fx = s.W * 0.82, fy = hy + 4;
+      s.jpath([[fx - 16, fy], [fx - 16, fy - 12], [fx, fy - 20], [fx + 16, fy - 12], [fx + 16, fy]], true);
+      if (act === 3) s.smoke(fx + 6, fy - 22, 3);
+      weather(s, act, hy, true);
+    },
+    house: function (s, act) {
+      var gy = s.H * 0.78;
+      s.jline(0, gy, s.W, gy, 1);
+      var hx = s.W * 0.5, hw = 150, hh = 84;
+      s.jpath([[hx - hw, gy], [hx - hw, gy - hh], [hx + hw, gy - hh], [hx + hw, gy]]);
+      s.jpath([[hx - hw - 18, gy - hh], [hx, gy - hh - 44], [hx + hw + 18, gy - hh]]);
+      s.jpath([[hx - hw - 10, gy - hh - 4], [hx, gy - hh - 40], [hx + hw + 10, gy - hh - 4]]);
+      for (var t = 1; t < 6; t++) {
+        s.jline(hx - hw - 18 + t * ((hw + 18) / 3.2), gy - hh - t * 6.2, hx + hw + 18 - t * ((hw + 18) / 3.2), gy - hh - t * 6.2, 0.5);
+      }
+      s.jpath([[hx - 24, gy], [hx - 24, gy - 52], [hx + 24, gy - 52], [hx + 24, gy]]);
+      s.jline(hx, gy, hx, gy - 52, 0.5);
+      var wx = hx - 92;
+      s.jpath([[wx - 22, gy - 24], [wx - 22, gy - 56], [wx + 22, gy - 56], [wx + 22, gy - 24]], true);
+      s.jline(wx, gy - 24, wx, gy - 56, 0.4);
+      s.jline(wx - 22, gy - 40, wx + 22, gy - 40, 0.4);
+      var wx2 = hx + 92;
+      s.jpath([[wx2 - 22, gy - 24], [wx2 - 22, gy - 56], [wx2 + 22, gy - 56], [wx2 + 22, gy - 24]], true);
+      s.jline(wx2, gy - 24, wx2, gy - 56, 0.4);
+      s.jline(wx2 - 22, gy - 40, wx2 + 22, gy - 40, 0.4);
+      s.tree(s.W * 0.09, gy, 70);
+      s.jpath([[s.W * 0.86, gy], [s.W * 0.86, gy - 14], [s.W * 0.92, gy - 14], [s.W * 0.92, gy]]);
+      s.arc(s.W * 0.89, gy - 20, 7, Math.PI * 0.9, Math.PI * 2.1);
+      if (act === 3) { s.sun(s.W * 0.78, 60, 16, false); }
+      weather(s, act === 3 ? 1 : act, gy - 120, true);
+    },
+    train: function (s, act) {
+      var hy = s.H * 0.42;
+      s.hills(hy, 20);
+      var vx = s.W * 0.56;
+      s.jline(s.W * 0.18, s.H, vx - 6, hy + 6, 1);
+      s.jline(s.W * 0.98, s.H, vx + 8, hy + 6, 1);
+      s.jline(s.W * 0.34, s.H, vx - 2, hy + 6, 1);
+      s.jline(s.W * 0.82, s.H, vx + 4, hy + 6, 1);
+      for (var i = 0; i < 7; i++) {
+        var t = i / 7, y = s.H - t * (s.H - hy - 10) * 0.96;
+        var half = (1 - t) * s.W * 0.33;
+        s.jline(vx - half * 0.9, y, vx + half, y, 0.6);
+      }
+      var px = s.W * 0.13;
+      s.jline(px, s.H * 0.9, px, hy - 40);
+      s.jpath([[px - 34, hy - 40], [px + 34, hy - 40], [px + 34, hy - 62], [px - 34, hy - 62]], true);
+      s.jline(px - 26, hy - 51, px + 26, hy - 51, 0.4);
+      for (var p = 0; p < 3; p++) {
+        var ex = s.W * (0.68 + p * 0.11), eh = 60 - p * 12, ey = hy + 10 + p * 2;
+        s.jline(ex, ey, ex, ey - eh);
+        s.jline(ex - 10 + p * 2, ey - eh + 8, ex + 10 - p * 2, ey - eh + 8, 0.4);
+      }
+      s.arc(-40, hy - 130, 190, Math.PI * 0.12, Math.PI * 0.38);
+      weather(s, act, hy, true);
+    },
+    temple: function (s, act) {
+      var gy = s.H * 0.82;
+      s.jline(0, gy, s.W, gy, 1);
+      s.jline(s.W * 0.2, gy + 10, s.W * 0.8, gy + 10, 0.6);
+      var cx = s.W * 0.5, rw = 140, ry = s.H * 0.34;
+      s.jpath([[cx - rw - 26, ry + 24], [cx - rw, ry + 6], [cx, ry - 14], [cx + rw, ry + 6], [cx + rw + 26, ry + 24]]);
+      s.jpath([[cx - rw - 26, ry + 24], [cx - rw - 14, ry + 34], [cx + rw + 14, ry + 34], [cx + rw + 26, ry + 24]]);
+      s.jline(cx - rw + 6, ry + 34, cx - rw + 6, gy);
+      s.jline(cx + rw - 6, ry + 34, cx + rw - 6, gy);
+      s.jline(cx - 46, ry + 34, cx - 46, gy);
+      s.jline(cx + 46, ry + 34, cx + 46, gy);
+      for (var l = 0; l < 4; l++) {
+        var lx = cx - 96 + l * 64, ly = ry + 52;
+        s.jline(lx, ry + 34, lx, ly);
+        s.arc(lx, ly + 12, 12, 0, Math.PI * 2);
+        s.jline(lx, ly + 24, lx, ly + 32, 0.4);
+      }
+      s.jpath([[cx - 20, gy], [cx - 20, gy - 26], [cx + 20, gy - 26], [cx + 20, gy]], true);
+      s.jline(cx - 26, gy - 26, cx + 26, gy - 26);
+      s.smoke(cx, gy - 30, act === 2 ? 2 : 4);
+      weather(s, act, s.H * 0.3, true);
+    },
+    market: function (s, act) {
+      var gy = s.H * 0.84;
+      s.jline(0, gy, s.W, gy, 1);
+      for (var i = 0; i < 4; i++) {
+        var t = i / 4, x = 30 + t * s.W * 0.62, y0 = s.H * 0.3 + t * 26, w = 120 - t * 30;
+        s.jpath([[x, y0], [x + w, y0]]);
+        for (var f = 0; f <= 4; f++) {
+          s.arc(x + (w / 4) * f - w / 8 + 6, y0 + 4, w / 9, Math.PI * 0.05, Math.PI * 0.95);
+        }
+        s.jline(x + 4, y0, x + 4, gy - t * 16, 0.8);
+        s.jline(x + w - 4, y0, x + w - 4, gy - t * 16, 0.8);
+      }
+      var sx = s.W * 0.84;
+      s.jline(sx, gy, sx, s.H * 0.22);
+      s.jpath([[sx, s.H * 0.26], [sx + 34, s.H * 0.26], [sx + 34, s.H * 0.5], [sx, s.H * 0.5]], true);
+      s.jline(sx + 8, s.H * 0.31, sx + 26, s.H * 0.31, 0.4);
+      s.jline(sx + 8, s.H * 0.38, sx + 26, s.H * 0.38, 0.4);
+      s.jline(sx + 8, s.H * 0.45, sx + 26, s.H * 0.45, 0.4);
+      for (var b = 0; b < 3; b++) {
+        var bx = s.W * (0.16 + b * 0.2), by = gy - 4;
+        s.arc(bx, by, 11, Math.PI, Math.PI * 2);
+        s.jline(bx - 11, by, bx + 11, by, 0.4);
+      }
+      if (act === 3) {
+        for (var g = 0; g < 6; g++) {
+          var gx = 50 + g * 76;
+          s.arc(gx, s.H * 0.16 + Math.sin(g) * 6, 4, 0, Math.PI * 2);
+        }
+        s.jpath([[20, s.H * 0.17], [s.W * 0.3, s.H * 0.13], [s.W * 0.62, s.H * 0.17], [s.W - 20, s.H * 0.12]]);
+      }
+      weather(s, act === 3 ? 1 : act, s.H * 0.28, true);
+    },
+    school: function (s, act) {
+      var gy = s.H * 0.76;
+      s.jline(0, gy, s.W, gy, 1);
+      s.arc(s.W * 0.5, gy + 60, 150, Math.PI * 1.08, Math.PI * 1.92);
+      s.arc(s.W * 0.5, gy + 60, 120, Math.PI * 1.1, Math.PI * 1.9);
+      var bx = s.W * 0.62, bw = 160, bh = 66;
+      s.jpath([[bx, gy], [bx, gy - bh], [bx + bw, gy - bh], [bx + bw, gy]]);
+      for (var wx = 0; wx < 4; wx++) {
+        var x = bx + 16 + wx * 38;
+        s.jpath([[x, gy - 22], [x, gy - 44], [x + 22, gy - 44], [x + 22, gy - 22]], true);
+      }
+      var fx = s.W * 0.18;
+      s.jline(fx, gy, fx, gy - 130);
+      s.jpath([[fx, gy - 130], [fx + 34, gy - 122], [fx, gy - 112]], true);
+      s.tree(s.W * 0.38, gy, 64);
+      var kx = s.W * 0.08;
+      s.jline(kx, gy, kx + 8, gy - 44);
+      s.jline(kx + 30, gy, kx + 22, gy - 44);
+      s.jline(kx + 8, gy - 44, kx + 22, gy - 44, 0.4);
+      s.jline(kx + 12, gy - 40, kx + 12, gy - 14);
+      s.jline(kx + 18, gy - 40, kx + 18, gy - 14);
+      s.jline(kx + 12, gy - 14, kx + 18, gy - 14, 0.3);
+      weather(s, act, s.H * 0.3, true);
+    },
+    night: function (s, act) {
+      var gy = s.H * 0.74;
+      s.jpath([[0, gy], [60, gy], [80, gy - 26], [150, gy - 26], [168, gy], [250, gy], [268, gy - 38], [352, gy - 38], [368, gy], [s.W, gy]]);
+      s.jline(0, gy + 24, s.W, gy + 24, 0.8);
+      var mx = s.W * 0.72, my = s.H * 0.24;
+      if (act === 2) { s.arc(mx, my, 26, Math.PI * 0.6, Math.PI * 1.7); s.cloud(mx + 22, my + 6, 20); }
+      else { s.sun(mx, my, 26, false); }
+      var stars = act === 3 ? 14 : 7;
+      for (var st = 0; st < stars; st++) {
+        var sx2 = 20 + s.rnd() * (s.W - 40), sy2 = 16 + s.rnd() * (s.H * 0.42);
+        if (Math.hypot(sx2 - mx, sy2 - my) < 44) continue;
+        s.jline(sx2 - 3, sy2, sx2 + 3, sy2, 0.1);
+        s.jline(sx2, sy2 - 3, sx2, sy2 + 3, 0.1);
+      }
+      var lx = s.W * 0.14;
+      s.jline(lx, gy + 24, lx, gy - 64);
+      s.jpath([[lx, gy - 64], [lx + 20, gy - 64]]);
+      s.arc(lx + 20, gy - 58, 6, 0, Math.PI * 2);
+      for (var gr = 0; gr < 10; gr++) {
+        var gx2 = 30 + s.rnd() * (s.W - 60);
+        s.jline(gx2, gy + 24, gx2 - 2 + s.rnd() * 4, gy + 12, 0.4);
+      }
+      if (act === 3) {
+        for (var ff = 0; ff < 6; ff++) {
+          s.arc(60 + s.rnd() * (s.W - 120), gy + 4 + s.rnd() * 14, 1.6, 0, Math.PI * 2);
+        }
+      }
+    },
+    room: function (s, act) {
+      var gy = s.H * 0.86;
+      s.jline(0, gy, s.W, gy, 0.8);
+      var wx = s.W * 0.6, wy = s.H * 0.16, ww = 150, wh = 130;
+      s.jpath([[wx, wy], [wx + ww, wy], [wx + ww, wy + wh], [wx, wy + wh]], true);
+      s.jline(wx + ww / 2, wy, wx + ww / 2, wy + wh, 0.4);
+      s.jline(wx, wy + wh / 2, wx + ww, wy + wh / 2, 0.4);
+      s.jpath([[wx - 8, wy - 8], [wx + 26, wy + 30], [wx + 14, wy + wh * 0.7], [wx - 8, wy + wh + 8]]);
+      if (act === 2) { s.rain(wx + 6, wy + 6, ww - 12, wh - 12, 14); }
+      else if (act === 3) { s.sun(wx + ww * 0.68, wy + wh * 0.32, 15, false); }
+      else { s.hills(wy + wh * 0.72, 18); }
+      var tx = s.W * 0.16, ty = gy - 56;
+      s.jline(tx - 10, ty, tx + 130, ty, 0.8);
+      s.jline(tx, ty, tx, gy); s.jline(tx + 120, ty, tx + 120, gy);
+      s.jpath([[tx + 24, ty - 4], [tx + 24, ty - 18], [tx + 46, ty - 18], [tx + 46, ty - 4]], true);
+      s.arc(tx + 50, ty - 11, 5, Math.PI * 1.5, Math.PI * 0.5);
+      s.smoke(tx + 35, ty - 20, 2);
+      s.jpath([[tx + 70, ty - 4], [tx + 70, ty - 30], [tx + 108, ty - 30], [tx + 108, ty - 4]], true);
+      s.arc(tx + 82, ty - 17, 7, 0, Math.PI * 2);
+      s.jline(tx + 96, ty - 24, tx + 102, ty - 24, 0.3);
+      s.jline(tx + 96, ty - 18, tx + 102, ty - 18, 0.3);
+      var fx2 = s.W * 0.33, fy2 = s.H * 0.2;
+      s.jpath([[fx2, fy2], [fx2 + 34, fy2], [fx2 + 34, fy2 + 44], [fx2, fy2 + 44]], true);
+      s.jpath([[fx2 + 5, fy2 + 5], [fx2 + 29, fy2 + 5], [fx2 + 29, fy2 + 39], [fx2 + 5, fy2 + 39]], true);
+      var cx2 = s.W * 0.2, cy2 = s.H * 0.24;
+      s.arc(cx2, cy2, 20, 0, Math.PI * 2);
+      s.jline(cx2, cy2, cx2, cy2 - 12, 0.3);
+      s.jline(cx2, cy2, cx2 + 8, cy2 + 4, 0.3);
+    }
+  };
+
+  /* ── 生成分鏡 ───────────────────────── */
+  var lastActs = null;
+
+  function buildBoard(text) {
+    var sentences = splitSentences(text);
+    var acts = groupIntoActs(sentences);
+    var globalScene = detectScene(text) || SCENES[SCENES.length - 1];
+    var data = acts.map(function (group, i) {
+      var actText = group.join("");
+      var scene = detectScene(actText) || globalScene;
+      return {
+        stage: STAGES[i],
+        summary: summarize(group),
+        scene: scene,
+        desc: scene.desc[i],
+        mood: detectMood(actText, i)
+      };
+    });
+    lastActs = data;
+    renderBoard(data);
+  }
+
+  function renderBoard(data) {
+    var grid = $("boardGrid");
+    grid.innerHTML = "";
+    data.forEach(function (d, i) {
+      var card = document.createElement("article");
+      card.className = "frame-card";
+      card.innerHTML =
+        '<div class="frame-preview">' +
+          '<canvas aria-label="第' + (i + 1) + '幕黑白線稿場景,僅有背景,無人物"></canvas>' +
+          '<span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>' +
+        '</div>' +
+        '<div class="frame-head">' +
+          '<span class="stage-glyph">' + d.stage.glyph + '</span>' +
+          '<span class="stage-meta"><span class="stage-act">' + d.stage.act + '</span>' +
+          '<span class="stage-name">' + d.stage.name + '</span></span>' +
+          '<span class="stage-shot">' + d.stage.shot + '</span>' +
+        '</div>' +
+        '<p class="frame-summary">' + escapeHtml(d.summary) + '</p>' +
+        '<div class="frame-field"><div class="field-label">背景畫面</div>' +
+          '<div class="field-body">' + d.desc + '</div></div>' +
+        '<div class="frame-field"><div class="field-label">情緒氛圍</div>' +
+          '<span class="mood-pill">' + d.mood + '</span></div>';
+      grid.appendChild(card);
+      var canvas = card.querySelector("canvas");
+      var sk = new Sketch(canvas, 7 + i * 131);
+      DRAWERS[d.scene.key](sk, i);
+      var delay = reduceMotion ? 0 : 120 + i * 160;
+      setTimeout(function () { card.classList.add("in"); }, delay);
+    });
+    var board = $("board");
+    board.classList.add("show");
+    board.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function redraw() {
+    if (!lastActs) return;
+    var canvases = document.querySelectorAll("#boardGrid canvas");
+    lastActs.forEach(function (d, i) {
+      if (!canvases[i]) return;
+      var sk = new Sketch(canvases[i], 7 + i * 131);
+      DRAWERS[d.scene.key](sk, i);
+    });
+  }
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);
+  new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  /* ── 生成按鈕 ───────────────────────── */
+  var goBtn = $("goBtn"), goNote = $("goNote"), storyEl = $("story");
+  goBtn.addEventListener("click", function () {
+    var text = storyEl.value.trim();
+    if (text.length < 6) {
+      goNote.textContent = "先寫下或錄下一小段故事,再按「生成分鏡」。";
+      goNote.classList.add("warn");
+      storyEl.focus();
+      return;
+    }
+    goNote.classList.remove("warn");
+    goBtn.disabled = true;
+    goBtn.textContent = "整理分鏡中⋯";
+    goNote.textContent = "正在把故事鋪成起、承、轉、合。";
+    setTimeout(function () {
+      buildBoard(text);
+      goBtn.disabled = false;
+      goBtn.textContent = "生成分鏡";
+      goNote.textContent = "分鏡完成。往下看看這四幕風景。";
+    }, reduceMotion ? 50 : 900);
+  });
+
+  $("againBtn").addEventListener("click", function () {
+    storyEl.focus();
+    storyEl.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+  });
+
+  /* ── 範例故事 ───────────────────────── */
+  document.querySelectorAll(".chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      storyEl.value = SAMPLES[Number(chip.dataset.sample)];
+      goNote.textContent = "已放入範例故事,按「生成分鏡」試試看。";
+      goNote.classList.remove("warn");
+      storyEl.focus();
+    });
+  });
+
+  /* ── 模擬錄音流程 ───────────────────── */
+  var recBtn = $("recBtn"), recLabel = $("recLabel"), recStatus = $("recStatus"), wave = $("wave");
+  var recState = "idle", recTimer = null, recSeconds = 0, sampleIdx = 0;
+
+  function setRec(state) {
+    recState = state;
+    recBtn.dataset.state = state;
+    wave.classList.toggle("on", state === "recording");
+    if (state === "idle") {
+      recLabel.textContent = "按此開始錄音";
+      recStatus.textContent = "";
+    } else if (state === "recording") {
+      recLabel.textContent = "停止錄音";
+      recStatus.innerHTML = '錄音中 <span class="timer">00:00</span> — 慢慢說,不用急。';
+    } else if (state === "processing") {
+      recLabel.textContent = "轉換中⋯";
+      recStatus.textContent = "正在把聲音轉成文字⋯";
+    }
+  }
+
+  recBtn.addEventListener("click", function () {
+    if (recState === "idle") {
+      setRec("recording");
+      recSeconds = 0;
+      recTimer = setInterval(function () {
+        recSeconds++;
+        var m = String(Math.floor(recSeconds / 60)).padStart(2, "0");
+        var sec = String(recSeconds % 60).padStart(2, "0");
+        var t = recStatus.querySelector(".timer");
+        if (t) t.textContent = m + ":" + sec;
+      }, 1000);
+    } else if (recState === "recording") {
+      clearInterval(recTimer);
+      setRec("processing");
+      setTimeout(function () {
+        var text = SAMPLES[sampleIdx % SAMPLES.length];
+        sampleIdx++;
+        typeInto(storyEl, text, function () {
+          setRec("idle");
+          recStatus.textContent = "已把語音轉成文字(示範模式)。可以直接修改,再生成分鏡。";
+        });
+      }, reduceMotion ? 200 : 1600);
+    }
+  });
+
+  function typeInto(el, text, done) {
+    if (reduceMotion) { el.value = text; done(); return; }
+    el.value = "";
+    var i = 0;
+    var t = setInterval(function () {
+      el.value += text[i];
+      i++;
+      if (i >= text.length) { clearInterval(t); done(); }
+    }, 22);
+  }
+})();
+</script>
+
+</body>
+</html>
