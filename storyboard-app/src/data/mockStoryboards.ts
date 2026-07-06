@@ -1,130 +1,131 @@
 import type { Storyboard } from '../types'
 
 /**
- * Mock 分鏡資料。
- * 真實產品會呼叫 AI API 把使用者的故事拆成起承轉合；
- * 原型階段以三組預先寫好的分鏡表輪替，模擬「重新生成」時的不同結果。
+ * Mock 分鏡資料（示範模式）。
+ * 未設定 API key 時，以三組預寫的「長輩回憶」分鏡表輪替，
+ * 模擬把口述回憶轉換成四幕藝術品的效果。
  * 所有場景描述都只包含背景、空間、物件與光影，不出現任何人物。
  */
 export const mockStoryboards: Storyboard[] = [
   {
-    id: 'rain-window',
-    title: '雨停之前',
+    id: 'sewing-machine',
+    title: '裁縫車的歌',
     beats: [
       {
         stage: '起',
         stageLabel: '起 · Opening',
-        summary: '一切從一個安靜的午後開始，日常還未被打擾。',
-        sceneDescription: '木質窗框、玻璃上的第一滴雨、窗台上未收的信。',
-        mood: '安靜 · 微微不安',
+        summary: '十八歲那年嫁過來，嫁妝是一台黑亮的裁縫車。',
+        sceneDescription: '老屋窗邊的裁縫車、疊得整齊的花布、午後斜斜的光。',
+        mood: '青澀 · 帶著期待',
         scene: 'window-rain',
       },
       {
         stage: '承',
         stageLabel: '承 · Development',
-        summary: '生活如常推進，只是雨越下越密，話越來越少。',
-        sceneDescription: '深夜街道、路燈下被雨打亮的柏油路、遠處店招熄了一半。',
-        mood: '綿長 · 壓抑',
-        scene: 'street-lamp',
-      },
-      {
-        stage: '轉',
-        stageLabel: '轉 · Turn',
-        summary: '一句沒說出口的話，讓房間突然空了下來。',
-        sceneDescription: '空房間、一把背對窗的椅子、地板上斜長的影子。',
-        mood: '失落 · 靜止',
+        summary: '一腳一腳踩出全家的衣裳，踩過幾十個年頭。',
+        sceneDescription: '牆上掛滿紙樣與軟尺、桌上的粉餅劃線、窗外換了季節的樹影。',
+        mood: '勤懇 · 溫火慢燉',
         scene: 'empty-room',
       },
       {
-        stage: '合',
-        stageLabel: '合 · Resolution',
-        summary: '雨停了，門縫透進光，日子重新有了呼吸。',
-        sceneDescription: '微開的門、門縫灑進的長條光、走廊盡頭的窗。',
-        mood: '釋然 · 微亮',
-        scene: 'door-light',
-      },
-    ],
-  },
-  {
-    id: 'sea-return',
-    title: '往海的方向',
-    beats: [
-      {
-        stage: '起',
-        stageLabel: '起 · Opening',
-        summary: '離開的那天，城市的輪廓在背後越縮越小。',
-        sceneDescription: '清晨的城市天際線、樓與樓之間灰白的霧。',
-        mood: '疏離 · 出發前的靜',
-        scene: 'city-skyline',
-      },
-      {
-        stage: '承',
-        stageLabel: '承 · Development',
-        summary: '路一直往前，山替換了街景，訊號越來越弱。',
-        sceneDescription: '層疊的山稜線、蜿蜒的小徑、電線杆的細影。',
-        mood: '孤獨 · 開闊',
-        scene: 'mountain-path',
-      },
-      {
         stage: '轉',
         stageLabel: '轉 · Turn',
-        summary: '在長廊的盡頭，才發現一直逃避的其實是自己。',
-        sceneDescription: '無人的長廊、規律的柱影、盡頭一扇過曝的亮窗。',
-        mood: '對峙 · 屏息',
+        summary: '孩子一個個離家，裁縫車慢慢安靜了下來。',
+        sceneDescription: '蓋上防塵布的裁縫車、空了一半的衣櫃、走廊盡頭亮著的一盞燈。',
+        mood: '安靜 · 微微失落',
         scene: 'corridor',
       },
       {
         stage: '合',
         stageLabel: '合 · Resolution',
-        summary: '海平線把所有情緒攤平，回程的票安安靜靜躺在口袋。',
-        sceneDescription: '無風的海面、一條筆直的海平線、沙灘上退潮的痕跡。',
-        mood: '平靜 · 遼闊',
-        scene: 'sea-horizon',
+        summary: '如今孫女學會踩踏板，老歌又在屋裡響起。',
+        sceneDescription: '重新掀開布的裁縫車、門縫灑進的晨光、椅上一塊縫到一半的新花布。',
+        mood: '欣慰 · 延續',
+        scene: 'door-light',
       },
     ],
   },
   {
-    id: 'old-room',
-    title: '搬家那天',
+    id: 'noodle-stall',
+    title: '巷口麵香',
     beats: [
       {
         stage: '起',
         stageLabel: '起 · Opening',
-        summary: '紙箱堆到天花板之前，這裡曾經是全世界。',
-        sceneDescription: '清空一半的房間、牆上留下相框的淺色方印。',
-        mood: '懷舊 · 溫吞',
-        scene: 'empty-room',
+        summary: '和老伴推著攤車，在巷口支起第一鍋熱湯。',
+        sceneDescription: '清晨的窄巷、攤車上的白鐵鍋、剛升起的炊煙與路燈餘光。',
+        mood: '打拚 · 熱氣騰騰',
+        scene: 'street-lamp',
       },
       {
         stage: '承',
         stageLabel: '承 · Development',
-        summary: '一件一件收，回憶比行李更佔位置。',
-        sceneDescription: '午後的窗、灰塵在光柱裡漂浮、窗外安靜的巷子。',
-        mood: '緩慢 · 捨不得',
+        summary: '一碗麵五毛錢，養大了三個孩子。',
+        sceneDescription: '掛在攤前的價目木牌、疊高的空碗、雨棚下滴著水的簷角。',
+        mood: '知足 · 忙碌',
         scene: 'window-rain',
       },
       {
         stage: '轉',
         stageLabel: '轉 · Turn',
-        summary: '鑰匙交出去的瞬間，門在身後合上了一整段時光。',
-        sceneDescription: '關到只剩一線光的門、門把上反射的最後一道夕陽。',
-        mood: '斷裂 · 鼻酸',
-        scene: 'door-light',
+        summary: '都市更新那年，巷子拆了，攤車進了倉庫。',
+        sceneDescription: '圍起的工地擋板、遠處新起的大樓輪廓、堆在角落蒙塵的攤車。',
+        mood: '不捨 · 時代更迭',
+        scene: 'city-skyline',
       },
       {
         stage: '合',
         stageLabel: '合 · Resolution',
-        summary: '新城市的燈一盞盞亮起，舊故事變成新故事的第一頁。',
-        sceneDescription: '入夜的城市輪廓、亮起的窗格、天邊最後一層暮色。',
-        mood: '期待 · 微光',
+        summary: '兒子把那口鍋擺進新店裡，湯頭還是那個味。',
+        sceneDescription: '亮著暖燈的新店門口、玻璃窗上的老店名、灶上冒著熟悉的蒸氣。',
+        mood: '傳承 · 暖',
+        scene: 'door-light',
+      },
+    ],
+  },
+  {
+    id: 'homebound-train',
+    title: '回鄉的火車',
+    beats: [
+      {
+        stage: '起',
+        stageLabel: '起 · Opening',
+        summary: '十六歲離開山裡的家，到城裡當學徒。',
+        sceneDescription: '層層山稜間的小路、肩挑行李留下的腳印小徑、清晨的薄霧。',
+        mood: '忐忑 · 少年遠行',
+        scene: 'mountain-path',
+      },
+      {
+        stage: '承',
+        stageLabel: '承 · Development',
+        summary: '城裡的日子一晃三十年，鄉音藏進了口袋。',
+        sceneDescription: '入夜亮起的城市天際線、宿舍窗格透出的一盞燈、屋頂之間的月台鐘。',
+        mood: '打拚 · 想家',
         scene: 'city-skyline',
+      },
+      {
+        stage: '轉',
+        stageLabel: '轉 · Turn',
+        summary: '接到母親病重的電報，連夜搭上回鄉的火車。',
+        sceneDescription: '深夜月台的長廊、一排空蕩的候車椅、號誌燈在雨裡明明滅滅。',
+        mood: '焦急 · 夜雨',
+        scene: 'corridor',
+      },
+      {
+        stage: '合',
+        stageLabel: '合 · Resolution',
+        summary: '天亮時山出現在車窗外，到家了。',
+        sceneDescription: '車窗外連綿的山稜線、田埂上的晨光、遠處炊煙升起的老屋頂。',
+        mood: '平靜 · 歸屬',
+        scene: 'sea-horizon',
       },
     ],
   },
 ]
 
-/** 模擬語音轉文字的結果 */
+/** 模擬語音轉文字的結果（長輩口述） */
 export const mockTranscript =
-  '那年夏天我一個人搬到海邊的小鎮，本來只是想暫住一個月，' +
-  '結果在那裡遇見了改變我一生的一封信。' +
-  '我猶豫了很久要不要回去，最後在雨停的那個早晨做了決定。'
+  '我十八歲嫁過來的時候，阿母給我一台裁縫車做嫁妝。' +
+  '那時候全家的衣服都是我一針一線做的，' +
+  '後來孩子大了、搬出去了，裁縫車就蓋起來了。' +
+  '前陣子孫女說想學，我把布掀開，機器還會動呢。'

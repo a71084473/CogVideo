@@ -69,7 +69,7 @@ export default function App() {
       )}
       <footer className="mx-auto max-w-5xl px-6 py-10">
         <p className="text-[10px] tracking-widest2 text-faint">
-          STORY · BOARD — A QUIET STORYBOARD PROTOTYPE
+          MEMORY · GALLERY — 把回憶留成藝術品
         </p>
       </footer>
     </div>

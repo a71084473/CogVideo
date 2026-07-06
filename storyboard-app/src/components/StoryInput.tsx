@@ -63,12 +63,15 @@ export default function StoryInput({
   return (
     <section id="input" className="border-b border-line">
       <div className="mx-auto max-w-5xl px-6 py-16 md:py-20">
-        <div className="mb-8 flex items-end justify-between">
+        <div className="mb-3 flex items-end justify-between">
           <h2 className="font-serif text-2xl tracking-wide text-ink md:text-3xl">
-            輸入你的故事
+            說一段您的回憶
           </h2>
-          <span className="text-xs tracking-widest2 text-faint">01 / INPUT</span>
+          <span className="text-xs tracking-widest2 text-faint">01 / MEMORY</span>
         </div>
+        <p className="mb-8 text-sm leading-relaxed text-faint">
+          不用想得太完整，想到什麼說什麼就好——一件老東西、一條街、一個下午。
+        </p>
 
         {/* 文字 / 聲音 切換 */}
         <div className="mb-6 inline-flex border border-ink" role="tablist" aria-label="輸入模式">
@@ -98,7 +101,7 @@ export default function StoryInput({
             onChange={(e) => onStoryChange(e.target.value)}
             placeholder="說一段你想被記住的故事……"
             rows={7}
-            className="w-full resize-y border border-line bg-transparent p-5 font-serif text-base leading-loose text-ink placeholder:text-faint focus:border-ink focus:outline-none"
+            className="w-full resize-y border border-line bg-transparent p-5 font-serif text-lg leading-loose text-ink placeholder:text-faint focus:border-ink focus:outline-none"
           />
         ) : (
           <div className="flex flex-col items-center border border-line px-6 py-12">
@@ -112,7 +115,8 @@ export default function StoryInput({
                   {/* 麥克風線框圖示 */}
                   <MicIcon />
                 </button>
-                <p className="mt-5 text-sm text-faint">按下開始，說一段你想被記住的故事……</p>
+                <p className="mt-5 text-base text-faint">按下開始，說一段你想被記住的故事……</p>
+                <p className="mt-1 text-sm text-faint">慢慢說就好，說錯了也沒關係。</p>
               </>
             )}
 
@@ -157,7 +161,7 @@ export default function StoryInput({
                   value={story}
                   onChange={(e) => onStoryChange(e.target.value)}
                   rows={5}
-                  className="w-full resize-y border border-line bg-transparent p-5 font-serif text-base leading-loose text-ink focus:border-ink focus:outline-none"
+                  className="w-full resize-y border border-line bg-transparent p-5 font-serif text-lg leading-loose text-ink focus:border-ink focus:outline-none"
                 />
                 <button
                   onClick={resetRecording}
@@ -179,14 +183,14 @@ export default function StoryInput({
           >
             {generating
               ? usingRealApi
-                ? 'Claude 正在拆解故事……'
-                : '正在拆解故事……'
+                ? '正在把回憶裱進畫框……'
+                : '正在整理回憶……'
               : '生成分鏡'}
           </button>
           <p className="text-xs text-faint">
             {usingRealApi
-              ? '由 Claude 依你的故事真實生成起承轉合。'
-              : '尚未設定 API key，將以 mock 資料示範流程。'}
+              ? '由 Claude 依這段回憶真實生成四幕分鏡。'
+              : '尚未設定 API key，將以示範回憶展示流程。'}
           </p>
         </div>
 

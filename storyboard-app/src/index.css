@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 為年長使用者放大整體字級（rem 基準） */
+html {
+  font-size: 17px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 18px;
+  }
+}
+
 /* 紙感底色：極淡的顆粒，維持黑白灰基調 */
 body {
   @apply bg-paper antialiased;

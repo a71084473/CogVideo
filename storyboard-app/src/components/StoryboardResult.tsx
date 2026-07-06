@@ -10,11 +10,12 @@ interface Props {
 
 /** 把分鏡表整理成可貼到文件的純文字 */
 function toPlainText(sb: Storyboard): string {
-  const header = `分鏡表 —《${sb.title}》\n${'─'.repeat(24)}\n`
+  const date = new Date().toLocaleDateString('zh-TW')
+  const header = `回憶藝術品 —《${sb.title}》 口述於 ${date}\n${'─'.repeat(24)}\n`
   const rows = sb.beats
     .map(
       (b, i) =>
-        `【${b.stage}】SC.${String(i + 1).padStart(2, '0')}\n` +
+        `【${b.stage}】第 ${i + 1} 幕\n` +
         `劇情摘要：${b.summary}\n` +
         `背景畫面：${b.sceneDescription}\n` +
         `情緒氛圍：${b.mood}\n`,
@@ -47,19 +48,31 @@ export default function StoryboardResult({ storyboard, onRegenerate, generating 
       <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
         <div className="mb-3 flex items-end justify-between">
           <h2 className="font-serif text-2xl tracking-wide text-ink md:text-3xl">
-            起承轉合分鏡
+            回憶的四幕
           </h2>
-          <span className="text-xs tracking-widest2 text-faint">02 / STORYBOARD</span>
+          <span className="text-xs tracking-widest2 text-faint">02 / GALLERY</span>
         </div>
         <p className="mb-10 font-serif text-sm text-faint">
-          《{storyboard.title}》 · 四格 · 無人物 · 只以場景敘事
+          一段口述，一件作品 · 無人物 · 只以場景敘事
         </p>
 
-        {/* 桌機四欄、平板兩欄、手機單欄 */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {storyboard.beats.map((beat, i) => (
-            <StoryboardCard key={`${storyboard.id}-${beat.stage}`} beat={beat} index={i} />
-          ))}
+        {/* 畫框：雙層細框，把四幕分鏡裱成一件作品 */}
+        <div className="border border-ink p-2 md:p-3">
+          <div className="border border-line px-4 py-8 md:px-8 md:py-10">
+            {/* 桌機四欄、平板兩欄、手機單欄 */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+              {storyboard.beats.map((beat, i) => (
+                <StoryboardCard key={`${storyboard.id}-${beat.stage}`} beat={beat} index={i} />
+              ))}
+            </div>
+            {/* 作品銘牌 */}
+            <div className="mt-8 flex flex-col items-center gap-1 border-t border-line pt-6 text-center">
+              <p className="font-serif text-xl tracking-wide text-ink">《{storyboard.title}》</p>
+              <p className="text-xs tracking-widest text-faint">
+                口述回憶 · {new Date().toLocaleDateString('zh-TW')} · 起承轉合四幕
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* 操作列 */}
@@ -78,7 +91,7 @@ export default function StoryboardResult({ storyboard, onRegenerate, generating 
             {copied ? '已複製 ✓' : '複製分鏡表'}
           </button>
           <p className="text-xs text-faint md:ml-2">
-            複製後可直接貼進企劃書或筆記。
+            複製後可貼給家人，或收進家族的回憶記錄裡。
           </p>
         </div>
       </div>
