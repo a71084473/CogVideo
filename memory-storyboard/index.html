@@ -374,11 +374,11 @@
   .board-grid {
     margin-top: 30px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 22px;
   }
-  @media (max-width: 1080px) { .board-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 620px) { .board-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1080px) { .board-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) { .board-grid { grid-template-columns: minmax(0, 1fr); } }
 
   .frame-card {
     background: var(--card);
@@ -399,7 +399,7 @@
     background: var(--frame-bg);
     border: 1px solid var(--line-strong);
   }
-  .frame-preview canvas { display: block; width: 100%; height: auto; }
+  .frame-preview canvas { display: block; width: 100%; max-width: 100%; height: auto; }
   .frame-preview .tick {
     position: absolute;
     width: 9px;
@@ -590,7 +590,7 @@
     <div class="board-grid" id="boardGrid"></div>
     <div class="board-foot">
       <button class="ghost-btn" id="againBtn">回到故事,再說一次</button>
-      <span class="board-note">每一格皆為黑白線稿場景,畫面中不出現人物、臉孔或身影。</span>
+      <span class="board-note">四幕分別畫下同一地點的晨光、日午、風雨與暮色。畫面中不出現人物、臉孔或身影。</span>
     </div>
   </section>
 
@@ -765,353 +765,660 @@
     return s + "。";
   }
 
-  /* ── 黑白線稿引擎 ───────────────────── */
+  /* ── 彩繪分鏡引擎 ───────────────────── */
   function makeRng(seed) {
     return function () {
       seed = (seed * 9301 + 49297) % 233280;
       return seed / 233280;
     };
   }
+  function hex3(c) { var n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function mix(c1, c2, t) {
+    var a = hex3(c1), b = hex3(c2);
+    var r = Math.round(a[0] + (b[0] - a[0]) * t);
+    var g = Math.round(a[1] + (b[1] - a[1]) * t);
+    var bl = Math.round(a[2] + (b[2] - a[2]) * t);
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1);
+  }
+  function tint(c, t) { return mix(c, "#ffffff", t); }
+  function shade(c, t) { return mix(c, "#141109", t); }
+  function rgba(c, a) { var v = hex3(c); return "rgba(" + v[0] + "," + v[1] + "," + v[2] + "," + a + ")"; }
 
-  function Sketch(canvas, seed) {
+  /* 同一地點的四種時刻:晨 / 日 / 風雨 / 暮 */
+  var PAL = [
+    { skyT: "#c9dde6", skyB: "#f4e9d6", sun: "#fdf6e0", sunA: 0.5, sunPos: [0.26, 0.28], sunR: 20,
+      far: "#a6bdbe", mid: "#7c998f", near: "#4a685c", dark: "#31453d",
+      cloud: "#ffffff", cloudA: 0.6, warm: "#e8b878", water: "#b9cdd2", sand: "#e6d7bb", rain: null },
+    { skyT: "#a9ccd6", skyB: "#eff0da", sun: "#f9eec6", sunA: 0.35, sunPos: [0.76, 0.18], sunR: 17,
+      far: "#9cb9a9", mid: "#6d947e", near: "#3e6252", dark: "#2b4539",
+      cloud: "#ffffff", cloudA: 0.75, warm: "#e2a55e", water: "#a5c5c6", sand: "#ead9b8", rain: null },
+    { skyT: "#57677a", skyB: "#9aa7a6", sun: null, sunA: 0, sunPos: [0.5, 0.2], sunR: 0,
+      far: "#79858c", mid: "#525f67", near: "#343f46", dark: "#222b32",
+      cloud: "#414c57", cloudA: 0.5, warm: "#dda45c", water: "#5e7079", sand: "#b2ab98", rain: "#e3ebf0" },
+    { skyT: "#514f7c", skyB: "#e7a06b", sun: "#f7c76f", sunA: 0.65, sunPos: [0.72, 0.5], sunR: 26,
+      far: "#8f7386", mid: "#655a74", near: "#3d3752", dark: "#282540",
+      cloud: "#f0bd8c", cloudA: 0.42, warm: "#f4b45f", water: "#d29a72", sand: "#dbb590", rain: null }
+  ];
+
+  function Painter(canvas, seed, act) {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var W = 480, H = 300;
+    var W = 520, H = 320;
     canvas.width = W * dpr;
     canvas.height = H * dpr;
     var ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
-    var draw = getComputedStyle(document.body).getPropertyValue("color");
-    var ink = getComputedStyle(document.documentElement).getPropertyValue("--draw").trim() || draw;
-    ctx.strokeStyle = ink;
-    ctx.fillStyle = ink;
-    ctx.lineWidth = 1.1;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     this.ctx = ctx; this.W = W; this.H = H;
     this.rnd = makeRng(seed);
+    this.act = act;
+    this.p = PAL[act];
   }
-  Sketch.prototype.jline = function (x1, y1, x2, y2, jit) {
-    var ctx = this.ctx, rnd = this.rnd;
-    jit = jit == null ? 1.2 : jit;
-    var seg = Math.max(2, Math.floor(Math.hypot(x2 - x1, y2 - y1) / 18));
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    for (var i = 1; i <= seg; i++) {
-      var t = i / seg;
-      var x = x1 + (x2 - x1) * t + (rnd() - 0.5) * jit;
-      var y = y1 + (y2 - y1) * t + (rnd() - 0.5) * jit;
-      ctx.lineTo(x, y);
+  Painter.prototype.rect = function (x, y, w, h, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.fillRect(x, y, w, h); c.restore();
+  };
+  Painter.prototype.poly = function (pts, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.beginPath();
+    c.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]);
+    c.closePath(); c.fill(); c.restore();
+  };
+  Painter.prototype.circle = function (x, y, r, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.beginPath();
+    c.arc(x, y, r, 0, Math.PI * 2); c.fill(); c.restore();
+  };
+  Painter.prototype.ellipse = function (x, y, rx, ry, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.beginPath();
+    c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fill(); c.restore();
+  };
+  Painter.prototype.stroke = function (pts, color, lw, a) {
+    var c = this.ctx; c.save();
+    c.globalAlpha = a == null ? 1 : a;
+    c.strokeStyle = color; c.lineWidth = lw || 1.2;
+    c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]);
+    c.stroke(); c.restore();
+  };
+  Painter.prototype.arcStroke = function (x, y, r, a1, a2, color, lw, a) {
+    var c = this.ctx; c.save();
+    c.globalAlpha = a == null ? 1 : a;
+    c.strokeStyle = color; c.lineWidth = lw || 1.2;
+    c.beginPath(); c.arc(x, y, r, a1, a2); c.stroke(); c.restore();
+  };
+  Painter.prototype.lgrad = function (y0, y1, c0, c1) {
+    var g = this.ctx.createLinearGradient(0, y0, 0, y1);
+    g.addColorStop(0, c0); g.addColorStop(1, c1);
+    return g;
+  };
+  Painter.prototype.sky = function (hy) {
+    var c = this.ctx;
+    c.fillStyle = this.lgrad(0, hy, this.p.skyT, this.p.skyB);
+    c.fillRect(0, 0, this.W, hy + 1);
+  };
+  Painter.prototype.glow = function (x, y, r, color, a) {
+    var c = this.ctx;
+    var g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, rgba(color, a));
+    g.addColorStop(1, rgba(color, 0));
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  Painter.prototype.celestial = function (x, y) {
+    var p = this.p;
+    if (!p.sun) return;
+    if (x == null) { x = this.W * p.sunPos[0]; y = this.H * p.sunPos[1]; }
+    this.glow(x, y, p.sunR * 3.4, p.sun, p.sunA);
+    this.circle(x, y, p.sunR, p.sun, 0.95);
+  };
+  Painter.prototype.cloudBlob = function (cx, cy, s) {
+    var p = this.p, c = this.ctx;
+    c.save(); c.globalAlpha = p.cloudA; c.fillStyle = p.cloud;
+    c.beginPath();
+    c.arc(cx - s * 0.75, cy, s * 0.48, 0, Math.PI * 2);
+    c.arc(cx, cy - s * 0.28, s * 0.6, 0, Math.PI * 2);
+    c.arc(cx + s * 0.7, cy - s * 0.05, s * 0.46, 0, Math.PI * 2);
+    c.arc(cx + s * 0.05, cy + s * 0.14, s * 0.5, 0, Math.PI * 2);
+    c.fill(); c.restore();
+  };
+  Painter.prototype.clouds = function () {
+    var W = this.W;
+    if (this.act === 0) { this.cloudBlob(W * 0.7, 52, 24); this.cloudBlob(W * 0.34, 82, 15); }
+    else if (this.act === 1) { this.cloudBlob(W * 0.28, 56, 20); this.cloudBlob(W * 0.84, 86, 13); }
+    else if (this.act === 2) { this.cloudBlob(W * 0.28, 48, 30); this.cloudBlob(W * 0.6, 40, 34); this.cloudBlob(W * 0.88, 62, 24); }
+    else { this.cloudBlob(W * 0.3, 58, 20); }
+  };
+  Painter.prototype.rainFx = function () {
+    var p = this.p;
+    if (!p.rain) return;
+    var c = this.ctx;
+    c.fillStyle = this.lgrad(0, this.H * 0.5, rgba(p.dark, 0.22), rgba(p.dark, 0));
+    c.fillRect(0, 0, this.W, this.H * 0.5);
+    for (var i = 0; i < 52; i++) {
+      var x = this.rnd() * this.W, y = this.rnd() * this.H * 0.9;
+      this.stroke([[x, y], [x - 4, y + 15]], p.rain, 1.2, 0.16 + this.rnd() * 0.2);
     }
-    ctx.stroke();
   };
-  Sketch.prototype.jpath = function (pts, close) {
-    var ctx = this.ctx, rnd = this.rnd;
-    ctx.beginPath();
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (var i = 1; i < pts.length; i++) {
-      ctx.lineTo(pts[i][0] + (rnd() - 0.5) * 1.4, pts[i][1] + (rnd() - 0.5) * 1.4);
-    }
-    if (close) ctx.closePath();
-    ctx.stroke();
-  };
-  Sketch.prototype.arc = function (cx, cy, r, a1, a2) {
-    var ctx = this.ctx;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, a1, a2);
-    ctx.stroke();
-  };
-  Sketch.prototype.cloud = function (cx, cy, s) {
-    this.arc(cx - s * 0.8, cy, s * 0.45, Math.PI, Math.PI * 2);
-    this.arc(cx, cy - s * 0.18, s * 0.6, Math.PI, Math.PI * 2);
-    this.arc(cx + s * 0.85, cy, s * 0.42, Math.PI, Math.PI * 2);
-    this.jline(cx - s * 1.25, cy, cx + s * 1.27, cy, 0.8);
-  };
-  Sketch.prototype.birds = function (cx, cy, n) {
+  Painter.prototype.birds = function (cx, cy, n) {
     for (var i = 0; i < n; i++) {
-      var x = cx + (this.rnd() - 0.5) * 90, y = cy + (this.rnd() - 0.5) * 30, w = 5 + this.rnd() * 4;
-      this.arc(x - w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85);
-      this.arc(x + w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85);
+      var x = cx + (this.rnd() - 0.5) * 110, y = cy + (this.rnd() - 0.5) * 34, w = 5 + this.rnd() * 4;
+      this.arcStroke(x - w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85, this.p.dark, 1.3, 0.8);
+      this.arcStroke(x + w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85, this.p.dark, 1.3, 0.8);
     }
   };
-  Sketch.prototype.sun = function (cx, cy, r, half) {
-    var ctx = this.ctx;
-    ctx.beginPath();
-    if (half) { ctx.arc(cx, cy, r, Math.PI, Math.PI * 2); } else { ctx.arc(cx, cy, r, 0, Math.PI * 2); }
-    ctx.stroke();
-  };
-  Sketch.prototype.rain = function (x, y, w, h, n) {
-    for (var i = 0; i < n; i++) {
-      var rx = x + this.rnd() * w, ry = y + this.rnd() * h;
-      this.jline(rx, ry, rx - 4, ry + 11, 0.4);
-    }
-  };
-  Sketch.prototype.smoke = function (x, y, n) {
-    for (var i = 0; i < n; i++) {
-      this.arc(x + (i % 2 === 0 ? 3 : -3), y - i * 12, 5 + i * 1.5, Math.PI * 0.2, Math.PI * 1.1);
-    }
-  };
-  Sketch.prototype.tree = function (x, y, s) {
-    this.jline(x, y, x, y - s * 0.8);
-    this.jline(x, y - s * 0.45, x - s * 0.3, y - s * 0.7);
-    this.jline(x, y - s * 0.55, x + s * 0.28, y - s * 0.85);
-    this.arc(x - s * 0.15, y - s * 0.95, s * 0.35, 0, Math.PI * 2);
-    this.arc(x + s * 0.22, y - s * 0.8, s * 0.26, 0, Math.PI * 2);
-  };
-  Sketch.prototype.hills = function (baseY, amp) {
+  Painter.prototype.ridge = function (baseY, amp, phase, fill, a) {
     var pts = [];
-    for (var x = -10; x <= this.W + 10; x += 34) {
-      pts.push([x, baseY - Math.abs(Math.sin(x * 0.011)) * amp - this.rnd() * 6]);
+    for (var x = -12; x <= this.W + 12; x += 24) {
+      var yy = baseY - (Math.sin(x * 0.012 + phase) * 0.5 + 0.5) * amp - this.rnd() * 5;
+      pts.push([x, yy]);
     }
-    this.jpath(pts);
+    pts.push([this.W + 12, this.H + 12]);
+    pts.push([-12, this.H + 12]);
+    this.poly(pts, fill, a);
+  };
+  Painter.prototype.mist = function (y, h, a) {
+    var c = this.ctx;
+    var g = c.createLinearGradient(0, y, 0, y + h);
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    g.addColorStop(0.45, "rgba(255,255,255," + a + ")");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = g;
+    c.fillRect(0, y, this.W, h);
+  };
+  Painter.prototype.finish = function () {
+    var c = this.ctx, p = this.p;
+    /* 全幅時刻色調 */
+    c.fillStyle = this.lgrad(0, this.H, rgba(p.skyT, 0.08), rgba(p.skyB, 0.12));
+    c.fillRect(0, 0, this.W, this.H);
+    if (this.act === 2) this.rect(0, 0, this.W, this.H, p.dark, 0.05);
+    /* 紙紋雜點 */
+    for (var i = 0; i < 620; i++) {
+      var x = this.rnd() * this.W, y = this.rnd() * this.H;
+      this.rect(x, y, 1, 1, i % 3 ? "#241f16" : "#ffffff", 0.045);
+    }
+    /* 暗角 */
+    var g = c.createRadialGradient(this.W / 2, this.H / 2, this.H * 0.42, this.W / 2, this.H / 2, this.W * 0.72);
+    g.addColorStop(0, "rgba(24,19,12,0)");
+    g.addColorStop(1, "rgba(24,19,12,0.18)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, this.W, this.H);
   };
 
-  /* 幕別天候:0 晨雲 1 飛鳥 2 風雨 3 暮色 */
-  function weather(s, act, horizonY, outdoor) {
-    if (!outdoor) return;
-    if (act === 0) { s.cloud(s.W * 0.72, 52, 22); s.cloud(s.W * 0.3, 74, 14); }
-    if (act === 1) { s.birds(s.W * 0.68, 58, 3); s.cloud(s.W * 0.26, 52, 16); }
-    if (act === 2) { s.cloud(s.W * 0.5, 46, 26); s.cloud(s.W * 0.78, 62, 18); s.rain(20, 30, s.W - 40, horizonY - 60, 26); }
-    if (act === 3) { s.sun(s.W * 0.74, horizonY, 26, true); s.birds(s.W * 0.32, 64, 2); }
-  }
-
+  /* ── 場景繪製(僅背景,無人物)────── */
   var DRAWERS = {
-    sea: function (s, act) {
-      var hy = s.H * 0.52;
-      s.jline(0, hy, s.W, hy, 0.8);
+    sea: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, hy = H * 0.55;
+      P.sky(hy);
+      var sx = W * p.sunPos[0], sy = P.act === 3 ? hy - 4 : H * p.sunPos[1];
+      P.celestial(sx, sy);
+      P.clouds();
+      P.poly([[0, hy], [W * 0.07, hy - 15], [W * 0.19, hy - 7], [W * 0.26, hy]], p.far, 0.9);
+      c.fillStyle = P.lgrad(hy, H, tint(p.water, 0.22), shade(p.water, 0.34));
+      c.fillRect(0, hy, W, H - hy);
+      if (p.sun) {
+        for (var i = 0; i < 10; i++) {
+          var ry = hy + 8 + i * 10 + P.rnd() * 5, rw = 30 - i * 1.8 + P.rnd() * 12;
+          P.rect(sx - rw / 2 + (P.rnd() - 0.5) * 12, ry, rw, 2.2, p.sun, 0.26);
+        }
+      }
       for (var r = 0; r < 5; r++) {
-        var y = hy + 18 + r * 22;
-        for (var x = 20 + r * 14; x < s.W - 20; x += 52) {
-          s.arc(x, y, 13, Math.PI * 0.1, Math.PI * 0.9);
+        var y = hy + 16 + r * 20;
+        for (var x = 16 + r * 14; x < W - 16; x += 46 + r * 6) {
+          P.arcStroke(x, y, 10 + r * 2, Math.PI * 0.08, Math.PI * 0.92, tint(p.water, 0.5), 1.4, 0.4 + r * 0.07);
         }
       }
-      s.jpath([[s.W * 0.1, hy], [s.W * 0.16, hy - 10], [s.W * 0.23, hy]]);
-      var bx = s.W * 0.68, by = hy - 4;
-      s.jpath([[bx - 26, by], [bx + 26, by], [bx + 18, by + 9], [bx - 18, by + 9]], true);
-      s.jline(bx, by, bx, by - 30);
-      s.jpath([[bx, by - 30], [bx + 20, by - 8], [bx, by - 8]], true);
-      weather(s, act, hy, true);
-    },
-    mountain: function (s, act) {
-      s.jpath([[0, 150], [70, 92], [150, 138], [230, 70], [330, 132], [420, 88], [s.W, 128]]);
-      s.jpath([[0, 190], [110, 150], [220, 182], [340, 146], [s.W, 178]]);
-      s.jline(30, 168, 120, 168, 0.5); s.jline(250, 158, 360, 158, 0.5);
-      for (var i = 0; i < 4; i++) {
-        var x = 60 + i * 110, y = s.H - 34 - (i % 2) * 10;
-        s.jline(x, y, x, y - 40);
-        s.jpath([[x - 16, y - 12], [x, y - 46], [x + 16, y - 12]]);
-        s.jpath([[x - 11, y - 26], [x, y - 52], [x + 11, y - 26]]);
-      }
-      s.jpath([[s.W * 0.42, s.H - 8], [s.W * 0.5, s.H - 40], [s.W * 0.46, s.H - 70], [s.W * 0.52, s.H - 96]]);
-      weather(s, act, 120, true);
-    },
-    field: function (s, act) {
-      var hy = s.H * 0.4;
-      s.hills(hy, 26);
-      var vx = s.W * 0.5;
-      for (var i = 0; i < 5; i++) {
-        var t = i / 4;
-        s.jline(vx - 8 - t * 250, s.H, vx - 2 - t * 26, hy + 8, 0.8);
-        s.jline(vx + 8 + t * 250, s.H, vx + 2 + t * 26, hy + 8, 0.8);
-      }
-      for (var r = 0; r < 4; r++) {
-        var y = hy + 26 + r * (18 + r * 8);
-        s.jline(30 - r * 6, y, s.W - 30 + r * 6, y, 1.6);
-      }
-      for (var p = 0; p < 3; p++) {
-        var px = s.W * (0.18 + p * 0.3), py = hy + 14;
-        s.jline(px, py, px, py - 34);
-        s.jline(px - 9, py - 28, px + 9, py - 28);
-      }
-      var fx = s.W * 0.82, fy = hy + 4;
-      s.jpath([[fx - 16, fy], [fx - 16, fy - 12], [fx, fy - 20], [fx + 16, fy - 12], [fx + 16, fy]], true);
-      if (act === 3) s.smoke(fx + 6, fy - 22, 3);
-      weather(s, act, hy, true);
-    },
-    house: function (s, act) {
-      var gy = s.H * 0.78;
-      s.jline(0, gy, s.W, gy, 1);
-      var hx = s.W * 0.5, hw = 150, hh = 84;
-      s.jpath([[hx - hw, gy], [hx - hw, gy - hh], [hx + hw, gy - hh], [hx + hw, gy]]);
-      s.jpath([[hx - hw - 18, gy - hh], [hx, gy - hh - 44], [hx + hw + 18, gy - hh]]);
-      s.jpath([[hx - hw - 10, gy - hh - 4], [hx, gy - hh - 40], [hx + hw + 10, gy - hh - 4]]);
-      for (var t = 1; t < 6; t++) {
-        s.jline(hx - hw - 18 + t * ((hw + 18) / 3.2), gy - hh - t * 6.2, hx + hw + 18 - t * ((hw + 18) / 3.2), gy - hh - t * 6.2, 0.5);
-      }
-      s.jpath([[hx - 24, gy], [hx - 24, gy - 52], [hx + 24, gy - 52], [hx + 24, gy]]);
-      s.jline(hx, gy, hx, gy - 52, 0.5);
-      var wx = hx - 92;
-      s.jpath([[wx - 22, gy - 24], [wx - 22, gy - 56], [wx + 22, gy - 56], [wx + 22, gy - 24]], true);
-      s.jline(wx, gy - 24, wx, gy - 56, 0.4);
-      s.jline(wx - 22, gy - 40, wx + 22, gy - 40, 0.4);
-      var wx2 = hx + 92;
-      s.jpath([[wx2 - 22, gy - 24], [wx2 - 22, gy - 56], [wx2 + 22, gy - 56], [wx2 + 22, gy - 24]], true);
-      s.jline(wx2, gy - 24, wx2, gy - 56, 0.4);
-      s.jline(wx2 - 22, gy - 40, wx2 + 22, gy - 40, 0.4);
-      s.tree(s.W * 0.09, gy, 70);
-      s.jpath([[s.W * 0.86, gy], [s.W * 0.86, gy - 14], [s.W * 0.92, gy - 14], [s.W * 0.92, gy]]);
-      s.arc(s.W * 0.89, gy - 20, 7, Math.PI * 0.9, Math.PI * 2.1);
-      if (act === 3) { s.sun(s.W * 0.78, 60, 16, false); }
-      weather(s, act === 3 ? 1 : act, gy - 120, true);
-    },
-    train: function (s, act) {
-      var hy = s.H * 0.42;
-      s.hills(hy, 20);
-      var vx = s.W * 0.56;
-      s.jline(s.W * 0.18, s.H, vx - 6, hy + 6, 1);
-      s.jline(s.W * 0.98, s.H, vx + 8, hy + 6, 1);
-      s.jline(s.W * 0.34, s.H, vx - 2, hy + 6, 1);
-      s.jline(s.W * 0.82, s.H, vx + 4, hy + 6, 1);
-      for (var i = 0; i < 7; i++) {
-        var t = i / 7, y = s.H - t * (s.H - hy - 10) * 0.96;
-        var half = (1 - t) * s.W * 0.33;
-        s.jline(vx - half * 0.9, y, vx + half, y, 0.6);
-      }
-      var px = s.W * 0.13;
-      s.jline(px, s.H * 0.9, px, hy - 40);
-      s.jpath([[px - 34, hy - 40], [px + 34, hy - 40], [px + 34, hy - 62], [px - 34, hy - 62]], true);
-      s.jline(px - 26, hy - 51, px + 26, hy - 51, 0.4);
-      for (var p = 0; p < 3; p++) {
-        var ex = s.W * (0.68 + p * 0.11), eh = 60 - p * 12, ey = hy + 10 + p * 2;
-        s.jline(ex, ey, ex, ey - eh);
-        s.jline(ex - 10 + p * 2, ey - eh + 8, ex + 10 - p * 2, ey - eh + 8, 0.4);
-      }
-      s.arc(-40, hy - 130, 190, Math.PI * 0.12, Math.PI * 0.38);
-      weather(s, act, hy, true);
-    },
-    temple: function (s, act) {
-      var gy = s.H * 0.82;
-      s.jline(0, gy, s.W, gy, 1);
-      s.jline(s.W * 0.2, gy + 10, s.W * 0.8, gy + 10, 0.6);
-      var cx = s.W * 0.5, rw = 140, ry = s.H * 0.34;
-      s.jpath([[cx - rw - 26, ry + 24], [cx - rw, ry + 6], [cx, ry - 14], [cx + rw, ry + 6], [cx + rw + 26, ry + 24]]);
-      s.jpath([[cx - rw - 26, ry + 24], [cx - rw - 14, ry + 34], [cx + rw + 14, ry + 34], [cx + rw + 26, ry + 24]]);
-      s.jline(cx - rw + 6, ry + 34, cx - rw + 6, gy);
-      s.jline(cx + rw - 6, ry + 34, cx + rw - 6, gy);
-      s.jline(cx - 46, ry + 34, cx - 46, gy);
-      s.jline(cx + 46, ry + 34, cx + 46, gy);
-      for (var l = 0; l < 4; l++) {
-        var lx = cx - 96 + l * 64, ly = ry + 52;
-        s.jline(lx, ry + 34, lx, ly);
-        s.arc(lx, ly + 12, 12, 0, Math.PI * 2);
-        s.jline(lx, ly + 24, lx, ly + 32, 0.4);
-      }
-      s.jpath([[cx - 20, gy], [cx - 20, gy - 26], [cx + 20, gy - 26], [cx + 20, gy]], true);
-      s.jline(cx - 26, gy - 26, cx + 26, gy - 26);
-      s.smoke(cx, gy - 30, act === 2 ? 2 : 4);
-      weather(s, act, s.H * 0.3, true);
-    },
-    market: function (s, act) {
-      var gy = s.H * 0.84;
-      s.jline(0, gy, s.W, gy, 1);
-      for (var i = 0; i < 4; i++) {
-        var t = i / 4, x = 30 + t * s.W * 0.62, y0 = s.H * 0.3 + t * 26, w = 120 - t * 30;
-        s.jpath([[x, y0], [x + w, y0]]);
-        for (var f = 0; f <= 4; f++) {
-          s.arc(x + (w / 4) * f - w / 8 + 6, y0 + 4, w / 9, Math.PI * 0.05, Math.PI * 0.95);
+      if (P.act === 2) {
+        for (var w2 = 0; w2 < 14; w2++) {
+          P.rect(P.rnd() * W, hy + 10 + P.rnd() * (H - hy - 40), 14 + P.rnd() * 18, 2.2, "#e9eef0", 0.5);
         }
-        s.jline(x + 4, y0, x + 4, gy - t * 16, 0.8);
-        s.jline(x + w - 4, y0, x + w - 4, gy - t * 16, 0.8);
       }
-      var sx = s.W * 0.84;
-      s.jline(sx, gy, sx, s.H * 0.22);
-      s.jpath([[sx, s.H * 0.26], [sx + 34, s.H * 0.26], [sx + 34, s.H * 0.5], [sx, s.H * 0.5]], true);
-      s.jline(sx + 8, s.H * 0.31, sx + 26, s.H * 0.31, 0.4);
-      s.jline(sx + 8, s.H * 0.38, sx + 26, s.H * 0.38, 0.4);
-      s.jline(sx + 8, s.H * 0.45, sx + 26, s.H * 0.45, 0.4);
+      var bx = W * 0.68, by = hy + 18;
+      P.poly([[bx - 30, by], [bx + 30, by], [bx + 20, by + 11], [bx - 20, by + 11]], shade(p.dark, 0.15));
+      P.rect(bx - 1.2, by - 34, 2.4, 34, shade(p.dark, 0.15));
+      P.poly([[bx + 2, by - 32], [bx + 25, by - 7], [bx + 2, by - 7]], P.act === 3 ? p.warm : (P.act === 2 ? tint(p.mid, 0.3) : "#f4efe2"), 0.95);
+      c.fillStyle = p.sand;
+      c.beginPath(); c.moveTo(0, H); c.lineTo(0, H - 52);
+      c.quadraticCurveTo(W * 0.3, H - 42, W * 0.55, H);
+      c.closePath(); c.fill();
+      c.strokeStyle = "#ffffff"; c.globalAlpha = 0.75; c.lineWidth = 2.6;
+      c.beginPath(); c.moveTo(0, H - 49);
+      c.quadraticCurveTo(W * 0.3, H - 39, W * 0.55, H);
+      c.stroke(); c.globalAlpha = 1;
+      if (P.act === 1 || P.act === 3) P.birds(W * 0.4, 60, 3);
+      P.rainFx();
+      P.finish();
+    },
+
+    mountain: function (P) {
+      var W = P.W, H = P.H, p = P.p;
+      P.sky(H * 0.9);
+      P.celestial();
+      P.clouds();
+      P.ridge(H * 0.34, 46, 1.1, p.far, 0.85);
+      P.mist(H * 0.38, 30, P.act === 2 ? 0.1 : 0.24);
+      P.ridge(H * 0.5, 52, 2.6, p.mid, 0.95);
+      P.mist(H * 0.56, 24, 0.16);
+      P.ridge(H * 0.68, 46, 4.1, p.near);
+      P.rect(0, H * 0.86, W, H * 0.14, p.dark);
+      P.poly([[W * 0.47, H * 0.87], [W * 0.55, H * 0.87], [W * 0.64, H], [W * 0.36, H]], tint(p.water, 0.35), 0.9);
+      P.stroke([[W * 0.51, H * 0.88], [W * 0.5, H]], "#ffffff", 1.6, 0.3);
+      for (var i = 0; i < 6; i++) {
+        var x = 40 + i * 88 + P.rnd() * 20, y = H * (0.78 + P.rnd() * 0.06);
+        P.rect(x - 1.4, y - 8, 2.8, 10, p.dark);
+        P.poly([[x - 10, y - 6], [x, y - 34], [x + 10, y - 6]], shade(p.near, 0.25));
+        P.poly([[x - 7, y - 20], [x, y - 42], [x + 7, y - 20]], shade(p.near, 0.25));
+      }
+      if (P.act === 1 || P.act === 3) P.birds(W * 0.62, 66, 3);
+      P.rainFx();
+      P.finish();
+    },
+
+    field: function (P) {
+      var W = P.W, H = P.H, p = P.p, hy = H * 0.42;
+      P.sky(hy + 4);
+      P.celestial();
+      P.clouds();
+      P.ridge(hy - 4, 28, 1.5, p.far, 0.9);
+      var rows = 5;
+      for (var r = 0; r < rows; r++) {
+        var t0 = Math.pow(r / rows, 1.35), t1 = Math.pow((r + 1) / rows, 1.35);
+        var yT = hy + t0 * (H - hy), yB = hy + t1 * (H - hy) + 1;
+        var col = r % 2 ? mix(p.mid, p.near, 0.4) : tint(p.mid, 0.18);
+        if (P.act === 2 && r % 2 === 0) col = tint(p.water, 0.3);
+        P.rect(0, yT, W, yB - yT, col);
+        P.rect(0, yT, W, 2, shade(p.sand, 0.25), 0.5);
+      }
+      for (var i = 0; i < 3; i++) {
+        var px = W * (0.2 + i * 0.28), ph = 46 - i * 8, py = hy + 12 + i * 3;
+        P.rect(px - 1.3, py - ph, 2.6, ph, p.dark, 0.9);
+        P.rect(px - 10 + i, py - ph + 7, 20 - i * 2, 2, p.dark, 0.9);
+      }
+      var fx = W * 0.84, fy = hy + 6;
+      P.poly([[fx - 20, fy], [fx - 20, fy - 14], [fx, fy - 24], [fx + 20, fy - 14], [fx + 20, fy]], p.dark);
+      if (P.act === 3) {
+        P.rect(fx - 5, fy - 10, 8, 7, p.warm, 0.95);
+        P.glow(fx - 1, fy - 7, 14, p.warm, 0.5);
+        P.arcStroke(fx + 10, fy - 32, 6, Math.PI * 0.2, Math.PI * 1.1, "#ffffff", 2.4, 0.4);
+        P.arcStroke(fx + 6, fy - 42, 7, Math.PI * 1.1, Math.PI * 2, "#ffffff", 2.4, 0.3);
+      }
+      if (P.act === 1) P.birds(W * 0.5, 58, 3);
+      P.rainFx();
+      P.finish();
+    },
+
+    house: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, gy = H * 0.74;
+      P.sky(gy);
+      P.celestial();
+      P.clouds();
+      P.ridge(gy - 34, 24, 2.2, p.far, 0.65);
+      c.fillStyle = P.lgrad(gy, H, p.sand, shade(p.sand, 0.22));
+      c.fillRect(0, gy, W, H - gy);
+      var hx = W * 0.53, hw = 128, hh = 84;
+      var wallC = mix("#e9dcbf", p.dark, P.act === 2 ? 0.24 : 0);
+      var roofC = mix("#8a5a48", p.dark, P.act === 2 ? 0.4 : (P.act === 3 ? 0.12 : 0.05));
+      P.rect(hx - hw, gy - hh, hw * 2, hh, wallC);
+      P.rect(hx - hw, gy - hh, hw * 2, hh * 0.16, shade(wallC, 0.12));
+      P.poly([[hx - hw - 22, gy - hh], [hx, gy - hh - 46], [hx + hw + 22, gy - hh]], roofC);
+      P.stroke([[hx - hw - 22, gy - hh], [hx, gy - hh - 46], [hx + hw + 22, gy - hh]], tint(roofC, 0.3), 2, 0.7);
+      P.rect(hx - 22, gy - 54, 44, 54, "#5d4636");
+      P.rect(hx - 18, gy - 50, 36, 50, shade("#5d4636", 0.25));
+      var winC = (P.act >= 2) ? p.warm : "#c8d6d4";
+      [hx - 88, hx + 46].forEach(function (wx) {
+        P.rect(wx, gy - 56, 42, 34, shade(wallC, 0.35));
+        P.rect(wx + 3, gy - 53, 36, 28, winC, 0.95);
+        if (P.act >= 2) P.glow(wx + 21, gy - 39, 30, p.warm, 0.35);
+        P.stroke([[wx + 21, gy - 53], [wx + 21, gy - 25]], shade(wallC, 0.4), 1.6, 0.9);
+        P.stroke([[wx + 3, gy - 39], [wx + 39, gy - 39]], shade(wallC, 0.4), 1.6, 0.9);
+      });
+      var tx = W * 0.1, tyy = gy + 6;
+      P.rect(tx - 3, tyy - 62, 6, 62, "#4e3b2c");
+      var leafC = mix("#5c7a4f", p.dark, P.act === 2 ? 0.35 : 0);
+      P.circle(tx - 14, tyy - 74, 22, leafC, 0.95);
+      P.circle(tx + 16, tyy - 66, 18, tint(leafC, 0.12), 0.95);
+      P.circle(tx + 2, tyy - 90, 19, tint(leafC, 0.06), 0.95);
+      P.rect(W * 0.86, gy + 14, 34, 10, "#6b5136");
+      P.rect(W * 0.87, gy + 24, 4, 8, "#6b5136");
+      P.rect(W * 0.885 + 22, gy + 24, 4, 8, "#6b5136");
+      P.ellipse(W * 0.78, gy + 34, 9, 5, shade(p.sand, 0.3), 0.7);
+      P.ellipse(W * 0.3, gy + 26, 11, 5, shade(p.sand, 0.3), 0.6);
+      P.ellipse(W * 0.5, gy + 40, 10, 5, shade(p.sand, 0.3), 0.6);
+      if (P.act === 1 || P.act === 3) P.birds(W * 0.3, 54, 2);
+      P.rainFx();
+      P.finish();
+    },
+
+    train: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, hy = H * 0.46;
+      P.sky(hy);
+      P.celestial();
+      P.clouds();
+      P.ridge(hy - 6, 26, 1.8, p.far, 0.85);
+      c.fillStyle = P.lgrad(hy, H, mix(p.sand, p.mid, 0.3), shade(mix(p.sand, p.mid, 0.3), 0.3));
+      c.fillRect(0, hy, W, H - hy);
+      var vx = W * 0.58, vy = hy + 4;
+      P.poly([[W * 0.2, H], [vx - 8, vy], [vx + 9, vy], [W * 1.02, H]], shade(p.sand, 0.34), 0.9);
+      for (var i = 0; i < 8; i++) {
+        var t = Math.pow(i / 8, 1.5), y = H - t * (H - vy - 8);
+        var half = (1 - t) * W * 0.3;
+        P.rect(vx - half * 0.92, y, half * 1.9, 3.4 - t * 2, shade(p.dark, 0.2), 0.75);
+      }
+      P.stroke([[W * 0.26, H], [vx - 5, vy]], shade(p.dark, 0.3), 3, 0.95);
+      P.stroke([[W * 0.9, H], [vx + 6, vy]], shade(p.dark, 0.3), 3, 0.95);
+      P.stroke([[W * 0.26, H], [vx - 5, vy]], tint(p.skyB, 0.3), 1, 0.7);
+      P.stroke([[W * 0.9, H], [vx + 6, vy]], tint(p.skyB, 0.3), 1, 0.7);
+      P.poly([[0, hy + 14], [W * 0.26, hy + 18], [W * 0.26, H], [0, H]], tint(p.sand, 0.28));
+      P.poly([[0, hy + 14], [W * 0.26, hy + 18], [W * 0.26, hy + 26], [0, hy + 22]], "#f0ead8", 0.9);
+      var sx2 = W * 0.12;
+      P.rect(sx2 - 2.4, hy - 46, 4.8, 60, "#5b4a38");
+      P.rect(sx2 - 34, hy - 64, 68, 26, "#f3ede0");
+      P.rect(sx2 - 34, hy - 64, 68, 5, "#a8462f", 0.9);
+      P.stroke([[sx2 - 24, hy - 52], [sx2 + 24, hy - 52]], "#5b4a38", 2, 0.8);
+      P.stroke([[sx2 - 18, hy - 45], [sx2 + 18, hy - 45]], "#5b4a38", 1.4, 0.6);
+      for (var e = 0; e < 3; e++) {
+        var ex = W * (0.7 + e * 0.11), eh = 62 - e * 13, ey = hy + 8 + e * 2;
+        P.rect(ex - 1.5, ey - eh, 3, eh, p.dark, 0.9);
+        P.rect(ex - 9 + e * 2, ey - eh + 6, 18 - e * 4, 2.4, p.dark, 0.9);
+      }
+      P.arcStroke(W * 0.55, hy - 118, 200, Math.PI * 0.24, Math.PI * 0.4, p.dark, 1.2, 0.5);
+      var lx = W * 0.31, lyy = hy + 2;
+      P.rect(lx - 1.8, lyy - 52, 3.6, 52, p.dark);
+      var lamp = P.act === 2 ? "#c25548" : (P.act === 3 ? p.warm : "#8ea08f");
+      P.circle(lx, lyy - 58, 6, lamp, 0.95);
+      if (P.act >= 2) P.glow(lx, lyy - 58, 20, lamp, 0.5);
+      if (P.act === 1) P.birds(W * 0.44, 58, 3);
+      P.rainFx();
+      P.finish();
+    },
+
+    temple: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, gy = H * 0.78, cx = W * 0.5;
+      P.sky(gy);
+      P.celestial();
+      P.clouds();
+      c.fillStyle = P.lgrad(gy, H, mix(p.sand, "#c9bfa8", 0.5), shade(mix(p.sand, "#c9bfa8", 0.5), 0.26));
+      c.fillRect(0, gy, W, H - gy);
+      P.stroke([[0, gy + 20], [W, gy + 16]], shade(p.sand, 0.4), 1, 0.3);
+      P.stroke([[0, gy + 38], [W, gy + 34]], shade(p.sand, 0.4), 1, 0.3);
+      var ry = H * 0.32;
+      var roofC = mix("#7d3b2e", p.dark, P.act === 2 ? 0.45 : 0.08);
+      var wallC = mix("#a34a36", p.dark, P.act === 2 ? 0.4 : 0.05);
+      P.rect(cx - 118, ry + 36, 236, gy - ry - 36, wallC);
+      P.rect(cx - 118, ry + 36, 236, 8, shade(wallC, 0.2));
+      [cx - 100, cx - 52, cx + 44, cx + 92].forEach(function (colX) {
+        P.rect(colX, ry + 44, 9, gy - ry - 44, shade(wallC, 0.3));
+      });
+      c.fillStyle = shade(wallC, 0.5);
+      c.beginPath();
+      c.moveTo(cx - 26, gy);
+      c.lineTo(cx - 26, ry + 78);
+      c.quadraticCurveTo(cx, ry + 58, cx + 26, ry + 78);
+      c.lineTo(cx + 26, gy);
+      c.closePath(); c.fill();
+      P.poly([[cx - 172, ry + 30], [cx - 150, ry + 6], [cx, ry - 24], [cx + 150, ry + 6], [cx + 172, ry + 30], [cx + 148, ry + 40], [cx - 148, ry + 40]], roofC);
+      P.stroke([[cx - 172, ry + 30], [cx - 150, ry + 6], [cx, ry - 24], [cx + 150, ry + 6], [cx + 172, ry + 30]], tint(roofC, 0.35), 2, 0.8);
+      P.rect(cx - 3, ry - 34, 6, 12, roofC);
+      var swing = P.act === 2 ? 6 : 0;
+      [cx - 122, cx - 62, cx + 56, cx + 116].forEach(function (lx, i) {
+        var ly = ry + 62 + (i % 2) * 3;
+        P.stroke([[lx, ry + 42], [lx + swing, ly]], shade(wallC, 0.4), 1.4, 0.9);
+        var lampC = mix("#d4593f", p.warm, P.act === 3 ? 0.5 : 0.15);
+        if (P.act >= 2) P.glow(lx + swing, ly + 10, 24, p.warm, 0.55);
+        P.circle(lx + swing, ly + 10, 11, lampC, 0.97);
+        P.rect(lx + swing - 4, ly - 2, 8, 3, shade("#d4593f", 0.3));
+        P.rect(lx + swing - 3, ly + 20, 6, 6, shade("#d4593f", 0.2), 0.9);
+      });
+      P.rect(cx - 16, gy - 26, 32, 26, shade(wallC, 0.55));
+      P.rect(cx - 22, gy - 30, 44, 6, shade(wallC, 0.4));
+      P.arcStroke(cx - 2, gy - 44, 8, Math.PI * 0.2, Math.PI * 1.2, "#ffffff", 2.6, 0.4);
+      P.arcStroke(cx + 4, gy - 60, 9, Math.PI * 1.1, Math.PI * 2.1, "#ffffff", 2.6, 0.3);
+      P.arcStroke(cx - 2, gy - 76, 10, Math.PI * 0.2, Math.PI * 1.1, "#ffffff", 2.6, 0.22);
+      if (P.act === 1) P.birds(W * 0.2, 56, 2);
+      P.rainFx();
+      P.finish();
+    },
+
+    market: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, gy = H * 0.66;
+      P.sky(gy);
+      P.clouds();
+      c.fillStyle = P.lgrad(gy, H, mix(p.sand, "#b5a98f", 0.5), shade("#b5a98f", 0.32));
+      c.fillRect(0, gy, W, H - gy);
+      var wallC = mix("#d9c9ae", p.dark, P.act === 2 ? 0.28 : 0.02);
+      P.rect(0, H * 0.18, W * 0.66, gy - H * 0.18, wallC);
+      P.rect(0, H * 0.18, W * 0.66, 8, shade(wallC, 0.25));
+      for (var wn = 0; wn < 4; wn++) {
+        var wx2 = 26 + wn * 78;
+        if (wx2 + 30 > W * 0.66) break;
+        P.rect(wx2, H * 0.24, 30, 24, P.act >= 2 ? p.warm : shade(wallC, 0.4), 0.9);
+        if (P.act >= 2) P.glow(wx2 + 15, H * 0.24 + 12, 22, p.warm, 0.3);
+      }
+      for (var st = 0; st < 3; st++) {
+        var ax = 10 + st * 112, aw = 104, ay = H * 0.42 + st * 4;
+        var awnC = st % 2 ? mix("#5f8781", p.dark, P.act === 2 ? 0.3 : 0) : mix("#b3604c", p.dark, P.act === 2 ? 0.3 : 0);
+        P.poly([[ax, ay], [ax + aw, ay], [ax + aw - 8, ay + 26], [ax + 8, ay + 26]], awnC);
+        for (var sc = 0; sc < 4; sc++) {
+          var scx = ax + 8 + (aw - 16) / 4 * sc + (aw - 16) / 8;
+          P.arcStroke(scx, ay + 26, (aw - 16) / 8, 0, Math.PI, awnC, 0, 0);
+          c.save(); c.fillStyle = awnC; c.beginPath();
+          c.arc(scx, ay + 26, (aw - 16) / 8, 0, Math.PI); c.fill(); c.restore();
+        }
+        P.rect(ax + 6, ay + 26, 3, gy - ay - 26 + 8, shade(wallC, 0.45), 0.9);
+        P.rect(ax + aw - 9, ay + 26, 3, gy - ay - 26 + 8, shade(wallC, 0.45), 0.9);
+        P.rect(ax + 14, gy - 22, aw - 28, 26, shade("#8a6f4d", P.act === 2 ? 0.3 : 0.05));
+        P.rect(ax + 14, gy - 22, aw - 28, 5, tint("#8a6f4d", 0.2), 0.8);
+      }
       for (var b = 0; b < 3; b++) {
-        var bx = s.W * (0.16 + b * 0.2), by = gy - 4;
-        s.arc(bx, by, 11, Math.PI, Math.PI * 2);
-        s.jline(bx - 11, by, bx + 11, by, 0.4);
+        var bx2 = W * (0.16 + b * 0.2), by2 = gy + 22 + (b % 2) * 8;
+        P.ellipse(bx2, by2, 13, 7, "#9a7a4e");
+        P.ellipse(bx2, by2 - 3, 11, 4, shade("#9a7a4e", 0.3));
       }
-      if (act === 3) {
-        for (var g = 0; g < 6; g++) {
-          var gx = 50 + g * 76;
-          s.arc(gx, s.H * 0.16 + Math.sin(g) * 6, 4, 0, Math.PI * 2);
+      var gx = W * 0.84;
+      P.rect(gx - 2, H * 0.2, 4, gy - H * 0.2, "#5b4a38");
+      P.rect(gx - 26, H * 0.22, 52, 74, "#f0e8d6");
+      P.rect(gx - 26, H * 0.22, 52, 74, shade("#f0e8d6", 0.06), 0);
+      P.rect(gx - 18, H * 0.26, 36, 5, "#5b4a38", 0.75);
+      P.rect(gx - 18, H * 0.3, 36, 5, "#5b4a38", 0.6);
+      P.rect(gx - 18, H * 0.34, 36, 5, "#5b4a38", 0.45);
+      P.rect(gx - 10, H * 0.4, 20, 20, "#a8462f", 0.85);
+      if (P.act === 3) {
+        c.strokeStyle = shade(p.dark, 0.2); c.lineWidth = 1.2; c.globalAlpha = 0.8;
+        c.beginPath(); c.moveTo(0, H * 0.12);
+        c.quadraticCurveTo(W * 0.5, H * 0.2, W, H * 0.1); c.stroke(); c.globalAlpha = 1;
+        for (var g2 = 0; g2 < 7; g2++) {
+          var gx2 = 30 + g2 * 76, gy2 = H * 0.12 + Math.sin(g2 / 6 * Math.PI) * H * 0.055;
+          P.glow(gx2, gy2, 14, p.warm, 0.7);
+          P.circle(gx2, gy2, 3.4, tint(p.warm, 0.4));
         }
-        s.jpath([[20, s.H * 0.17], [s.W * 0.3, s.H * 0.13], [s.W * 0.62, s.H * 0.17], [s.W - 20, s.H * 0.12]]);
       }
-      weather(s, act === 3 ? 1 : act, s.H * 0.28, true);
-    },
-    school: function (s, act) {
-      var gy = s.H * 0.76;
-      s.jline(0, gy, s.W, gy, 1);
-      s.arc(s.W * 0.5, gy + 60, 150, Math.PI * 1.08, Math.PI * 1.92);
-      s.arc(s.W * 0.5, gy + 60, 120, Math.PI * 1.1, Math.PI * 1.9);
-      var bx = s.W * 0.62, bw = 160, bh = 66;
-      s.jpath([[bx, gy], [bx, gy - bh], [bx + bw, gy - bh], [bx + bw, gy]]);
-      for (var wx = 0; wx < 4; wx++) {
-        var x = bx + 16 + wx * 38;
-        s.jpath([[x, gy - 22], [x, gy - 44], [x + 22, gy - 44], [x + 22, gy - 22]], true);
+      if (P.act === 2) {
+        P.ellipse(W * 0.4, H * 0.9, 46, 7, tint(p.skyT, 0.3), 0.5);
+        P.ellipse(W * 0.72, H * 0.84, 30, 5, tint(p.skyT, 0.3), 0.4);
       }
-      var fx = s.W * 0.18;
-      s.jline(fx, gy, fx, gy - 130);
-      s.jpath([[fx, gy - 130], [fx + 34, gy - 122], [fx, gy - 112]], true);
-      s.tree(s.W * 0.38, gy, 64);
-      var kx = s.W * 0.08;
-      s.jline(kx, gy, kx + 8, gy - 44);
-      s.jline(kx + 30, gy, kx + 22, gy - 44);
-      s.jline(kx + 8, gy - 44, kx + 22, gy - 44, 0.4);
-      s.jline(kx + 12, gy - 40, kx + 12, gy - 14);
-      s.jline(kx + 18, gy - 40, kx + 18, gy - 14);
-      s.jline(kx + 12, gy - 14, kx + 18, gy - 14, 0.3);
-      weather(s, act, s.H * 0.3, true);
+      P.rainFx();
+      P.finish();
     },
-    night: function (s, act) {
-      var gy = s.H * 0.74;
-      s.jpath([[0, gy], [60, gy], [80, gy - 26], [150, gy - 26], [168, gy], [250, gy], [268, gy - 38], [352, gy - 38], [368, gy], [s.W, gy]]);
-      s.jline(0, gy + 24, s.W, gy + 24, 0.8);
-      var mx = s.W * 0.72, my = s.H * 0.24;
-      if (act === 2) { s.arc(mx, my, 26, Math.PI * 0.6, Math.PI * 1.7); s.cloud(mx + 22, my + 6, 20); }
-      else { s.sun(mx, my, 26, false); }
-      var stars = act === 3 ? 14 : 7;
+
+    school: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, gy = H * 0.6;
+      P.sky(gy);
+      P.celestial();
+      P.clouds();
+      P.ridge(gy - 8, 20, 2.4, p.far, 0.7);
+      var grass = mix(p.mid, "#6a8a55", 0.45);
+      c.fillStyle = P.lgrad(gy, H, tint(grass, 0.12), shade(grass, 0.22));
+      c.fillRect(0, gy, W, H - gy);
+      var track = mix("#b4674f", p.dark, P.act === 2 ? 0.3 : 0.02);
+      P.ellipse(W * 0.44, H * 1.02, W * 0.46, H * 0.26, track);
+      P.ellipse(W * 0.44, H * 1.04, W * 0.32, H * 0.17, tint(grass, 0.2));
+      c.save(); c.strokeStyle = "#ffffff"; c.globalAlpha = 0.5; c.lineWidth = 1.4;
+      c.beginPath(); c.ellipse(W * 0.44, H * 1.03, W * 0.39, H * 0.215, 0, Math.PI * 1.02, Math.PI * 1.98); c.stroke();
+      c.restore();
+      var bx = W * 0.6, bw = 168, bh = 74;
+      var wallC = mix("#e8ddc3", p.dark, P.act === 2 ? 0.22 : 0);
+      P.rect(bx, gy - bh, bw, bh, wallC);
+      P.rect(bx, gy - bh - 10, bw, 12, mix("#8a5a48", p.dark, P.act === 2 ? 0.35 : 0.08));
+      for (var wn = 0; wn < 4; wn++) {
+        var wx3 = bx + 14 + wn * 40;
+        P.rect(wx3, gy - bh + 18, 26, 22, P.act >= 2 ? p.warm : "#c4d2d2", 0.95);
+        P.stroke([[wx3 + 13, gy - bh + 18], [wx3 + 13, gy - bh + 40]], shade(wallC, 0.35), 1.3, 0.8);
+      }
+      P.rect(bx + bw / 2 - 10, gy - 30, 20, 30, shade(wallC, 0.45));
+      var fx2 = W * 0.16;
+      P.rect(fx2 - 1.6, gy - 128, 3.2, 128, "#e5e0d2");
+      P.rect(fx2 - 1.6, gy - 128, 3.2, 128, shade(p.dark, 0), 0.15);
+      P.poly([[fx2 + 2, gy - 126], [fx2 + 40, gy - 118], [fx2 + 2, gy - 108]], "#b23a2e", 0.95);
+      var tx2 = W * 0.36, ty2 = gy + 4;
+      P.rect(tx2 - 2.6, ty2 - 58, 5.2, 58, "#4e3b2c");
+      var leaf2 = mix("#5c7a4f", p.dark, P.act === 2 ? 0.32 : 0);
+      P.circle(tx2 - 13, ty2 - 68, 20, leaf2, 0.95);
+      P.circle(tx2 + 14, ty2 - 62, 17, tint(leaf2, 0.1), 0.95);
+      P.circle(tx2 + 1, ty2 - 84, 17, tint(leaf2, 0.05), 0.95);
+      var kx = W * 0.06, ky = gy + 8;
+      P.stroke([[kx, ky], [kx + 9, ky - 46]], p.dark, 2.4, 0.95);
+      P.stroke([[kx + 34, ky], [kx + 25, ky - 46]], p.dark, 2.4, 0.95);
+      P.stroke([[kx + 9, ky - 46], [kx + 25, ky - 46]], p.dark, 2.4, 0.95);
+      P.stroke([[kx + 13, ky - 42], [kx + 13, ky - 14]], shade(p.dark, 0), 1.3, 0.8);
+      P.stroke([[kx + 21, ky - 42], [kx + 21, ky - 14]], shade(p.dark, 0), 1.3, 0.8);
+      P.rect(kx + 11, ky - 15, 12, 3.4, "#8a5a48");
+      if (P.act === 1 || P.act === 3) P.birds(W * 0.5, 52, 3);
+      P.rainFx();
+      P.finish();
+    },
+
+    night: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx;
+      var skyC = P.act === 2 ? ["#2a2f3c", "#4a5560"] : (P.act === 3 ? ["#1b2138", "#3c4a70"] : ["#232a44", "#46557a"]);
+      c.fillStyle = P.lgrad(0, H, skyC[0], skyC[1]);
+      c.fillRect(0, 0, W, H);
+      var mx = W * 0.72, my = H * 0.24;
+      if (P.act !== 2) {
+        P.glow(mx, my, 66, "#f2ead2", 0.5);
+        P.circle(mx, my, 24, "#f4eddb", 0.98);
+        P.circle(mx - 7, my - 5, 4.5, "#ded5bd", 0.5);
+        P.circle(mx + 8, my + 7, 3, "#ded5bd", 0.4);
+      } else {
+        P.circle(mx, my, 22, "#c8c4b4", 0.35);
+        P.cloudBlob(mx + 8, my + 8, 26);
+        P.cloudBlob(W * 0.34, H * 0.2, 30);
+      }
+      var stars = P.act === 3 ? 46 : 24;
       for (var st = 0; st < stars; st++) {
-        var sx2 = 20 + s.rnd() * (s.W - 40), sy2 = 16 + s.rnd() * (s.H * 0.42);
-        if (Math.hypot(sx2 - mx, sy2 - my) < 44) continue;
-        s.jline(sx2 - 3, sy2, sx2 + 3, sy2, 0.1);
-        s.jline(sx2, sy2 - 3, sx2, sy2 + 3, 0.1);
+        var sx3 = 14 + P.rnd() * (W - 28), sy3 = 10 + P.rnd() * H * 0.5;
+        if (Math.hypot(sx3 - mx, sy3 - my) < 52) continue;
+        P.circle(sx3, sy3, 0.9 + P.rnd() * 0.9, "#ffffff", 0.3 + P.rnd() * 0.55);
       }
-      var lx = s.W * 0.14;
-      s.jline(lx, gy + 24, lx, gy - 64);
-      s.jpath([[lx, gy - 64], [lx + 20, gy - 64]]);
-      s.arc(lx + 20, gy - 58, 6, 0, Math.PI * 2);
-      for (var gr = 0; gr < 10; gr++) {
-        var gx2 = 30 + s.rnd() * (s.W - 60);
-        s.jline(gx2, gy + 24, gx2 - 2 + s.rnd() * 4, gy + 12, 0.4);
+      var ry2 = H * 0.64;
+      P.poly([[0, ry2 + 14], [W * 0.16, ry2 + 10], [W * 0.2, ry2 - 16], [W * 0.34, ry2 - 16], [W * 0.38, ry2 + 8], [W * 0.56, ry2 + 4], [W * 0.6, ry2 - 26], [W * 0.78, ry2 - 26], [W * 0.82, ry2 + 6], [W, ry2 + 2], [W, H], [0, H]], "#20263a");
+      P.poly([[0, ry2 + 40], [W * 0.3, ry2 + 34], [W * 0.5, ry2 + 44], [W * 0.8, ry2 + 36], [W, ry2 + 42], [W, H], [0, H]], "#161b2b");
+      [[W * 0.26, ry2 - 4], [W * 0.68, ry2 - 14]].forEach(function (win) {
+        P.rect(win[0], win[1], 9, 11, p.warm, 0.95);
+        P.glow(win[0] + 4, win[1] + 5, 16, p.warm, 0.4);
+      });
+      var lx2 = W * 0.13, ly2 = H * 0.9;
+      P.rect(lx2 - 2, ly2 - 92, 4, 92, "#0e1220");
+      P.rect(lx2 - 2, ly2 - 92, 20, 3, "#0e1220");
+      P.glow(lx2 + 18, ly2 - 86, 34, "#f0c576", 0.6);
+      P.circle(lx2 + 18, ly2 - 86, 5.5, "#f6d79a", 0.98);
+      P.ellipse(lx2 + 18, ly2 + 6, 44, 9, "#f0c576", 0.14);
+      for (var g3 = 0; g3 < 12; g3++) {
+        var gx3 = 20 + P.rnd() * (W - 40);
+        P.stroke([[gx3, H], [gx3 - 1 + P.rnd() * 2, H - 8 - P.rnd() * 6]], "#0e1220", 1.4, 0.8);
       }
-      if (act === 3) {
-        for (var ff = 0; ff < 6; ff++) {
-          s.arc(60 + s.rnd() * (s.W - 120), gy + 4 + s.rnd() * 14, 1.6, 0, Math.PI * 2);
+      if (P.act === 3) {
+        for (var ff = 0; ff < 8; ff++) {
+          var fx3 = 40 + P.rnd() * (W - 80), fy3 = ry2 + 30 + P.rnd() * 50;
+          P.glow(fx3, fy3, 9, "#d8e084", 0.6);
+          P.circle(fx3, fy3, 1.7, "#eef2b0", 0.9);
         }
       }
+      if (P.act === 2) P.rainFx();
+      P.finish();
     },
-    room: function (s, act) {
-      var gy = s.H * 0.86;
-      s.jline(0, gy, s.W, gy, 0.8);
-      var wx = s.W * 0.6, wy = s.H * 0.16, ww = 150, wh = 130;
-      s.jpath([[wx, wy], [wx + ww, wy], [wx + ww, wy + wh], [wx, wy + wh]], true);
-      s.jline(wx + ww / 2, wy, wx + ww / 2, wy + wh, 0.4);
-      s.jline(wx, wy + wh / 2, wx + ww, wy + wh / 2, 0.4);
-      s.jpath([[wx - 8, wy - 8], [wx + 26, wy + 30], [wx + 14, wy + wh * 0.7], [wx - 8, wy + wh + 8]]);
-      if (act === 2) { s.rain(wx + 6, wy + 6, ww - 12, wh - 12, 14); }
-      else if (act === 3) { s.sun(wx + ww * 0.68, wy + wh * 0.32, 15, false); }
-      else { s.hills(wy + wh * 0.72, 18); }
-      var tx = s.W * 0.16, ty = gy - 56;
-      s.jline(tx - 10, ty, tx + 130, ty, 0.8);
-      s.jline(tx, ty, tx, gy); s.jline(tx + 120, ty, tx + 120, gy);
-      s.jpath([[tx + 24, ty - 4], [tx + 24, ty - 18], [tx + 46, ty - 18], [tx + 46, ty - 4]], true);
-      s.arc(tx + 50, ty - 11, 5, Math.PI * 1.5, Math.PI * 0.5);
-      s.smoke(tx + 35, ty - 20, 2);
-      s.jpath([[tx + 70, ty - 4], [tx + 70, ty - 30], [tx + 108, ty - 30], [tx + 108, ty - 4]], true);
-      s.arc(tx + 82, ty - 17, 7, 0, Math.PI * 2);
-      s.jline(tx + 96, ty - 24, tx + 102, ty - 24, 0.3);
-      s.jline(tx + 96, ty - 18, tx + 102, ty - 18, 0.3);
-      var fx2 = s.W * 0.33, fy2 = s.H * 0.2;
-      s.jpath([[fx2, fy2], [fx2 + 34, fy2], [fx2 + 34, fy2 + 44], [fx2, fy2 + 44]], true);
-      s.jpath([[fx2 + 5, fy2 + 5], [fx2 + 29, fy2 + 5], [fx2 + 29, fy2 + 39], [fx2 + 5, fy2 + 39]], true);
-      var cx2 = s.W * 0.2, cy2 = s.H * 0.24;
-      s.arc(cx2, cy2, 20, 0, Math.PI * 2);
-      s.jline(cx2, cy2, cx2, cy2 - 12, 0.3);
-      s.jline(cx2, cy2, cx2 + 8, cy2 + 4, 0.3);
+
+    room: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, fy = H * 0.78;
+      var wallC = mix("#e6d8bd", p.skyT, P.act === 2 ? 0.3 : 0.12);
+      c.fillStyle = P.lgrad(0, fy, tint(wallC, 0.14), wallC);
+      c.fillRect(0, 0, W, fy);
+      var floorC = mix("#9a7b58", p.dark, P.act === 2 ? 0.3 : 0.08);
+      c.fillStyle = P.lgrad(fy, H, floorC, shade(floorC, 0.28));
+      c.fillRect(0, fy, W, H - fy);
+      P.stroke([[0, fy], [W, fy]], shade(floorC, 0.3), 2, 0.6);
+      for (var pl = 1; pl < 4; pl++) {
+        P.stroke([[0, fy + pl * 14], [W, fy + pl * 14]], shade(floorC, 0.3), 1, 0.25);
+      }
+      var wx = W * 0.58, wy = H * 0.14, ww = 150, wh = 128;
+      P.rect(wx - 8, wy - 8, ww + 16, wh + 16, "#54432f");
+      c.save();
+      c.beginPath(); c.rect(wx, wy, ww, wh); c.clip();
+      c.fillStyle = P.lgrad(wy, wy + wh, p.skyT, p.skyB);
+      c.fillRect(wx, wy, ww, wh);
+      if (p.sun) {
+        var vsx = wx + ww * (P.act === 3 ? 0.62 : 0.34), vsy = wy + wh * 0.3;
+        P.glow(vsx, vsy, 34, p.sun, p.sunA);
+        P.circle(vsx, vsy, 11, p.sun, 0.95);
+      }
+      var vpts = [];
+      for (var vx2 = wx - 6; vx2 <= wx + ww + 6; vx2 += 18) {
+        vpts.push([vx2, wy + wh * 0.62 - (Math.sin(vx2 * 0.03) * 0.5 + 0.5) * 20]);
+      }
+      vpts.push([wx + ww + 6, wy + wh + 6]); vpts.push([wx - 6, wy + wh + 6]);
+      P.poly(vpts, p.far, 0.9);
+      P.rect(wx, wy + wh * 0.78, ww, wh * 0.22, p.mid, 0.9);
+      if (P.act === 2) {
+        for (var rr = 0; rr < 16; rr++) {
+          var rx2 = wx + P.rnd() * ww, ry3 = wy + P.rnd() * wh;
+          P.stroke([[rx2, ry3], [rx2 - 3, ry3 + 11]], p.rain, 1.1, 0.4);
+        }
+      }
+      c.restore();
+      P.stroke([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], "#54432f", 4, 1);
+      P.stroke([[wx, wy + wh / 2], [wx + ww, wy + wh / 2]], "#54432f", 4, 1);
+      c.fillStyle = mix("#c9b391", p.skyB, 0.2);
+      c.globalAlpha = 0.92;
+      c.beginPath();
+      c.moveTo(wx - 26, wy - 14);
+      c.quadraticCurveTo(wx + 14, wy + wh * 0.4, wx - 4, wy + wh + 14);
+      c.lineTo(wx - 30, wy + wh + 14);
+      c.closePath(); c.fill(); c.globalAlpha = 1;
+      P.stroke([[wx - 20, wy + 10], [wx - 14, wy + wh * 0.5]], shade("#c9b391", 0.2), 1.2, 0.4);
+      var tx3 = W * 0.13, ty3 = fy - 52;
+      P.rect(tx3 - 12, ty3, 150, 7, "#6b5136");
+      P.rect(tx3 - 6, ty3 + 7, 8, 52 - 7, "#5d4632");
+      P.rect(tx3 + 124, ty3 + 7, 8, 52 - 7, "#5d4632");
+      var potC = mix("#9db4a6", p.dark, P.act === 2 ? 0.2 : 0);
+      P.circle(tx3 + 34, ty3 - 13, 13, potC);
+      P.rect(tx3 + 22, ty3 - 13, 24, 12, potC);
+      P.stroke([[tx3 + 46, ty3 - 16], [tx3 + 56, ty3 - 22]], potC, 4, 1);
+      P.rect(tx3 + 30, ty3 - 30, 8, 5, potC);
+      P.rect(tx3 + 74, ty3 - 10, 18, 10, "#f2ead8");
+      P.arcStroke(tx3 + 83, ty3 - 22, 5, Math.PI * 0.2, Math.PI * 1.2, "#ffffff", 2, 0.5);
+      P.arcStroke(tx3 + 86, ty3 - 32, 6, Math.PI * 1.1, Math.PI * 2.1, "#ffffff", 2, 0.35);
+      P.rect(W * 0.3, H * 0.18, 40, 52, "#6b5136");
+      P.rect(W * 0.3 + 5, H * 0.18 + 5, 30, 42, "#f2ead8");
+      P.rect(W * 0.3 + 9, H * 0.18 + 10, 22, 30, mix(p.far, "#f2ead8", 0.4), 0.8);
+      P.rect(W * 0.12, H * 0.16, 30, 38, "#6b5136");
+      P.rect(W * 0.12 + 4, H * 0.16 + 4, 22, 30, "#f2ead8");
+      var cx3 = W * 0.22, cy3 = H * 0.52;
+      P.circle(cx3, cy3, 17, "#f4eede");
+      P.arcStroke(cx3, cy3, 17, 0, Math.PI * 2, "#54432f", 2.2, 1);
+      P.stroke([[cx3, cy3], [cx3, cy3 - 10]], "#54432f", 1.8, 0.9);
+      P.stroke([[cx3, cy3], [cx3 + 7, cy3 + 3]], "#54432f", 1.4, 0.9);
+      if (P.act >= 2) {
+        var lx3 = W * 0.88, ly3 = fy - 64;
+        P.rect(lx3 - 2, ly3 + 18, 4, 46, "#54432f");
+        P.poly([[lx3 - 16, ly3 + 18], [lx3 + 16, ly3 + 18], [lx3 + 10, ly3], [lx3 - 10, ly3]], p.warm, 0.95);
+        P.glow(lx3, ly3 + 22, 46, p.warm, 0.5);
+      }
+      P.finish();
     }
   };
 
@@ -1145,7 +1452,7 @@
       card.className = "frame-card";
       card.innerHTML =
         '<div class="frame-preview">' +
-          '<canvas aria-label="第' + (i + 1) + '幕黑白線稿場景,僅有背景,無人物"></canvas>' +
+          '<canvas aria-label="第' + (i + 1) + '幕彩繪場景,僅有背景,無人物"></canvas>' +
           '<span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>' +
         '</div>' +
         '<div class="frame-head">' +
@@ -1161,8 +1468,8 @@
           '<span class="mood-pill">' + d.mood + '</span></div>';
       grid.appendChild(card);
       var canvas = card.querySelector("canvas");
-      var sk = new Sketch(canvas, 7 + i * 131);
-      DRAWERS[d.scene.key](sk, i);
+      var painter = new Painter(canvas, 7 + i * 131, i);
+      DRAWERS[d.scene.key](painter);
       var delay = reduceMotion ? 0 : 120 + i * 160;
       setTimeout(function () { card.classList.add("in"); }, delay);
     });
@@ -1174,18 +1481,6 @@
   function escapeHtml(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
-
-  function redraw() {
-    if (!lastActs) return;
-    var canvases = document.querySelectorAll("#boardGrid canvas");
-    lastActs.forEach(function (d, i) {
-      if (!canvases[i]) return;
-      var sk = new Sketch(canvases[i], 7 + i * 131);
-      DRAWERS[d.scene.key](sk, i);
-    });
-  }
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);
-  new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   /* ── 生成按鈕 ───────────────────────── */
   var goBtn = $("goBtn"), goNote = $("goNote"), storyEl = $("story");
@@ -1268,6 +1563,10 @@
       }, reduceMotion ? 200 : 1600);
     }
   });
+
+  window.__test = {
+    draw: function (canvas, key, act) { DRAWERS[key](new Painter(canvas, 7 + act * 131, act)); }
+  };
 
   function typeInto(el, text, done) {
     if (reduceMotion) { el.value = text; done(); return; }
