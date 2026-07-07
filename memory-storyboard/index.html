@@ -484,6 +484,43 @@
     padding: 5px 16px;
   }
 
+  .board-mode {
+    max-width: 720px;
+    margin: 26px auto 0;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .board-mode .ghost-btn { border-color: var(--indigo-soft); color: var(--indigo); }
+  .board-mode .ghost-btn:hover { border-color: var(--indigo); }
+  .board-mode .ghost-btn[disabled] { opacity: 0.55; cursor: wait; }
+
+  .ai-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+  }
+  .frame-preview.ai-on .ai-img { opacity: 1; }
+  .gen-badge {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: #f5f2e8;
+    background: rgba(20, 17, 10, 0.62);
+    padding: 4px 10px;
+    border-radius: 3px;
+    pointer-events: none;
+  }
+
   .board-foot {
     max-width: 720px;
     margin: 46px auto 0;
@@ -587,10 +624,14 @@
       <h2 id="h-board">四幕分鏡表</h2>
       <span class="hint">起・承・轉・合 — 只以背景敘事</span>
     </div>
+    <div class="board-mode">
+      <button class="ghost-btn" id="aiBtn">✦ 以 AI 生成精緻插圖</button>
+      <span class="board-note" id="aiNote">AI 模式把每一幕的故事原文直接交給繪圖模型即時創作,不受任何圖庫限制;需要網路連線。</span>
+    </div>
     <div class="board-grid" id="boardGrid"></div>
     <div class="board-foot">
       <button class="ghost-btn" id="againBtn">回到故事,再說一次</button>
-      <span class="board-note">每一幕依故事內容選擇場景與時刻——清晨、日午、風雨、暮色或夜晚。畫面中不出現人物、臉孔或身影。</span>
+      <span class="board-note">每一幕依故事內容生成場景與時刻——清晨、日午、風雨、暮色或夜晚。畫面中不出現人物、臉孔或身影。</span>
     </div>
   </section>
 
@@ -1815,6 +1856,7 @@
       return {
         stage: STAGES[i],
         summary: summarize(group),
+        text: actText,
         spec: spec,
         chosen: chosen,
         pi: pi,
@@ -1823,6 +1865,7 @@
         mood: detectMood(actText, i)
       };
     });
+    currentData = data;
     renderBoard(data);
   }
 
@@ -1835,6 +1878,7 @@
       card.innerHTML =
         '<div class="frame-preview">' +
           '<canvas aria-label="第' + (i + 1) + '幕插畫場景,僅有背景,無人物"></canvas>' +
+          '<img class="ai-img" alt="第' + (i + 1) + '幕 AI 生成插圖,僅有背景,無人物" />' +
           '<span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>' +
         '</div>' +
         '<div class="frame-head">' +
@@ -1944,6 +1988,68 @@
       }, reduceMotion ? 200 : 1600);
     }
   });
+
+
+  /* ── AI 生成模式:故事原文 → 繪圖模型,不經任何圖庫 ── */
+  var currentData = null;
+  var aiBtn = $("aiBtn"), aiNote = $("aiNote");
+
+  var TIME_EN = ["misty early morning", "bright mid-day", "storm and heavy rain", "golden dusk", "starry night"];
+  function actPrompt(d) {
+    return "精緻繪本插畫,水彩質感,柔和的光,電影分鏡構圖。場景取材:" + d.text +
+      " 。exquisite storybook illustration, delicate watercolor, cinematic wide establishing shot, " +
+      TIME_EN[d.pi] + ", scenery only, completely empty of people, no people, no humans, no faces, no figures, no animals, background landscape only";
+  }
+  function aiUrl(d) {
+    return "https://image.pollinations.ai/prompt/" + encodeURIComponent(actPrompt(d)) +
+      "?width=1040&height=640&nologo=true&model=flux&seed=" + d.seed;
+  }
+
+  aiBtn.addEventListener("click", function () {
+    if (!currentData) {
+      aiNote.textContent = "請先輸入故事並按「生成分鏡」,再用 AI 重新繪製四幕。";
+      return;
+    }
+    aiBtn.disabled = true;
+    aiNote.textContent = "AI 正依每一幕的原文繪製插圖,約需十幾秒…";
+    var previews = document.querySelectorAll("#boardGrid .frame-preview");
+    var pending = 0, failed = 0;
+    currentData.forEach(function (d, i) {
+      var box = previews[i];
+      if (!box) return;
+      var img = box.querySelector(".ai-img");
+      var badge = box.querySelector(".gen-badge");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "gen-badge";
+        box.appendChild(badge);
+      }
+      badge.textContent = "AI 繪製中…";
+      pending++;
+      img.onload = function () {
+        box.classList.add("ai-on");
+        badge.textContent = "AI 生成";
+        if (--pending === 0) finishAi(failed);
+      };
+      img.onerror = function () {
+        failed++;
+        badge.textContent = "離線・手繪預覽";
+        if (--pending === 0) finishAi(failed);
+      };
+      img.src = aiUrl(d);
+    });
+  });
+
+  function finishAi(failed) {
+    aiBtn.disabled = false;
+    if (failed === 0) {
+      aiNote.textContent = "AI 插圖完成。每一幕都由故事原文即時生成,再按一次可重新繪製。";
+    } else if (failed === 4) {
+      aiNote.textContent = "目前環境無法連線繪圖服務(預覽沙盒會封鎖外部連線)。將頁面下載或部署後,AI 模式即可使用;先以手繪預覽呈現。";
+    } else {
+      aiNote.textContent = "部分插圖生成失敗,已保留手繪預覽;可再按一次重試。";
+    }
+  }
 
   window.__test = {
     draw: function (canvas, text, act, pi) {
