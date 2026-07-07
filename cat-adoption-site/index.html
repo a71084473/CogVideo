@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>合拍 PawMatch｜找到那隻跟你的生活合拍的貓</title>
+<meta name="description" content="回答幾個小問題,幫你找到跟你生活合拍的貓。個性配對、儀式化的認養旅程、透明的中途生態。" />
+<!-- 單檔可運行:React 18 UMD + Babel Standalone + Tailwind CDN(開啟本檔即可執行,需網路) -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+<script>
+/*
+ * 設計計畫(見 README.md 詳述):
+ * 色票取自貓毛色系 —— 奶油 #FBF7F0(底)、奶茶 #F0E7D8(卡片)、暖橘 #C05621(唯一主 CTA 色)、
+ * 灰藍 #47586A(次要)、深炭 #2F2C28(文字)。
+ * 標題字 Zen Maru Gothic(圓體=寵物友善咖啡店的溫度),內文 Noto Sans TC(長文可讀性)。
+ * 全站唯一招牌記憶點:貓掌腳印進度指示(配對測驗專用)。
+ */
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        cream:  '#FBF7F0',
+        latte:  '#F0E7D8',
+        clay:   '#C05621',
+        claydk: '#9C4318',
+        ink:    '#2F2C28',
+        mist:   '#47586A',
+        misty:  '#DCE3E9',
+        meadow: '#5B7553',
+        sun:    '#B7791F',
+      },
+      fontFamily: {
+        round: ['"Zen Maru Gothic"', '"Noto Sans TC"', 'sans-serif'],
+        body:  ['"Noto Sans TC"', 'sans-serif'],
+      },
+    },
+  },
+};
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background: #FBF7F0; color: #2F2C28; }
+  /* 可見的鍵盤 focus 樣式(全站一致) */
+  :focus-visible { outline: 3px solid #C05621; outline-offset: 2px; border-radius: 6px; }
+  /* 尊重 reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+  .fade-in { animation: fadeIn .35s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  /* 跳到主要內容(鍵盤使用者) */
+  .skip-link { position: absolute; left: -9999px; top: 0; z-index: 100; }
+  .skip-link:focus { left: 8px; top: 8px; background: #2F2C28; color: #fff; padding: 10px 16px; border-radius: 8px; }
+</style>
+</head>
+<body class="font-body">
+<a href="#main" class="skip-link">跳到主要內容</a>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useRef, useEffect } = React;
+
+/* ============================================================
+ * 假資料
+ * ============================================================ */
+
+const FOSTERS = {
+  hana: {
+    id: 'hana', name: '花花姐姐', years: 6,
+    philosophy: '先讓貓決定節奏,人跟上就好。',
+    intro: '台北文山區中途,六年來送出 43 隻貓回家。',
+  },
+  alun: {
+    id: 'alun', name: '阿倫', years: 3,
+    philosophy: '每隻貓都值得一個不將就的家。',
+    intro: '新竹市中途,白天是工程師,晚上是六隻貓的室友。',
+  },
+};
+
+/* 個性向量:活力 energy、黏人度 cuddle、獨處耐受 alone、環境敏感 sensitive、照護需求 care(1–5) */
+const CATS = [
+  {
+    id: 'agray', name: '阿灰', age: '2 歲', sex: '男生', breed: '米克斯(灰虎斑)',
+    furFrom: '#8195A6', furTo: '#5B6B7A',
+    tagline: '我是慢熟的觀察家,給我一週,我會睡在你的鍵盤上。',
+    story: '我從一個工地被接出來,那天之後日子就只剩下好事了。剛到新環境我會先躲兩天,從櫃子縫隙做完整場勘;但只要你晚上固定坐在同一張椅子上,第三天我就會出現在你腳邊,第七天霸佔你的鍵盤。我不太出聲,想討摸的時候會用頭輕輕撞你的小腿一下,就一下。如果你的生活安靜、規律、平日不常在家,我大概就是為你準備的那隻貓。',
+    vector: { energy: 2, cuddle: 2, alone: 5, sensitive: 3, care: 1 },
+    needs: [
+      { title: '我需要一個能躲的小基地', how: '準備一個有頂的貓窩或紙箱放在安靜角落,頭兩週不要伸手進去撈我。', buy: '採買參考:有頂貓窩/大紙箱＋舊毛巾即可。' },
+      { title: '我需要固定的日常節奏', how: '餵食與清砂盆盡量固定時間,我用時間表建立安全感。', buy: '採買參考:定時餵食器(可選)。' },
+    ],
+    health: [
+      { date: '2025-11-02', label: '救援日', done: true },
+      { date: '2025-11-20', label: '第一劑疫苗', done: true },
+      { date: '2025-12-18', label: '第二劑疫苗', done: true },
+      { date: '2025-12-18', label: '體內外驅蟲', done: true },
+      { date: '2026-01-15', label: '結紮', done: true },
+      { date: '2026-06-30', label: '年度健檢', done: true },
+    ],
+    fosterId: 'hana',
+  },
+  {
+    id: 'mochi', name: '麻糬', age: '1 歲半', sex: '女生', breed: '米克斯(白底橘斑)',
+    furFrom: '#F3E9DA', furTo: '#E8B77D',
+    tagline: '我的專長是把自己摺成任何能貼著你的形狀。',
+    story: '我是從一窩五隻裡最後被接走的那個,大概因為我忙著跟每個人撒嬌忘了上鏡。你坐下的三秒內我會出現在你大腿上,你去廁所我會在門口用氣音抗議。我會在你打字時把頭塞進你的手掌下面要求優先處理。我需要的不多:一個大部分時間都在家、而且不介意做什麼事都有觀眾的人。如果你想要的是全天候貼身室友,請直接看向我。',
+    vector: { energy: 3, cuddle: 5, alone: 1, sensitive: 2, care: 2 },
+    needs: [
+      { title: '我需要有人長時間在家', how: '我獨處超過半天會焦慮拔毛,遠端工作者或在家時間長的家庭最合拍。', buy: '採買參考:不需要買,需要你在。' },
+      { title: '我需要窗戶有防護網', how: '我追鳥的時候不太看路,隱形鐵窗或防墜網先裝好我再搬進來。', buy: '採買參考:隱形鐵窗(每才約 NT$40–70)。' },
+    ],
+    health: [
+      { date: '2026-02-10', label: '救援日', done: true },
+      { date: '2026-03-01', label: '第一劑疫苗', done: true },
+      { date: '2026-03-29', label: '第二劑疫苗', done: true },
+      { date: '2026-03-29', label: '體內外驅蟲', done: true },
+      { date: '2026-07-20', label: '結紮', done: false },
+    ],
+    fosterId: 'hana',
+  },
+  {
+    id: 'tiger', name: '小虎', age: '8 個月', sex: '男生', breed: '米克斯(橘虎斑)',
+    furFrom: '#E8964F', furTo: '#C05621',
+    tagline: '我對世界只有一個問題:這個可以玩嗎?',
+    story: '我在一個雨天的騎樓下被撿到,從此把每一天都過成晴天。逗貓棒揮三下我可以飛簷走壁二十分鐘,累了會突然斷電、四腳朝天睡在走道正中央。我學東西很快——已經會坐下等飯,正在自學開抽屜(中途說這不算優點)。我需要一個精力跟得上我、家裡經得起跑酷的人;如果你有另一隻年輕的貓,我可以無縫加入。',
+    vector: { energy: 5, cuddle: 3, alone: 2, sensitive: 1, care: 2 },
+    needs: [
+      { title: '我需要每天的放電時間', how: '早晚各 15 分鐘逗貓棒,能救你的窗簾一命。', buy: '採買參考:逗貓棒替換羽毛頭、軌道球。' },
+      { title: '我需要垂直空間', how: '跳台或層板讓我往上跑,比往你書櫃上跑好。', buy: '採買參考:貓跳台(NT$1,500 起)或壁掛層板。' },
+      { title: '我需要窗戶有防護網', how: '我的煞車系統還在測試版,防墜網是硬需求。', buy: '採買參考:隱形鐵窗、紗窗防抓網。' },
+    ],
+    health: [
+      { date: '2026-04-05', label: '救援日', done: true },
+      { date: '2026-04-26', label: '第一劑疫苗', done: true },
+      { date: '2026-05-24', label: '第二劑疫苗', done: true },
+      { date: '2026-05-24', label: '體內外驅蟲', done: true },
+      { date: '2026-08-10', label: '結紮', done: false },
+    ],
+    fosterId: 'alun',
+  },
+  {
+    id: 'momo', name: '墨墨', age: '4 歲', sex: '女生', breed: '米克斯(全黑)',
+    furFrom: '#4A4642', furTo: '#2F2C28',
+    tagline: '我不吵不鬧,只是剛好永遠在你三步以內。',
+    story: '我原本住在一間倒閉的早餐店,老闆離開前把我托給了中途。我話很少,一天可能只喵一次,通常是提醒你晚餐時間到了。我喜歡在你看書時趴在同一張沙發的另一端,距離控制得剛剛好——夠近,但不打擾。突然的大聲響會讓我躲一下,不過五分鐘後我會自己回來。適合我的人,大概也是那種覺得「安靜地待在一起」就是最好的相處的人。',
+    vector: { energy: 1, cuddle: 3, alone: 4, sensitive: 4, care: 1 },
+    needs: [
+      { title: '我需要相對安靜的環境', how: '我對突發聲響比較敏感,家裡若常有派對或幼兒尖叫,我會過得辛苦。', buy: '採買參考:費洛蒙插電組(適應期用,可選)。' },
+      { title: '我需要一點耐心的等待', how: '前兩週請讓我主動靠近你,獎勵零食放地上就好,不用遞到我面前。', buy: '採買參考:凍乾零食一包。' },
+    ],
+    health: [
+      { date: '2025-08-14', label: '救援日', done: true },
+      { date: '2025-09-02', label: '第一劑疫苗', done: true },
+      { date: '2025-09-30', label: '第二劑疫苗', done: true },
+      { date: '2025-09-30', label: '體內外驅蟲', done: true },
+      { date: '2025-10-25', label: '結紮', done: true },
+      { date: '2026-05-11', label: '年度健檢', done: true },
+    ],
+    fosterId: 'hana',
+  },
+  {
+    id: 'pudding', name: '布丁', age: '7 歲', sex: '女生', breed: '米克斯(三花)',
+    furFrom: '#EAD7BD', furTo: '#C98A4B',
+    tagline: '我七歲了,人生哲學只有一條:大腿是用來睡的。',
+    story: '前主人出國工作,把我連同我的毯子一起交給了中途。我是那種你回家開門、就會在玄關等你的貓,然後陪你走到沙發,在你坐下的瞬間完成上腿。我的腎需要吃處方飼料照顧,每半年回診一次——中途說要找一個「聽得懂例行公事的浪漫」的人。我不玩跑酷了,但我會用呼嚕聲把你一天的疲勞震掉。想被一隻貓穩穩接住的人,我在這裡。',
+    vector: { energy: 2, cuddle: 4, alone: 3, sensitive: 2, care: 4 },
+    needs: [
+      { title: '我需要吃腎臟處方飼料', how: '早期腎病,吃處方飼料就能穩定控制,不需要天天吃藥。', buy: '採買參考:腎處方乾糧(每月約 NT$900)。' },
+      { title: '我需要每半年回診一次', how: '回診看看腎指數的近況,一次門診約 NT$1,500,中途可推薦熟識的醫院。', buy: '採買參考:外出籠(硬殼較安全)。' },
+      { title: '我需要隨時有乾淨的水', how: '多水對我的腎最好,流動式飲水機能騙我多喝好幾口。', buy: '採買參考:陶瓷流動飲水機。' },
+    ],
+    health: [
+      { date: '2026-01-08', label: '救援日', done: true },
+      { date: '2026-01-25', label: '第一劑疫苗', done: true },
+      { date: '2026-02-22', label: '第二劑疫苗', done: true },
+      { date: '2026-02-22', label: '體內外驅蟲', done: true },
+      { date: '2019-06-01', label: '結紮(前家庭完成)', done: true },
+      { date: '2026-06-15', label: '腎指數回診', done: true },
+    ],
+    fosterId: 'alun',
+  },
+  {
+    id: 'sesame', name: '芝麻', age: '1 歲', sex: '男生', breed: '米克斯(賓士)',
+    furFrom: '#3E3A36', furTo: '#F5F0E8',
+    tagline: '穿西裝的好奇寶寶,你家的每個櫃子我都想開會討論一下。',
+    story: '我出生在一個地下停車場,兩個月大就跟著中途學會了對人類的全然信任。我的日常是巡邏、開櫃子、對新東西進行安全評估——快遞紙箱必須由我親自驗收。小孩拉我尾巴我會走開而不是出手,狗對我叫我只會歪頭。中途說我是「新手村最友善的 NPC」。如果你家熱鬧、有小孩或已經有毛室友,我大概是最容易融入的那一個。',
+    vector: { energy: 4, cuddle: 3, alone: 3, sensitive: 1, care: 1 },
+    needs: [
+      { title: '我需要櫃子有兒童安全扣', how: '我真的會開櫃子。裝上安全扣,你的乾貨和我的肚子都安全。', buy: '採買參考:兒童安全鎖扣(十入約 NT$150)。' },
+      { title: '我需要每天一點探索遊戲', how: '藏零食讓我找、紙箱迷宮,都能滿足我的偵探魂。', buy: '採買參考:嗅聞墊或自製紙箱即可。' },
+    ],
+    health: [
+      { date: '2025-07-19', label: '救援日', done: true },
+      { date: '2025-09-06', label: '第一劑疫苗', done: true },
+      { date: '2025-10-04', label: '第二劑疫苗', done: true },
+      { date: '2025-10-04', label: '體內外驅蟲', done: true },
+      { date: '2026-01-20', label: '結紮', done: true },
+      { date: '2026-07-19', label: '年度健檢', done: false },
+    ],
+    fosterId: 'alun',
+  },
+];
+
+/* 成長相簿(脫敏:只顯示貓名與月齡) */
+const ALBUM = [
+  { name: '橘子',   months: 14, homeMonth: 12, furFrom: '#E8964F', furTo: '#C05621', note: '第一次自己跳上冰箱成功' },
+  { name: '雪球',   months: 9,  homeMonth: 6,  furFrom: '#F5F0E8', furTo: '#DCD2C0', note: '學會開毛毯自己蓋' },
+  { name: '奶昔',   months: 20, homeMonth: 15, furFrom: '#EAD7BD', furTo: '#C98A4B', note: '體重達標,醫生說讚' },
+  { name: '煤球',   months: 30, homeMonth: 24, furFrom: '#4A4642', furTo: '#2F2C28', note: '兩週年,收到新跳台' },
+  { name: '拿鐵',   months: 11, homeMonth: 8,  furFrom: '#D9C3A5', furTo: '#8B6844', note: '跟家裡的狗和解了' },
+  { name: '花捲',   months: 16, homeMonth: 10, furFrom: '#E8B77D', furTo: '#B0764A', note: '首次剪指甲零流血事件' },
+  { name: '阿磅',   months: 26, homeMonth: 18, furFrom: '#8195A6', furTo: '#5B6B7A', note: '減肥成功 0.8 公斤' },
+  { name: '豆腐',   months: 8,  homeMonth: 5,  furFrom: '#F5F0E8', furTo: '#E8DCC8', note: '會在鬧鐘前叫人起床了' },
+  { name: '玳玳',   months: 40, homeMonth: 36, furFrom: '#6B5544', furTo: '#3E3A36', note: '三週年,依然是沙發之王' },
+  { name: '麻花',   months: 13, homeMonth: 9,  furFrom: '#C9A876', furTo: '#8B6844', note: '第一次看雪(在陽台)' },
+  { name: '嗶嗶',   months: 10, homeMonth: 7,  furFrom: '#3E3A36', furTo: '#F5F0E8', note: '學會擊掌換零食' },
+  { name: '湯圓',   months: 22, homeMonth: 16, furFrom: '#F3E9DA', furTo: '#E8B77D', note: '陪小主人讀完整套繪本' },
+];
+
+/* 透明帳本(假資料) */
+const LEDGER = [
+  { date: '2026-07-03', kind: 'in',  cat: '收入', item: '廠商贊助|好貓罐頭 24 入(七月抽獎池)', amount: 1680, month: '2026-07' },
+  { date: '2026-07-01', kind: 'in',  cat: '收入', item: '定期贊助|32 位月捐者', amount: 9600, month: '2026-07' },
+  { date: '2026-06-28', kind: 'out', cat: '醫療', item: '布丁|腎指數回診(佑康動物醫院)', amount: -1450, month: '2026-06' },
+  { date: '2026-06-25', kind: 'out', cat: '飼料', item: '中途站六月乾糧採購', amount: -4200, month: '2026-06' },
+  { date: '2026-06-18', kind: 'out', cat: '醫療', item: '芝麻|年度健檢預約訂金', amount: -500,  month: '2026-06' },
+  { date: '2026-06-12', kind: 'in',  cat: '收入', item: '單筆贊助|認養人回捐', amount: 2000, month: '2026-06' },
+  { date: '2026-06-05', kind: 'out', cat: '雜支', item: '貓砂 12 包(團購)', amount: -2760, month: '2026-06' },
+  { date: '2026-05-30', kind: 'out', cat: '醫療', item: '小虎|第二劑疫苗(安心動物醫院)', amount: -800, month: '2026-05' },
+  { date: '2026-05-22', kind: 'out', cat: '雜支', item: '外出籠 2 個(見面日借用)', amount: -1980, month: '2026-05' },
+  { date: '2026-05-15', kind: 'in',  cat: '收入', item: '義賣|貓掌貼紙(設計師捐贈)', amount: 3150, month: '2026-05' },
+  { date: '2026-05-08', kind: 'out', cat: '飼料', item: '幼貓罐頭 48 入', amount: -1920, month: '2026-05' },
+  { date: '2026-05-02', kind: 'in',  cat: '收入', item: '定期贊助|30 位月捐者', amount: 9000, month: '2026-05' },
+];
+
+/* ============================================================
+ * 配對測驗:題目與演算法(B1)
+ * ============================================================ */
+
+const QUESTIONS = [
+  {
+    id: 'home', title: '你現在住在什麼樣的地方?',
+    options: [
+      { value: 'rent',   label: '租屋' },
+      { value: 'own',    label: '自有住宅' },
+      { value: 'family', label: '與家人同住' },
+    ],
+  },
+  {
+    id: 'landlord', title: '房東那邊,同意養貓了嗎?',
+    hint: '先確認過房東,之後的旅程會順很多 🙂',
+    onlyIf: (a) => a.home === 'rent',
+    options: [
+      { value: 'yes',    label: '已經同意了' },
+      { value: 'notyet', label: '還沒問,我會先確認' },
+    ],
+  },
+  {
+    id: 'time', title: '平常你在家的時間是?',
+    options: [
+      { value: 'home',  label: '幾乎都在家(遠端工作/在家時間長)' },
+      { value: 'out',   label: '早出晚歸' },
+      { value: 'shift', label: '排班,不太固定' },
+    ],
+  },
+  {
+    id: 'exp', title: '和貓一起生活的經驗?',
+    options: [
+      { value: 'first', label: '這會是我的第一隻貓' },
+      { value: 'had',   label: '以前養過' },
+      { value: 'has',   label: '家裡現在就有貓' },
+    ],
+  },
+  {
+    id: 'family', title: '家裡還有其他成員嗎?',
+    options: [
+      { value: 'kids', label: '有幼兒' },
+      { value: 'pets', label: '有其他寵物' },
+      { value: 'both', label: '幼兒和寵物都有' },
+      { value: 'none', label: '目前都沒有' },
+    ],
+  },
+  {
+    id: 'play', title: '你期待跟貓怎麼相處?',
+    options: [
+      { value: 'cuddle',   label: '黏人一點,跟前跟後' },
+      { value: 'roommate', label: '像室友,各自安好' },
+      { value: 'active',   label: '活潑一點,常常一起玩' },
+      { value: 'quiet',    label: '安靜地陪在旁邊就好' },
+    ],
+  },
+];
+
+function activeQuestions(answers) {
+  return QUESTIONS.filter((q) => !q.onlyIf || q.onlyIf(answers));
+}
+
+/* 加權距離配對:輸出排序後的 {cat, fit, reason} */
+function matchCats(answers) {
+  const pref    = { energy: 3, cuddle: 3, alone: 3, sensitive: 3, care: 2.5 };
+  const weights = { energy: 1, cuddle: 1, alone: 1, sensitive: 0.8, care: 0.8 };
+
+  if (answers.time === 'out')   { pref.alone = 5; weights.alone = 2; pref.cuddle = 2.5; }
+  if (answers.time === 'shift') { pref.alone = 4.2; weights.alone = 1.6; }
+  if (answers.time === 'home')  { pref.alone = 2; pref.cuddle = 4; }
+
+  if (answers.play === 'cuddle')   { pref.cuddle = 5; weights.cuddle = 2; }
+  if (answers.play === 'roommate') { pref.cuddle = 2; pref.alone = Math.max(pref.alone, 4); }
+  if (answers.play === 'active')   { pref.energy = 5; weights.energy = 2; }
+  if (answers.play === 'quiet')    { pref.energy = 1.5; weights.energy = 1.6; pref.cuddle = 3.5; }
+
+  if (answers.exp === 'first') { pref.care = 1; weights.care = 1.6; pref.sensitive = 2.5; }
+
+  if (answers.family === 'kids' || answers.family === 'both') {
+    pref.sensitive = 1; weights.sensitive = 1.8; pref.energy = Math.max(pref.energy, 3);
+  }
+  if (answers.family === 'pets' || answers.family === 'both') {
+    pref.sensitive = Math.min(pref.sensitive, 1.5); weights.sensitive = Math.max(weights.sensitive, 1.6);
+  }
+
+  return CATS.map((cat) => {
+    let dist = 0, maxDist = 0;
+    for (const k of Object.keys(pref)) {
+      dist    += weights[k] * Math.abs(cat.vector[k] - pref[k]);
+      maxDist += weights[k] * 4;
+    }
+    const fit = Math.max(35, Math.round(100 * (1 - dist / maxDist)));
+    return { cat, fit, reason: buildReason(answers, cat) };
+  }).sort((a, b) => b.fit - a.fit);
+}
+
+/* 合拍理由:必須引用使用者的答案 */
+function buildReason(a, cat) {
+  const v = cat.vector, n = cat.name;
+  if (a.time === 'out'      && v.alone >= 4)  return `你說平日在家時間短——${n}是獨處高手,自己也能過得很好。`;
+  if (a.play === 'cuddle'   && v.cuddle >= 4) return `你想要跟前跟後的陪伴——${n}的黏人程度,正好接得住。`;
+  if (a.play === 'active'   && v.energy >= 4) return `你說想常常一起玩——${n}的電量,保證讓你先喊累。`;
+  if (a.play === 'quiet'    && v.energy <= 2) return `你喜歡安靜的陪伴——${n}最擅長的就是不打擾的溫柔。`;
+  if (a.play === 'roommate' && v.alone >= 3 && v.cuddle <= 3) return `你想找個各自安好的室友——${n}把距離感拿捏得剛剛好。`;
+  if (a.exp === 'first'     && v.care <= 2)   return `第一次養貓——${n}的照顧需求單純,很適合和你一起入門。`;
+  if ((a.family === 'kids' || a.family === 'pets' || a.family === 'both') && v.sensitive <= 2)
+    return `你家比較熱鬧——${n}天生淡定,不怕環境裡有動靜。`;
+  if (a.time === 'home'     && v.cuddle >= 3) return `你在家的時間長——${n}會很樂意當你的全職同事。`;
+  return `${n}的個性和你描述的生活樣態,整體最合拍。`;
+}
+
+/* ============================================================
+ * 共用小元件
+ * ============================================================ */
+
+/* 招牌記憶點:貓掌腳印(全站唯一,用於測驗進度) */
+function PawIcon({ filled, size = 26 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true"
+      fill={filled ? '#C05621' : '#DCD2C0'} className="inline-block">
+      <ellipse cx="7"  cy="7"  rx="2.1" ry="2.7" />
+      <ellipse cx="12" cy="5.6" rx="2.1" ry="2.7" />
+      <ellipse cx="17" cy="7"  rx="2.1" ry="2.7" />
+      <path d="M12 10c-3.6 0-6.4 2.6-6.4 5.5 0 2 1.6 3.3 3.4 2.9 1.1-.2 1.9-.7 3-.7s1.9.5 3 .7c1.8.4 3.4-.9 3.4-2.9C18.4 12.6 15.6 10 12 10z" />
+    </svg>
+  );
+}
+
+/* 貓咪頭像(SVG 佔位,依毛色漸層) */
+function CatAvatar({ cat, size = 'h-40', label }) {
+  const gid = 'g-' + cat.id + '-' + (label || 'a');
+  return (
+    <div className={`${size} w-full rounded-2xl overflow-hidden`} role="img"
+      aria-label={label || `${cat.name} 的照片:${cat.breed}`}>
+      <svg viewBox="0 0 200 140" className="w-full h-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={cat.furFrom} />
+            <stop offset="100%" stopColor={cat.furTo} />
+          </linearGradient>
+        </defs>
+        <rect width="200" height="140" fill="#F0E7D8" />
+        <circle cx="100" cy="95" r="52" fill={`url(#${gid})`} />
+        <polygon points="62,62 78,38 88,62" fill={`url(#${gid})`} />
+        <polygon points="138,62 122,38 112,62" fill={`url(#${gid})`} />
+        <circle cx="84" cy="90" r="5" fill="#2F2C28" />
+        <circle cx="116" cy="90" r="5" fill="#2F2C28" />
+        <circle cx="85.6" cy="88.4" r="1.6" fill="#FBF7F0" />
+        <circle cx="117.6" cy="88.4" r="1.6" fill="#FBF7F0" />
+        <path d="M96 103 q4 4 8 0" stroke="#2F2C28" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+        <path d="M100 103 v-4" stroke="#2F2C28" strokeWidth="2.4" strokeLinecap="round" />
+      </svg>
+    </div>
+  );
+}
+
+/* 主 CTA:全站唯一顏色、觸控目標 ≥44px */
+function CtaButton({ children, onClick, href, className = '' }) {
+  const cls = `inline-flex items-center justify-center min-h-[48px] px-6 rounded-full
+    bg-clay text-white font-round font-bold text-base hover:bg-claydk transition-colors ${className}`;
+  return href
+    ? <a href={href} className={cls} onClick={onClick}>{children}</a>
+    : <button type="button" className={cls} onClick={onClick}>{children}</button>;
+}
+
+function GhostButton({ children, onClick, href, className = '' }) {
+  const cls = `inline-flex items-center justify-center min-h-[48px] px-6 rounded-full
+    border-2 border-mist text-mist font-round font-bold hover:bg-misty transition-colors ${className}`;
+  return href
+    ? <a href={href} className={cls} onClick={onClick}>{children}</a>
+    : <button type="button" className={cls} onClick={onClick}>{children}</button>;
+}
+
+function SectionTitle({ kicker, title, children }) {
+  return (
+    <header className="max-w-2xl mx-auto text-center mb-10">
+      {kicker && <p className="text-clay font-round font-bold tracking-widest text-sm mb-2">{kicker}</p>}
+      <h2 className="font-round font-black text-3xl md:text-4xl text-ink">{title}</h2>
+      {children && <p className="mt-3 text-mist leading-relaxed">{children}</p>}
+    </header>
+  );
+}
+
+function Modal({ title, onClose, children }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    if (ref.current) ref.current.focus();
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6"
+      role="dialog" aria-modal="true" aria-label={title}>
+      <div className="absolute inset-0 bg-ink/50" onClick={onClose} aria-hidden="true"></div>
+      <div ref={ref} tabIndex={-1}
+        className="relative bg-cream w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 fade-in">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <h3 className="font-round font-black text-2xl text-ink">{title}</h3>
+          <button type="button" onClick={onClose} aria-label="關閉視窗"
+            className="min-h-[44px] min-w-[44px] rounded-full bg-latte text-ink font-bold hover:bg-misty">✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+ * 導覽列
+ * ============================================================ */
+function Nav({ setPage }) {
+  const [open, setOpen] = useState(false);
+  const links = [
+    ['#quiz',    '開始配對'],
+    ['#cats',    '認識貓咪'],
+    ['#journey', '認養旅程'],
+    ['#album',   '成長相簿'],
+    ['#support', '新手支援'],
+  ];
+  return (
+    <nav className="sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-latte" aria-label="主導覽">
+      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
+        <a href="#top" className="flex items-center gap-2 font-round font-black text-xl text-ink">
+          <PawIcon filled size={24} /> 合拍 PawMatch
+        </a>
+        <div className="hidden md:flex items-center gap-1">
+          {links.map(([href, label]) => (
+            <a key={href} href={href}
+              className="min-h-[44px] inline-flex items-center px-3 rounded-lg text-ink hover:bg-latte font-medium">
+              {label}
+            </a>
+          ))}
+          <button type="button" onClick={() => setPage('ledger')}
+            className="min-h-[44px] inline-flex items-center px-3 rounded-lg text-mist hover:bg-latte">公開帳本</button>
+          <button type="button" onClick={() => setPage('admin')}
+            className="min-h-[44px] inline-flex items-center px-3 rounded-lg text-mist hover:bg-latte">中途入口</button>
+        </div>
+        <button type="button" className="md:hidden min-h-[44px] min-w-[44px] rounded-lg hover:bg-latte"
+          aria-expanded={open} aria-label={open ? '收合選單' : '展開選單'} onClick={() => setOpen(!open)}>☰</button>
+      </div>
+      {open && (
+        <div className="md:hidden px-4 pb-4 flex flex-col gap-1 fade-in">
+          {links.map(([href, label]) => (
+            <a key={href} href={href} onClick={() => setOpen(false)}
+              className="min-h-[48px] flex items-center px-3 rounded-lg hover:bg-latte font-medium">{label}</a>
+          ))}
+          <button type="button" onClick={() => { setPage('ledger'); setOpen(false); }}
+            className="min-h-[48px] flex items-center px-3 rounded-lg text-mist hover:bg-latte">公開帳本</button>
+          <button type="button" onClick={() => { setPage('admin'); setOpen(false); }}
+            className="min-h-[48px] flex items-center px-3 rounded-lg text-mist hover:bg-latte">中途入口</button>
+        </div>
+      )}
+    </nav>
+  );
+}
+
+/* ============================================================
+ * 1. Hero
+ * ============================================================ */
+function Hero() {
+  return (
+    <section id="top" className="bg-cream">
+      <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 className="font-round font-black text-4xl md:text-5xl leading-tight text-ink">
+            找到那隻<br />跟你的生活<span className="text-clay">合拍</span>的貓
+          </h1>
+          <p className="mt-5 text-lg text-mist leading-relaxed">
+            回答幾個小問題,我們幫你認識最適合你日常節奏的貓。<br className="hidden md:block" />
+            不是你挑貓,也不是貓挑你——是生活彼此合拍。
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <CtaButton href="#quiz">開始配對</CtaButton>
+            <GhostButton href="#cats">先逛逛貓咪</GhostButton>
+          </div>
+          <p className="mt-6 text-sm text-mist">已有 <strong className="text-ink">127</strong> 段合拍的日常,正在成長相簿裡曬著太陽。</p>
+        </div>
+        {/* 溫暖日常,不用悲情救援影像 */}
+        <div className="grid grid-cols-3 gap-3" aria-hidden="true">
+          {CATS.slice(0, 6).map((c, i) => (
+            <div key={c.id} className={i === 0 ? 'col-span-2 row-span-2' : ''}>
+              <CatAvatar cat={c} size={i === 0 ? 'h-full min-h-[220px]' : 'h-28'} label={`${c.name}的日常照`} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+ * 2. 生活樣態配對測驗(對話式、一屏一題、皆可跳過)
+ * ============================================================ */
+function Quiz({ openChat }) {
+  const [started, setStarted] = useState(false);
+  const [answers, setAnswers] = useState({});
+  const [step, setStep] = useState(0);
+  const [done, setDone] = useState(false);
+  const [saved, setSaved] = useState({});   // 「先收藏」輕承諾
+
+  const qs = activeQuestions(answers);
+  const total = qs.length;
+  const remaining = total - step;
+  const q = qs[step];
+
+  const answer = (val) => {
+    const next = { ...answers };
+    if (val !== undefined) next[q.id] = val;
+    setAnswers(next);
+    const nextQs = activeQuestions(next);
+    if (step + 1 >= nextQs.length) setDone(true);
+    else setStep(step + 1);
+  };
+  const back = () => { if (step > 0) setStep(step - 1); };
+  const restart = () => { setAnswers({}); setStep(0); setDone(false); setStarted(false); };
+
+  if (!started && !done) {
+    return (
+      <section id="quiz" className="bg-latte">
+        <div className="max-w-3xl mx-auto px-4 py-16 md:py-20 text-center">
+          <SectionTitle kicker="生活樣態配對" title="回答幾個小問題,幫你找到合拍的貓">
+            5–7 題,每題都可以跳過。這不是關卡,只是讓貓咪們先認識你一點點。
+          </SectionTitle>
+          <CtaButton onClick={() => setStarted(true)}>開始配對</CtaButton>
+        </div>
+      </section>
+    );
+  }
+
+  if (done) {
+    const results = matchCats(answers).slice(0, 3);
+    const skipped = qs.filter((qq) => answers[qq.id] === undefined).length;
+    const landlordPending = answers.landlord === 'notyet';
+    return (
+      <section id="quiz" className="bg-latte">
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <SectionTitle kicker="配對結果" title="目前跟你最合拍的三隻貓">
+            合拍不是分數高低,是生活節奏對得上。最終的相遇,由最了解牠們的中途陪你完成。
+          </SectionTitle>
+
+          {landlordPending && (
+            <div className="max-w-2xl mx-auto mb-6 bg-cream border border-sun/40 rounded-2xl p-4 text-ink">
+              <p><strong className="font-round">小提醒:</strong>先確認過房東,之後的旅程會順很多。確認好之前,可以先收藏喜歡的貓、看看牠的近況。</p>
+            </div>
+          )}
+          {skipped >= 3 && (
+            <div className="max-w-2xl mx-auto mb-6 bg-cream border border-misty rounded-2xl p-4 text-mist">
+              <p>你跳過了幾題,所以這份結果比較像初次見面的直覺。想更準的話,隨時可以重新配對。</p>
+            </div>
+          )}
+
+          <ol className="grid md:grid-cols-3 gap-5 list-none">
+            {results.map(({ cat, fit, reason }, i) => (
+              <li key={cat.id} className="bg-cream rounded-3xl p-5 flex flex-col fade-in">
+                <CatAvatar cat={cat} />
+                <div className="mt-4 flex items-baseline justify-between">
+                  <h3 className="font-round font-black text-xl">{cat.name}</h3>
+                  <span className="text-clay font-round font-bold" aria-label={`合拍度 ${fit}%`}>合拍 {fit}%</span>
+                </div>
+                <p className="mt-2 text-sm text-mist leading-relaxed flex-1">
+                  <strong className="text-ink">為什麼合拍:</strong>{reason}
+                </p>
+                <div className="mt-4 flex flex-col gap-2">
+                  <CtaButton onClick={() => openChat(cat, answers)}>跟中途聊聊{cat.name}</CtaButton>
+                  <GhostButton onClick={() => setSaved({ ...saved, [cat.id]: true })}>
+                    {saved[cat.id] ? '已收藏,會通知你牠的近況 ✓' : '先收藏,看牠的近況'}
+                  </GhostButton>
+                </div>
+              </li>
+            ))}
+          </ol>
+
+          <div className="text-center mt-8">
+            <button type="button" onClick={restart}
+              className="min-h-[44px] px-4 text-mist underline underline-offset-4 hover:text-ink">重新配對一次</button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section id="quiz" className="bg-latte">
+      <div className="max-w-2xl mx-auto px-4 py-16 md:py-20">
+        {/* 貓掌進度:正向句式 */}
+        <div className="text-center mb-8" aria-live="polite">
+          <div className="flex justify-center gap-1.5 mb-2" aria-hidden="true">
+            {qs.map((qq, i) => <PawIcon key={qq.id} filled={i < step} />)}
+          </div>
+          <p className="text-mist font-round font-bold">
+            {remaining <= 1 ? '最後一題,答完就能看結果!' : `還差 ${remaining} 題就能看結果`}
+          </p>
+        </div>
+
+        <div key={q.id} className="bg-cream rounded-3xl p-6 md:p-8 fade-in">
+          <h3 className="font-round font-black text-2xl text-ink">{q.title}</h3>
+          {q.hint && <p className="mt-2 text-sun">{q.hint}</p>}
+          <div className="mt-6 flex flex-col gap-3">
+            {q.options.map((opt) => (
+              <button key={opt.value} type="button" onClick={() => answer(opt.value)}
+                className="min-h-[52px] px-5 rounded-2xl bg-latte text-left font-medium text-ink
+                  hover:bg-misty hover:translate-x-1 transition-all">
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-6 flex items-center justify-between">
+            <button type="button" onClick={back} disabled={step === 0}
+              className="min-h-[44px] px-3 text-mist disabled:opacity-40 underline underline-offset-4 hover:text-ink">
+              上一題
+            </button>
+            <button type="button" onClick={() => answer(undefined)}
+              className="min-h-[44px] px-3 text-mist underline underline-offset-4 hover:text-ink">
+              跳過這題
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* 「跟中途聊聊」:預填自我介紹草稿,認養人確認後才送出(B1-4) */
+function ChatModal({ cat, answers, onClose }) {
+  const foster = FOSTERS[cat.fosterId];
+  const [sent, setSent] = useState(false);
+  const summary = useMemo(() => {
+    const map = {
+      home:   { rent: '目前租屋', own: '住在自有住宅', family: '和家人同住' },
+      landlord: { yes: '房東已同意養貓', notyet: '正在跟房東確認' },
+      time:   { home: '大部分時間都在家', out: '平日早出晚歸', shift: '排班、時間不固定' },
+      exp:    { first: '這會是我的第一隻貓', had: '以前有養貓經驗', has: '家裡現在也有貓' },
+      family: { kids: '家裡有幼兒', pets: '家裡有其他寵物', both: '家裡有幼兒也有寵物', none: '目前家裡沒有其他成員' },
+      play:   { cuddle: '期待黏人一點的相處', roommate: '期待像室友一樣各自安好', active: '想常常一起玩', quiet: '喜歡安靜的陪伴' },
+    };
+    const lines = Object.entries(answers)
+      .filter(([k, v]) => v !== undefined && map[k] && map[k][v])
+      .map(([k, v]) => map[k][v]);
+    return `嗨,${foster.name}!\n我在合拍上認識了${cat.name},想跟你聊聊牠。\n\n先自我介紹一下:\n` +
+      lines.map((l) => `・${l}`).join('\n') +
+      `\n\n想多了解${cat.name}平常的樣子,也想聽聽你覺得我們合不合拍。謝謝你照顧牠!`;
+  }, [answers, cat, foster]);
+  const [draft, setDraft] = useState(summary);
+
+  return (
+    <Modal title={`跟 ${foster.name} 聊聊 ${cat.name}`} onClose={onClose}>
+      {sent ? (
+        <div className="text-center py-8 fade-in">
+          <PawIcon filled size={40} />
+          <p className="mt-4 font-round font-bold text-xl">訊息已送出!</p>
+          <p className="mt-2 text-mist leading-relaxed">
+            {foster.name} 通常會在一兩天內回覆。<br />
+            每隻貓的中途最了解牠——他們的把關,是給你和貓的保障。
+          </p>
+          <CtaButton onClick={onClose} className="mt-6">好的,等牠的消息</CtaButton>
+        </div>
+      ) : (
+        <div>
+          <p className="text-mist mb-3">這是幫你擬好的自我介紹草稿,改成你的語氣再送出就可以:</p>
+          <label htmlFor="chat-draft" className="sr-only">給中途的訊息草稿</label>
+          <textarea id="chat-draft" value={draft} onChange={(e) => setDraft(e.target.value)} rows={10}
+            className="w-full rounded-2xl border border-misty bg-white p-4 leading-relaxed text-ink" />
+          <div className="mt-4 flex flex-wrap gap-3 justify-end">
+            <GhostButton onClick={onClose}>再想想</GhostButton>
+            <CtaButton onClick={() => setSent(true)}>送出給{foster.name}</CtaButton>
+          </div>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+/* ============================================================
+ * 3. 貓咪列表與檔案頁(B2)
+ * ============================================================ */
+function CatCard({ cat, onOpen }) {
+  return (
+    <li className="bg-white rounded-3xl overflow-hidden flex flex-col shadow-sm">
+      <CatAvatar cat={cat} />
+      <div className="p-5 flex flex-col flex-1">
+        <h3 className="font-round font-black text-xl text-ink">{cat.name}</h3>
+        <p className="mt-2 text-ink leading-relaxed flex-1">「{cat.tagline}」</p>
+        <p className="mt-3 text-sm text-mist">{cat.breed}・{cat.age}・{cat.sex}</p>
+        <GhostButton onClick={() => onOpen(cat)} className="mt-4 w-full">認識{cat.name}</GhostButton>
+      </div>
+    </li>
+  );
+}
+
+function NeedCard({ need }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-latte rounded-2xl p-4">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
+        className="w-full min-h-[44px] flex items-center justify-between text-left font-round font-bold text-ink">
+        <span>{need.title}</span>
+        <span aria-hidden="true" className="text-mist">{open ? '−' : '+'}</span>
+      </button>
+      {open && (
+        <div className="mt-2 text-sm leading-relaxed fade-in">
+          <p className="text-ink"><strong>怎麼做:</strong>{need.how}</p>
+          <p className="mt-1 text-mist">{need.buy}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CatProfile({ cat, onClose, openChat }) {
+  const foster = FOSTERS[cat.fosterId];
+  const siblings = CATS.filter((c) => c.fosterId === cat.fosterId && c.id !== cat.id);
+  return (
+    <Modal title={`${cat.name} 的檔案`} onClose={onClose}>
+      <CatAvatar cat={cat} size="h-52" />
+      <p className="mt-3 text-sm text-mist">{cat.breed}・{cat.age}・{cat.sex}</p>
+
+      {/* 個性故事(最上) */}
+      <section className="mt-5" aria-label={`${cat.name}的個性故事`}>
+        <h4 className="font-round font-black text-lg text-clay">我的故事</h4>
+        <p className="mt-2 leading-loose text-ink">{cat.story}</p>
+      </section>
+
+      {/* 生活需求:以貓為主詞 */}
+      <section className="mt-6" aria-label={`${cat.name}的生活需求`}>
+        <h4 className="font-round font-black text-lg text-clay">這隻貓的需求</h4>
+        <div className="mt-3 grid gap-3">
+          {cat.needs.map((n) => <NeedCard key={n.title} need={n} />)}
+        </div>
+      </section>
+
+      {/* 健康護照:垂直時間軸 */}
+      <section className="mt-6" aria-label={`${cat.name}的健康護照`}>
+        <h4 className="font-round font-black text-lg text-clay">健康護照</h4>
+        <ol className="mt-3 relative border-l-2 border-misty ml-3 list-none">
+          {cat.health.map((h) => (
+            <li key={h.label + h.date} className="ml-5 pb-4 relative">
+              <span aria-hidden="true"
+                className={`absolute -left-[27px] top-1 h-4 w-4 rounded-full border-2 border-cream ${h.done ? 'bg-meadow' : 'bg-sun'}`}></span>
+              <p className="font-medium text-ink">{h.label}
+                {!h.done && <span className="ml-2 text-xs bg-latte text-sun px-2 py-0.5 rounded-full">即將完成</span>}
+              </p>
+              <p className="text-sm text-mist">{h.date}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* 所屬中途(實名介紹) */}
+      <section className="mt-4 bg-latte rounded-2xl p-5" aria-label="照顧牠的中途">
+        <h4 className="font-round font-black text-lg text-ink">照顧我的中途:{foster.name}</h4>
+        <p className="mt-1 text-sm text-mist">{foster.intro}(資歷 {foster.years} 年)</p>
+        <p className="mt-2 text-ink">照顧哲學:「{foster.philosophy}」</p>
+        {siblings.length > 0 && (
+          <p className="mt-2 text-sm text-mist">
+            {foster.name} 還照顧著:{siblings.map((s) => s.name).join('、')}
+          </p>
+        )}
+      </section>
+
+      <div className="mt-6 flex justify-end">
+        <CtaButton onClick={() => { onClose(); openChat(cat, {}); }}>跟中途聊聊{cat.name}</CtaButton>
+      </div>
+    </Modal>
+  );
+}
+
+function CatsSection({ openChat }) {
+  const [openCat, setOpenCat] = useState(null);
+  return (
+    <section id="cats" className="bg-cream">
+      <div className="max-w-6xl mx-auto px-4 py-16 md:py-20">
+        <SectionTitle kicker="認識貓咪" title="每一隻,都先用個性跟你打招呼">
+          品種和花色只是外衣。先聽牠們自己說說,自己是什麼樣的貓。
+        </SectionTitle>
+        <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 list-none">
+          {CATS.map((cat) => <CatCard key={cat.id} cat={cat} onOpen={setOpenCat} />)}
+        </ul>
+      </div>
+      {openCat && <CatProfile cat={openCat} onClose={() => setOpenCat(null)} openChat={openChat} />}
+    </section>
+  );
+}
+
+/* ============================================================
+ * 4. 認養旅程(儀式化四階段)
+ * ============================================================ */
+function Journey() {
+  const steps = [
+    { name: '相識', you: '看檔案、做配對,跟中途聊聊這隻貓', foster: '分享貓咪日常,回答你所有的問題' },
+    { name: '見面', you: '約時間去見牠本貓,感受彼此的頻率', foster: '安排見面,介紹牠的小習慣' },
+    { name: '試相處', you: '一到兩週的試相處,讓生活實際磨合', foster: '隨時支援,陪你度過適應期' },
+    { name: '承諾日', you: '簽下認養約定,牠正式成為家人', foster: '交接健康護照,之後也一直都在' },
+  ];
+  return (
+    <section id="journey" className="bg-latte">
+      <div className="max-w-5xl mx-auto px-4 py-16 md:py-20">
+        <SectionTitle kicker="認養旅程" title="迎接家人的四個階段">
+          這是一段和貓互相認識的旅程,每一步你都不是一個人走。
+        </SectionTitle>
+        <ol className="grid md:grid-cols-4 gap-4 list-none">
+          {steps.map((s, i) => (
+            <li key={s.name} className="bg-cream rounded-3xl p-5 relative">
+              <div className="flex items-center gap-2 mb-3">
+                <span aria-hidden="true"
+                  className="h-9 w-9 rounded-full bg-clay text-white font-round font-bold flex items-center justify-center">{i + 1}</span>
+                <h3 className="font-round font-black text-xl">{s.name}</h3>
+              </div>
+              <p className="text-sm leading-relaxed"><strong className="text-clay">你:</strong>{s.you}</p>
+              <p className="mt-2 text-sm leading-relaxed"><strong className="text-mist">中途:</strong>{s.foster}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-8 max-w-2xl mx-auto bg-cream rounded-2xl p-5 text-center">
+          <p className="text-ink leading-relaxed">
+            最終的決定,由貓咪的中途做出。<br className="sm:hidden" />
+            <strong className="font-round">每隻貓的中途最了解牠,他們的把關是給你和貓的保障。</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+ * 5. 成長相簿(社會證明)＋回家之後(B3)
+ * ============================================================ */
+function AdopterView() {
+  const [privacy, setPrivacy] = useState({ 0: 'foster', 1: 'foster', 2: 'public' });
+  const [askOpen, setAskOpen] = useState(false);
+  const myTimeline = [
+    { month: '回家第 1 個月', note: '第一晚就睡在床尾,適應力滿分' },
+    { month: '回家第 2 個月', note: '學會擊掌,代價是一整包凍乾' },
+    { month: '回家第 3 個月', note: '體重 4.2kg,醫生說剛剛好' },
+  ];
+  const tiger = CATS[2];
+  return (
+    <div className="bg-cream rounded-3xl p-6 md:p-8 mt-10">
+      <h3 className="font-round font-black text-2xl text-ink">回家之後(認養人視角預覽)</h3>
+      <p className="mt-1 text-mist">這是你把貓咪接回家後會看到的頁面。</p>
+
+      <div className="mt-6 grid lg:grid-cols-2 gap-8">
+        <div>
+          <h4 className="font-round font-bold text-lg text-clay">小虎的時間軸</h4>
+          <ol className="mt-3 grid gap-3 list-none">
+            {myTimeline.map((t, i) => (
+              <li key={t.month} className="bg-latte rounded-2xl p-4 flex gap-4 items-center">
+                <CatAvatar cat={tiger} size="h-16" label={`小虎${t.month}的照片`} />
+                <div className="flex-1">
+                  <p className="font-round font-bold">{t.month}</p>
+                  <p className="text-sm text-mist">{t.note}</p>
+                  <fieldset className="mt-2">
+                    <legend className="sr-only">這張照片的隱私設定</legend>
+                    <div className="inline-flex rounded-full bg-cream p-1 text-xs">
+                      <button type="button" onClick={() => setPrivacy({ ...privacy, [i]: 'foster' })}
+                        aria-pressed={privacy[i] === 'foster'}
+                        className={`min-h-[44px] px-3 rounded-full ${privacy[i] === 'foster' ? 'bg-mist text-white' : 'text-mist'}`}>
+                        只給中途看
+                      </button>
+                      <button type="button" onClick={() => setPrivacy({ ...privacy, [i]: 'public' })}
+                        aria-pressed={privacy[i] === 'public'}
+                        className={`min-h-[44px] px-3 rounded-full ${privacy[i] === 'public' ? 'bg-clay text-white' : 'text-mist'}`}>
+                        公開到相簿牆
+                      </button>
+                    </div>
+                  </fieldset>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-2 text-xs text-mist">每張照片預設只給中途看,想公開的才公開。</p>
+        </div>
+
+        <div className="grid gap-4 content-start">
+          <div className="bg-latte rounded-2xl p-5">
+            <h4 className="font-round font-bold text-lg text-ink">下次曬貓提醒(預告)</h4>
+            <p className="mt-2 text-ink bg-cream rounded-xl p-3 text-sm leading-relaxed">
+              🗓️「小虎回家滿 3 個月了,牠的粉絲想看看牠。」
+            </p>
+            <p className="mt-2 text-xs text-mist">提醒由系統送出,像日曆通知一樣中性。想關掉隨時可以。</p>
+          </div>
+          <div className="bg-latte rounded-2xl p-5">
+            <h4 className="font-round font-bold text-lg text-ink">本月抽獎池</h4>
+            <p className="mt-2 text-sm text-ink">這個月曬貓,就有機會抽:</p>
+            <ul className="mt-2 text-sm text-mist list-disc list-inside">
+              <li>好貓罐頭 24 入(廠商贊助)</li>
+              <li>陶瓷流動飲水機 ×2</li>
+              <li>逗貓棒替換組 ×5</li>
+            </ul>
+          </div>
+          <div className="bg-latte rounded-2xl p-5">
+            <h4 className="font-round font-bold text-lg text-ink">遇到狀況?</h4>
+            <p className="mt-2 text-sm text-mist">發問不會影響任何紀錄。問題不是你的失敗,是每隻貓附贈的關卡。</p>
+            <GhostButton onClick={() => setAskOpen(true)} className="mt-3">匿名問一下</GhostButton>
+          </div>
+          <details className="bg-cream border border-misty rounded-2xl p-4 text-sm">
+            <summary className="min-h-[44px] cursor-pointer font-medium text-mist">設定:讓牠回家</summary>
+            <p className="mt-2 text-ink leading-relaxed">
+              任何原因需要讓牠回家,都可以。我們只想確保牠安全。
+            </p>
+            <p className="mt-1 text-xs text-mist">原因欄位不是必填,我們不追問。</p>
+            <GhostButton className="mt-3">聯絡中途安排接回</GhostButton>
+          </details>
+        </div>
+      </div>
+
+      {askOpen && (
+        <Modal title="匿名問一下" onClose={() => setAskOpen(false)}>
+          <p className="text-mist mb-3">這裡的發問完全匿名,不會連到你的任何紀錄。</p>
+          <label htmlFor="ask-box" className="sr-only">你的問題</label>
+          <textarea id="ask-box" rows={4} placeholder="例:牠已經兩天不太吃飯,我該先觀察還是直接看醫生?"
+            className="w-full rounded-2xl border border-misty bg-white p-4" />
+          <div className="mt-4 flex justify-end">
+            <CtaButton onClick={() => setAskOpen(false)}>送出問題</CtaButton>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function Album() {
+  const [showAdopter, setShowAdopter] = useState(false);
+  return (
+    <section id="album" className="bg-cream">
+      <div className="max-w-6xl mx-auto px-4 py-16 md:py-20">
+        <SectionTitle kicker="成長相簿" title="回家以後,牠們過得怎麼樣?">
+          127 隻已經回家的貓,在這裡曬牠們的日常。系統會溫柔提醒你曬貓,曬了還能抽獎。
+        </SectionTitle>
+        <ul className="columns-2 md:columns-3 lg:columns-4 gap-4 list-none [column-fill:_balance]">
+          {ALBUM.map((a, i) => (
+            <li key={a.name + i} className="mb-4 break-inside-avoid bg-white rounded-3xl overflow-hidden shadow-sm">
+              <CatAvatar cat={{ id: 'al' + i, ...a, name: a.name }} size={i % 3 === 0 ? 'h-44' : 'h-32'}
+                label={`${a.name}回家第${a.homeMonth}個月的近況照`} />
+              <div className="p-4">
+                <p className="font-round font-bold text-ink">{a.name}<span className="text-mist font-normal text-sm">・{a.months} 個月大</span></p>
+                <p className="text-xs text-clay font-round font-bold mt-1">回家第 {a.homeMonth} 個月</p>
+                <p className="text-sm text-mist mt-1">{a.note}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="text-center mt-8">
+          <GhostButton onClick={() => setShowAdopter(!showAdopter)} aria-expanded={showAdopter}>
+            {showAdopter ? '收合預覽' : '看看認養之後的頁面長怎樣'}
+          </GhostButton>
+        </div>
+        {showAdopter && <AdopterView />}
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+ * 6. 新手支援與透明區
+ * ============================================================ */
+function Support({ setPage }) {
+  const [askOpen, setAskOpen] = useState(false);
+  return (
+    <section id="support" className="bg-latte">
+      <div className="max-w-6xl mx-auto px-4 py-16 md:py-20">
+        <SectionTitle kicker="新手支援與透明" title="接住每一個第一次">
+          養貓沒有標準答案,但每個問題都有人陪你找答案。
+        </SectionTitle>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="bg-cream rounded-3xl p-6">
+            <h3 className="font-round font-black text-xl text-ink">新手指南</h3>
+            <ul className="mt-4 grid gap-3 list-none">
+              {[
+                ['門窗防護', '隱形鐵窗與紗窗加固,搬進來前先做好'],
+                ['第一週相處', '從一個房間開始,讓牠自己決定探索的速度'],
+                ['飲食入門', '主食罐、乾糧與飲水,一張圖看懂怎麼選'],
+              ].map(([t, d]) => (
+                <li key={t} className="bg-latte rounded-2xl p-4">
+                  <p className="font-round font-bold text-ink">{t}</p>
+                  <p className="text-sm text-mist mt-1">{d}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="bg-cream rounded-3xl p-6 flex flex-col">
+            <h3 className="font-round font-black text-xl text-ink">匿名發問</h3>
+            <p className="mt-4 text-ink leading-relaxed flex-1">
+              問題不是你的失敗,是每隻貓附贈的關卡。這裡的發問完全匿名,由資深中途輪流回覆。
+            </p>
+            <GhostButton onClick={() => setAskOpen(true)} className="mt-4">匿名問一下</GhostButton>
+          </div>
+          <div className="bg-cream rounded-3xl p-6 flex flex-col gap-4">
+            <div className="flex-1">
+              <h3 className="font-round font-black text-xl text-ink">無責退回</h3>
+              <p className="mt-4 text-ink leading-relaxed">
+                任何原因養不了,貓永遠可以回家,我們不追問。牠的安全,永遠排在面子前面。
+              </p>
+            </div>
+            <div className="border-t border-latte pt-4">
+              <h3 className="font-round font-black text-xl text-ink">公開帳本</h3>
+              <p className="mt-2 text-sm text-mist">贊助與金流全公開,每一塊錢的來去都在這裡。</p>
+              <GhostButton onClick={() => setPage('ledger')} className="mt-3">看公開帳本</GhostButton>
+            </div>
+          </div>
+        </div>
+      </div>
+      {askOpen && (
+        <Modal title="匿名問一下" onClose={() => setAskOpen(false)}>
+          <p className="text-mist mb-3">完全匿名。還沒認養也可以問,想像中的問題也算數。</p>
+          <label htmlFor="ask-box-2" className="sr-only">你的問題</label>
+          <textarea id="ask-box-2" rows={4} placeholder="例:租屋處空間不大,一隻貓夠活動嗎?"
+            className="w-full rounded-2xl border border-misty bg-white p-4" />
+          <div className="mt-4 flex justify-end">
+            <CtaButton onClick={() => setAskOpen(false)}>送出問題</CtaButton>
+          </div>
+        </Modal>
+      )}
+    </section>
+  );
+}
+
+function Footer({ setPage }) {
+  return (
+    <footer className="bg-ink text-cream">
+      <div className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-8">
+        <div>
+          <p className="font-round font-black text-xl flex items-center gap-2"><PawIcon filled size={22} /> 合拍 PawMatch</p>
+          <p className="mt-2 text-sm text-cream/70 leading-relaxed">
+            我們是介紹人,不是判官。每一段認養,最終都由最了解貓的中途陪你完成。
+          </p>
+        </div>
+        <nav aria-label="頁尾導覽" className="text-sm grid gap-2 content-start">
+          <a href="#quiz" className="min-h-[44px] inline-flex items-center hover:underline">開始配對</a>
+          <a href="#cats" className="min-h-[44px] inline-flex items-center hover:underline">認識貓咪</a>
+          <a href="#album" className="min-h-[44px] inline-flex items-center hover:underline">成長相簿</a>
+        </nav>
+        <div className="text-sm grid gap-2 content-start">
+          <button type="button" onClick={() => setPage('ledger')} className="min-h-[44px] inline-flex items-center hover:underline text-left">公開帳本(金流全公開)</button>
+          <button type="button" onClick={() => setPage('admin')} className="min-h-[44px] inline-flex items-center hover:underline text-left">中途入口</button>
+          <p className="text-cream/50 mt-2">© 2026 合拍 PawMatch|示意網站,所有資料皆為假資料</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ============================================================
+ * 中途後台(B4:減負儀表板)
+ * ============================================================ */
+function AdminPage({ setPage }) {
+  const [reminded, setReminded] = useState({});
+  const [decisions, setDecisions] = useState({});
+  const quietOnes = [
+    { name: '拿鐵', last: '4 個月前', adopter: 'C**n' },
+    { name: '花捲', last: '3 個月前', adopter: 'W**g' },
+  ];
+  const messages = [
+    {
+      id: 'm1', cat: '麻糬', from: 'L**i',
+      summary: ['大部分時間都在家', '這會是第一隻貓', '期待黏人一點的相處', '房東已同意養貓'],
+    },
+    {
+      id: 'm2', cat: '小虎', from: 'H**o',
+      summary: ['排班、時間不固定', '家裡現在也有貓', '想常常一起玩'],
+    },
+  ];
+  const passports = [{ cat: '芝麻', item: '年度健檢', due: '2026-07-19' }];
+
+  return (
+    <main id="main" className="max-w-5xl mx-auto px-4 py-10">
+      <button type="button" onClick={() => setPage('site')}
+        className="min-h-[44px] text-mist underline underline-offset-4 hover:text-ink">← 回到網站</button>
+      <h1 className="mt-4 font-round font-black text-3xl text-ink">早安,花花姐姐</h1>
+      <p className="mt-1 text-mist">今天有 3 件事,系統能幫忙的都準備好了——你只要按幾個鍵。</p>
+
+      {/* 久未曬貓:黃色關心,不是紅色警報 */}
+      <section className="mt-8" aria-label="好久不見的貓">
+        <h2 className="font-round font-bold text-xl text-ink">好久不見的貓({quietOnes.length})</h2>
+        <p className="text-sm text-mist mt-1">很久沒曬貓不一定有事,多半只是生活太忙。兩種問候,你挑一種:</p>
+        <ul className="mt-3 grid gap-3 list-none">
+          {quietOnes.map((q) => (
+            <li key={q.name} className="bg-[#FFF7E6] border border-sun/30 rounded-2xl p-4 flex flex-wrap items-center gap-3">
+              <div className="flex-1 min-w-[180px]">
+                <p className="font-round font-bold text-ink">{q.name}(認養人 {q.adopter})</p>
+                <p className="text-sm text-mist">上次曬貓:{q.last}</p>
+              </div>
+              {reminded[q.name] ? (
+                <p className="text-meadow font-medium">已送出 ✓</p>
+              ) : (
+                <div className="flex gap-2 flex-wrap">
+                  <GhostButton onClick={() => setReminded({ ...reminded, [q.name]: 1 })} className="text-sm min-h-[44px]">
+                    送出溫柔提醒(系統名義)
+                  </GhostButton>
+                  <GhostButton onClick={() => setReminded({ ...reminded, [q.name]: 1 })} className="text-sm min-h-[44px]">
+                    私訊關心(我的名義)
+                  </GhostButton>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 待回覆配對訊息 */}
+      <section className="mt-10" aria-label="想認識你家貓的人">
+        <h2 className="font-round font-bold text-xl text-ink">想認識你家貓的人({messages.length})</h2>
+        <p className="text-sm text-mist mt-1">「不合適」不會通知對方原因——系統會溫柔地幫他們轉介其他合拍的貓。</p>
+        <ul className="mt-3 grid md:grid-cols-2 gap-3 list-none">
+          {messages.map((m) => (
+            <li key={m.id} className="bg-white rounded-2xl p-5 shadow-sm">
+              <p className="font-round font-bold text-ink">{m.from} 想聊聊 <span className="text-clay">{m.cat}</span></p>
+              <ul className="mt-2 text-sm text-mist list-disc list-inside">
+                {m.summary.map((s) => <li key={s}>{s}</li>)}
+              </ul>
+              {decisions[m.id] ? (
+                <p className="mt-3 text-meadow font-medium">已標記:{decisions[m.id]} ✓</p>
+              ) : (
+                <div className="mt-3 flex gap-2 flex-wrap">
+                  {['聊聊看', '再想想', '不合適'].map((d) => (
+                    <button key={d} type="button" onClick={() => setDecisions({ ...decisions, [m.id]: d })}
+                      className={`min-h-[44px] px-4 rounded-full font-medium border-2
+                        ${d === '聊聊看' ? 'border-meadow text-meadow hover:bg-meadow hover:text-white'
+                          : 'border-misty text-mist hover:bg-misty'}`}>
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 待更新健康護照 */}
+      <section className="mt-10" aria-label="健康護照待更新">
+        <h2 className="font-round font-bold text-xl text-ink">健康護照待更新({passports.length})</h2>
+        <ul className="mt-3 grid gap-3 list-none">
+          {passports.map((p) => (
+            <li key={p.cat} className="bg-white rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3 shadow-sm">
+              <p className="text-ink"><strong className="font-round">{p.cat}</strong>|{p.item}(預計 {p.due})</p>
+              <GhostButton className="text-sm">完成後一鍵更新</GhostButton>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+  );
+}
+
+/* ============================================================
+ * 透明帳本頁(B5)
+ * ============================================================ */
+function LedgerPage({ setPage }) {
+  const [month, setMonth] = useState('all');
+  const [cat, setCat] = useState('all');
+  const months = ['all', ...new Set(LEDGER.map((l) => l.month))];
+  const catsK = ['all', ...new Set(LEDGER.map((l) => l.cat))];
+  const rows = LEDGER.filter((l) => (month === 'all' || l.month === month) && (cat === 'all' || l.cat === cat));
+  const balance = rows.reduce((s, l) => s + l.amount, 0);
+
+  return (
+    <main id="main" className="max-w-4xl mx-auto px-4 py-10">
+      <button type="button" onClick={() => setPage('site')}
+        className="min-h-[44px] text-mist underline underline-offset-4 hover:text-ink">← 回到網站</button>
+      <h1 className="mt-4 font-round font-black text-3xl text-ink">公開帳本</h1>
+      <p className="mt-1 text-lg text-mist">每一塊錢的來去,都在這裡。</p>
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        <label className="flex items-center gap-2 text-sm text-mist">
+          月份
+          <select value={month} onChange={(e) => setMonth(e.target.value)}
+            className="min-h-[44px] rounded-xl border border-misty bg-white px-3">
+            {months.map((m) => <option key={m} value={m}>{m === 'all' ? '全部' : m}</option>)}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 text-sm text-mist">
+          類別
+          <select value={cat} onChange={(e) => setCat(e.target.value)}
+            className="min-h-[44px] rounded-xl border border-misty bg-white px-3">
+            {catsK.map((c) => <option key={c} value={c}>{c === 'all' ? '全部' : c}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <p className="mt-4 text-sm text-mist">篩選範圍小計:
+        <strong className={balance >= 0 ? 'text-meadow' : 'text-clay'}> NT$ {balance.toLocaleString()}</strong>
+      </p>
+
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-sm border-collapse min-w-[560px]">
+          <caption className="sr-only">贊助收入與支出流水帳</caption>
+          <thead>
+            <tr className="text-left text-mist border-b border-misty">
+              <th scope="col" className="py-3 pr-3 font-medium">日期</th>
+              <th scope="col" className="py-3 pr-3 font-medium">來源/用途</th>
+              <th scope="col" className="py-3 pr-3 font-medium text-right">金額</th>
+              <th scope="col" className="py-3 font-medium">憑證</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((l, i) => (
+              <tr key={i} className="border-b border-latte">
+                <td className="py-3 pr-3 whitespace-nowrap text-mist">{l.date}</td>
+                <td className="py-3 pr-3 text-ink">
+                  <span className="inline-block text-xs bg-latte rounded-full px-2 py-0.5 mr-2 text-mist">{l.cat}</span>
+                  {l.item}
+                </td>
+                <td className={`py-3 pr-3 text-right whitespace-nowrap font-medium ${l.amount >= 0 ? 'text-meadow' : 'text-ink'}`}>
+                  {l.amount >= 0 ? '+' : '−'}NT$ {Math.abs(l.amount).toLocaleString()}
+                </td>
+                <td className="py-3">
+                  <span className="inline-block h-8 w-11 rounded border border-misty bg-latte" role="img"
+                    aria-label={`${l.item} 的憑證縮圖`}></span>
+                </td>
+              </tr>
+            ))}
+            {rows.length === 0 && (
+              <tr><td colSpan="4" className="py-8 text-center text-mist">
+                這個篩選條件下還沒有紀錄。換個月份或類別看看。
+              </td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-4 text-xs text-mist">所有憑證原件可申請調閱。此頁為示意,資料皆為假資料。</p>
+    </main>
+  );
+}
+
+/* ============================================================
+ * App
+ * ============================================================ */
+function App() {
+  const [page, setPage] = useState('site');           // site | admin | ledger
+  const [chat, setChat] = useState(null);             // { cat, answers }
+  const openChat = (cat, answers) => setChat({ cat, answers });
+
+  useEffect(() => { window.scrollTo(0, 0); }, [page]);
+
+  if (page === 'admin')  return (<div><Nav setPage={setPage} /><AdminPage setPage={setPage} /></div>);
+  if (page === 'ledger') return (<div><Nav setPage={setPage} /><LedgerPage setPage={setPage} /></div>);
+
+  return (
+    <div>
+      <Nav setPage={setPage} />
+      <main id="main">
+        <Hero />
+        <Quiz openChat={openChat} />
+        <CatsSection openChat={openChat} />
+        <Journey />
+        <Album />
+        <Support setPage={setPage} />
+      </main>
+      <Footer setPage={setPage} />
+      {chat && <ChatModal cat={chat.cat} answers={chat.answers} onClose={() => setChat(null)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
