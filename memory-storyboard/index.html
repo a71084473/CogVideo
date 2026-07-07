@@ -549,6 +549,82 @@
     letter-spacing: 0.05em;
   }
 
+  /* ── 記憶配對 ─────────────────────── */
+  #matchSec { display: none; }
+  #matchSec.show { display: block; }
+  .match-bar {
+    max-width: 720px;
+    margin: 24px auto 0;
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-family: var(--sans);
+  }
+  .match-count {
+    font-size: 14px;
+    color: var(--indigo);
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .match-note { font-size: 13px; color: var(--ink-soft); letter-spacing: 0.04em; min-height: 1.5em; }
+  .tile-tray {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 14px;
+  }
+  .tile {
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 8px 8px 10px;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    transition: transform 0.15s, border-color 0.2s, opacity 0.3s;
+  }
+  .tile:hover { border-color: var(--indigo-soft); }
+  .tile:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+  .tile.selected { border-color: var(--indigo); transform: translateY(-3px); }
+  .tile.done { opacity: 0.38; cursor: default; }
+  .tile canvas { width: 100%; height: auto; display: block; }
+  .tile .tile-name {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+    display: block;
+  }
+  .tile.done .tile-name::after { content: " ✓"; color: var(--indigo); }
+  .tile.shake { animation: tileShake 0.4s; }
+  @keyframes tileShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .tile-ghost {
+    position: fixed;
+    z-index: 50;
+    pointer-events: none;
+    width: 104px;
+    opacity: 0.92;
+    transform: translate(-50%, -60%);
+  }
+  .frame-card.drop-hint { border-color: var(--indigo); box-shadow: 0 0 0 2px var(--indigo-soft), var(--shadow); }
+  .frame-card.hint-glow { animation: hintGlow 1.6s ease; }
+  @keyframes hintGlow {
+    0%, 100% { box-shadow: var(--shadow); }
+    40% { box-shadow: 0 0 0 3px var(--indigo); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile.shake, .frame-card.hint-glow { animation: none; }
+  }
+
   footer.colophon {
     max-width: 720px;
     margin: 90px auto 0;
@@ -633,6 +709,21 @@
       <button class="ghost-btn" id="againBtn">回到故事,再說一次</button>
       <span class="board-note">每一幕依故事內容生成場景與時刻——清晨、日午、風雨、暮色或夜晚。畫面中不出現人物、臉孔或身影。</span>
     </div>
+  </section>
+
+  <!-- ── 03 記憶配對 ── -->
+  <section id="matchSec" aria-labelledby="h-match">
+    <hr class="board-rule" />
+    <div class="section-head">
+      <span class="section-no">參</span>
+      <h2 id="h-match">記憶配對</h2>
+      <span class="hint">把插圖元件,放回它所屬的那一幕</span>
+    </div>
+    <div class="match-bar">
+      <span class="match-count" id="matchCount"></span>
+      <span class="match-note" id="matchNote">拖曳下面的插圖到上面的分鏡卡;也可以先點一下插圖,再點一張分鏡卡。</span>
+    </div>
+    <div class="tile-tray" id="tileTray"></div>
   </section>
 
   <footer class="colophon">
@@ -770,9 +861,9 @@
   }
 
   /* ── 畫家:精緻插圖引擎 ─────────────── */
-  function Painter(canvas, seed, act, pi) {
+  function Painter(canvas, seed, act, pi, w, h) {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var W = 520, H = 320;
+    var W = w || 520, H = h || 320;
     canvas.width = W * dpr;
     canvas.height = H * dpr;
     var ctx = canvas.getContext("2d");
@@ -1787,7 +1878,7 @@
   }
 
   /* ── 場景渲染 ───────────────────────── */
-  function renderScene(canvas, spec, chosen, seed, act, pi) {
+  function renderScene(canvas, spec, chosen, seed, act, pi, extras) {
     var P = new Painter(canvas, seed, act, pi);
     BASES[spec.base || "plain"](P);
     chosen.bg.forEach(function (k) { ELS[k].draw(P); });
@@ -1827,6 +1918,15 @@
       }
       el.draw(P, x, P.gy + 6, 0.9);
     });
+    (extras || []).forEach(function (k, i) {
+      var el = ELS[k];
+      if (!el) return;
+      if (el.indoor && !P.interior) return;
+      if (el.full || SKYELS.indexOf(k) !== -1 || el.indoor) { el.draw(P); return; }
+      var x = P.W * [0.3, 0.68, 0.16, 0.86][i % 4] + (P.rnd() - 0.5) * 20;
+      var s = spec.base === "field" ? 0.65 : 0.85;
+      el.draw(P, x, P.gy + 4, s);
+    });
     chosen.sky.forEach(function (k) { ELS[k].draw(P); });
     if ((P.pi === 1 || P.pi === 3) && !P.interior) P.birds(P.W * 0.4, P.H * 0.18, 3);
     if (P.pi === 4 && !P.interior) {
@@ -1859,6 +1959,7 @@
         text: actText,
         spec: spec,
         chosen: chosen,
+        extras: [],
         pi: pi,
         seed: hashText(actText) + i * 131,
         desc: describeScene(spec, chosen, pi),
@@ -1867,6 +1968,7 @@
     });
     currentData = data;
     renderBoard(data);
+    buildGame(data);
   }
 
   function renderBoard(data) {
@@ -2050,6 +2152,368 @@
       aiNote.textContent = "部分插圖生成失敗,已保留手繪預覽;可再按一次重試。";
     }
   }
+
+
+  /* ── 記憶配對:故事元件 → 拖回所屬的一幕 ── */
+  var EL_NAMES = {
+    house: "老屋", temple: "廟", school: "學校", storefront: "店攤", train: "火車站",
+    lighthouse: "燈塔", bridge: "小橋", boat: "小船", tree: "大樹", pines: "松樹",
+    bamboo: "竹叢", flowers: "花圃", lanterns: "燈籠", lamp: "路燈", poles: "電線桿",
+    well: "水井", swing: "鞦韆", clothesline: "曬衣繩", kite: "風箏", fireworks: "煙火",
+    fireflies: "螢火蟲", smoke: "炊煙", keepsakes: "老相框", sewing: "縫紉機", skyline: "城市"
+  };
+  var TILE_S = { temple: 0.36, house: 0.46, school: 0.4, storefront: 0.48, lighthouse: 0.56,
+    bridge: 0.48, boat: 0.66, tree: 0.6, pines: 0.5, bamboo: 0.52, flowers: 0.72,
+    lamp: 0.6, poles: 0.44, well: 0.66, swing: 0.66, clothesline: 0.48 };
+  var TIME_NAMES = ["清晨", "日午", "風雨", "黃昏", "夜晚"];
+  var BASE_NAMES = { sea: "大海", river: "小溪", field: "稻田", mountain: "山巒", street: "老街", plain: "原野", interior: "屋內" };
+  var PRAISES = ["答對了!", "很好!", "就是這裡!", "沒錯!"];
+
+  function drawTile(canvas, key) {
+    var P = new Painter(canvas, hashText(key), 1, 1, 116, 84);
+    var W = P.W, H = P.H, p = P.p, c = P.ctx;
+    P.rect(0, 0, W, H, "#f6f1e6");
+    P.rect(0, H - 13, W, 13, "#e9e1cd");
+    P.gy = H - 13; P.hy = H * 0.5; P.waterY = H - 18;
+    switch (key) {
+      case "train":
+        P.stroke([[8, H - 20], [W - 8, H - 26]], shade(p.dark, 0.2), 2.6, 0.9);
+        P.stroke([[8, H - 10], [W - 8, H - 14]], shade(p.dark, 0.2), 2.6, 0.9);
+        for (var sl = 0; sl < 6; sl++) P.rect(12 + sl * 18, H - 24 + sl * 0.4, 10, 2.4, shade(p.dark, 0.2), 0.6);
+        P.rect(W / 2 - 2, H - 66, 4, 44, "#5b4a38");
+        P.rect(W / 2 - 24, H - 76, 48, 19, "#f3ede0");
+        P.rect(W / 2 - 24, H - 76, 48, 4, "#a8462f", 0.9);
+        P.stroke([[W / 2 - 15, H - 67], [W / 2 + 15, H - 67]], "#5b4a38", 1.8, 0.8);
+        break;
+      case "lanterns":
+        P.stroke([[10, 16], [W - 10, 22]], shade(p.dark, 0.15), 1.2, 0.7);
+        P.stroke([[W / 2, 19], [W / 2, 30]], shade("#d4593f", 0.2), 1.4, 0.9);
+        P.glow(W / 2, 44, 26, p.warm, 0.5);
+        P.shadeCircle(W / 2, 44, 15, mix("#d4593f", p.warm, 0.3));
+        P.rect(W / 2 - 5, 27, 10, 4, shade("#d4593f", 0.3));
+        P.rect(W / 2 - 4, 59, 8, 6, shade("#d4593f", 0.2), 0.9);
+        break;
+      case "kite":
+        c.save(); c.translate(W / 2, 32); c.rotate(0.3);
+        c.fillStyle = "#c9584a";
+        c.beginPath(); c.moveTo(0, -18); c.lineTo(13, 0); c.lineTo(0, 22); c.lineTo(-13, 0); c.closePath(); c.fill();
+        c.fillStyle = tint("#c9584a", 0.3);
+        c.beginPath(); c.moveTo(0, -18); c.lineTo(13, 0); c.lineTo(0, 0); c.closePath(); c.fill();
+        c.strokeStyle = shade("#c9584a", 0.3); c.lineWidth = 1;
+        c.beginPath(); c.moveTo(0, -18); c.lineTo(0, 22); c.moveTo(-13, 0); c.lineTo(13, 0); c.stroke();
+        c.restore();
+        c.save(); c.strokeStyle = p.dark; c.globalAlpha = 0.5;
+        c.beginPath(); c.moveTo(W / 2 - 3, 55); c.quadraticCurveTo(W / 2 - 20, 66, W / 2 - 14, H - 12); c.stroke(); c.restore();
+        break;
+      case "fireworks":
+        P.glow(W / 2, 36, 34, "#e8b878", 0.4);
+        for (var fr = 0; fr < 12; fr++) {
+          var fa = fr / 12 * Math.PI * 2;
+          P.stroke([[W / 2 + Math.cos(fa) * 8, 36 + Math.sin(fa) * 8], [W / 2 + Math.cos(fa) * 26, 36 + Math.sin(fa) * 26]], "#d98a94", 1.6, 0.85);
+          P.circle(W / 2 + Math.cos(fa) * 26, 36 + Math.sin(fa) * 26, 1.6, "#e8b878", 0.9);
+        }
+        break;
+      case "fireflies":
+        [[34, 30], [62, 48], [84, 26], [50, 62]].forEach(function (pt) {
+          P.glow(pt[0], pt[1], 11, "#d8e084", 0.6);
+          P.circle(pt[0], pt[1], 2, "#eef2b0", 0.95);
+        });
+        break;
+      case "skyline":
+        [[20, 40, 18], [44, 56, 22], [72, 34, 18], [94, 48, 16]].forEach(function (b) {
+          P.rect(b[0], H - 13 - b[1], b[2], b[1], mix(p.far, p.skyB, 0.2), 0.95);
+          P.rect(b[0] + 4, H - 13 - b[1] + 6, 4, 4, p.warm, 0.8);
+          P.rect(b[0] + b[2] - 8, H - 13 - b[1] + 14, 4, 4, p.warm, 0.7);
+        });
+        break;
+      case "smoke":
+        P.rect(W / 2 - 10, H - 34, 20, 21, mix("#8a5a48", p.dark, 0.1));
+        for (var sm = 0; sm < 4; sm++) {
+          P.arcStroke(W / 2 + (sm % 2 === 0 ? 4 : -4), H - 40 - sm * 12, 6 + sm * 2, Math.PI * (0.2 + (sm % 2) * 0.9), Math.PI * (1.1 + (sm % 2) * 0.9), "#9a938a", 2.6, 0.6 - sm * 0.1);
+        }
+        break;
+      case "keepsakes":
+        P.rect(24, 16, 32, 42, "#6b5136");
+        P.rect(28, 20, 24, 34, "#f2ead8");
+        P.rect(31, 25, 18, 24, mix(p.far, "#f2ead8", 0.4), 0.85);
+        P.rect(66, 36, 30, 20, mix("#8a5a48", p.dark, 0.1));
+        P.shadeCircle(75, 46, 5.5, "#f2ead8");
+        P.rect(84, 40, 9, 3, "#f2ead8", 0.7);
+        P.rect(84, 46, 9, 3, "#f2ead8", 0.55);
+        break;
+      case "sewing":
+        var mc = mix("#3a3a38", p.dark, 0.2);
+        P.rect(28, H - 26, 60, 5, "#6b5136");
+        P.rect(34, H - 21, 5, 10, "#5d4632");
+        P.rect(78, H - 21, 5, 10, "#5d4632");
+        P.rect(38, H - 38, 36, 6, mc);
+        P.poly([[40, H - 38], [40, H - 54], [50, H - 58], [66, H - 58], [66, H - 38]], mc);
+        P.rect(62, H - 56, 4, 14, tint(mc, 0.2));
+        P.shadeCircle(34, H - 46, 6, tint(mc, 0.25));
+        break;
+      case "t0": case "t1": case "t2": case "t3": case "t4":
+        var tp = PAL[+key[1]];
+        c.fillStyle = P.lgrad(0, H - 13, tp.skyT, tp.skyB);
+        c.fillRect(0, 0, W, H - 13);
+        if (key === "t2") {
+          c.save(); c.fillStyle = tp.cloud; c.globalAlpha = 0.8; c.beginPath();
+          c.arc(W / 2 - 14, 30, 11, 0, Math.PI * 2); c.arc(W / 2 + 2, 24, 14, 0, Math.PI * 2); c.arc(W / 2 + 16, 32, 10, 0, Math.PI * 2); c.fill(); c.restore();
+          for (var rn = 0; rn < 6; rn++) {
+            P.stroke([[W / 2 - 20 + rn * 8, 46], [W / 2 - 23 + rn * 8, 60]], tp.rain, 1.6, 0.8);
+          }
+        } else {
+          P.glow(W * 0.55, key === "t3" ? 52 : 34, 28, tp.sun, tp.sunA + 0.15);
+          P.shadeCircle(W * 0.55, key === "t3" ? 52 : 34, 14, tp.sun);
+          if (key === "t4") {
+            for (var st2 = 0; st2 < 9; st2++) {
+              P.circle(10 + P.rnd() * (W - 20), 8 + P.rnd() * 44, 1 + P.rnd(), "#ffffff", 0.4 + P.rnd() * 0.5);
+            }
+          }
+        }
+        break;
+      case "b_sea":
+        c.fillStyle = P.lgrad(0, 36, p.skyT, p.skyB); c.fillRect(0, 0, W, 36);
+        c.fillStyle = P.lgrad(36, H - 13, tint(p.water, 0.25), shade(p.water, 0.25));
+        c.fillRect(0, 36, W, H - 49);
+        for (var wv = 0; wv < 8; wv++) {
+          P.arcStroke(14 + (wv % 4) * 28, 46 + Math.floor(wv / 4) * 16, 9, Math.PI * 0.1, Math.PI * 0.9, tint(p.water, 0.5), 1.3, 0.6);
+        }
+        break;
+      case "b_river":
+        P.rect(0, 0, W, H - 13, mix(p.mid, "#7f975f", 0.4));
+        c.fillStyle = tint(p.water, 0.3); c.beginPath();
+        c.moveTo(W * 0.42, 0); c.bezierCurveTo(W * 0.2, 30, W * 0.7, 50, W * 0.44, H - 13);
+        c.lineTo(W * 0.72, H - 13); c.bezierCurveTo(W * 0.9, 46, W * 0.5, 28, W * 0.58, 0);
+        c.closePath(); c.fill();
+        break;
+      case "b_field":
+        c.fillStyle = P.lgrad(0, 22, p.skyT, p.skyB); c.fillRect(0, 0, W, 22);
+        for (var fr2 = 0; fr2 < 4; fr2++) {
+          P.rect(0, 22 + fr2 * 13, W, 13, fr2 % 2 ? mix(p.mid, p.near, 0.4) : tint(p.mid, 0.18));
+          P.rect(0, 22 + fr2 * 13, W, 1.6, tint(p.sand, 0.2), 0.6);
+        }
+        break;
+      case "b_mountain":
+        c.fillStyle = P.lgrad(0, H - 13, p.skyT, p.skyB); c.fillRect(0, 0, W, H - 13);
+        P.poly([[0, 46], [26, 22], [52, 40], [82, 16], [116, 42], [116, H - 13], [0, H - 13]], mix(p.far, p.skyB, 0.3));
+        P.poly([[0, 60], [36, 40], [70, 58], [100, 42], [116, 54], [116, H - 13], [0, H - 13]], p.mid);
+        break;
+      case "b_street":
+        P.rect(0, 0, W, H - 13, mix("#d9c9ae", p.dark, 0.02));
+        P.rect(0, 0, W, 8, shade("#d9c9ae", 0.25));
+        P.rect(12, 14, 22, 16, mix(p.skyT, "#c8d6d4", 0.5), 0.95);
+        P.rect(48, 14, 22, 16, mix(p.skyT, "#c8d6d4", 0.5), 0.95);
+        P.poly([[8, 42], [76, 42], [70, 58], [14, 58]], mix("#b3604c", p.dark, 0));
+        P.rect(84, 20, 22, 40, "#f0e8d6");
+        P.rect(88, 26, 14, 3, "#5b4a38", 0.7);
+        P.rect(88, 32, 14, 3, "#5b4a38", 0.55);
+        break;
+      case "b_plain":
+        c.fillStyle = P.lgrad(0, 30, p.skyT, p.skyB); c.fillRect(0, 0, W, 30);
+        P.rect(0, 30, W, H - 43, mix(p.mid, "#7f975f", 0.4));
+        P.poly([[0, 38], [40, 30], [80, 40], [116, 32], [116, 46], [0, 46]], tint(mix(p.mid, "#7f975f", 0.4), 0.12), 0.6);
+        P.grassTufts(H - 34, 6, mix(p.mid, "#7f975f", 0.4));
+        break;
+      case "b_interior":
+        P.rect(0, 0, W, H - 26, mix("#e6d8bd", p.skyT, 0.12));
+        P.rect(0, H - 26, W, 13, mix("#9a7b58", p.dark, 0.08));
+        P.rect(66, 12, 38, 34, "#54432f");
+        P.rect(70, 16, 30, 26, mix(p.skyT, p.skyB, 0.5));
+        P.stroke([[85, 16], [85, 42]], "#54432f", 2.4, 1);
+        P.rect(16, H - 40, 36, 4, "#6b5136");
+        P.rect(20, H - 36, 4, 10, "#5d4632");
+        P.rect(44, H - 36, 4, 10, "#5d4632");
+        break;
+      case "n_grass":
+        P.grassTufts(H * 0.3, 14, mix(p.mid, "#7f975f", 0.4));
+        break;
+      case "n_pebbles":
+        P.shadeCircle(40, 54, 11, "#b9b2a2");
+        P.shadeCircle(62, 58, 8, "#a8a191");
+        P.shadeCircle(78, 50, 6, "#c4bdae");
+        break;
+      case "w_birds":
+        P.birds(W / 2, 34, 3);
+        P.cloudBlob(W * 0.72, 58, 12);
+        break;
+      case "w_cloud":
+        P.cloudBlob(W / 2, 44, 24);
+        break;
+      default:
+        if (ELS[key]) ELS[key].draw(P, W / 2, P.gy, TILE_S[key] || 0.5);
+    }
+  }
+
+  var gameTiles = [], matchedCount = 0, selectedTile = null;
+  var matchNote = $("matchNote"), matchCount = $("matchCount");
+
+  function buildGame(data) {
+    var tray = $("tileTray");
+    tray.innerHTML = "";
+    gameTiles = []; matchedCount = 0; selectedTile = null;
+    var seen = {};
+    data.forEach(function (d, ai) {
+      d.spec.els.forEach(function (k) {
+        if (!EL_NAMES[k]) return;
+        var entry = seen[k];
+        if (!entry) { entry = seen[k] = { key: k, name: EL_NAMES[k], acts: [] }; gameTiles.push(entry); }
+        if (entry.acts.indexOf(ai) === -1) entry.acts.push(ai);
+      });
+    });
+    function addFiller(key, name, actFilter) {
+      if (gameTiles.length >= 10) return;
+      var acts = [];
+      data.forEach(function (d, ai) { if (actFilter(d)) acts.push(ai); });
+      if (acts.length > 0) gameTiles.push({ key: key, name: name, acts: acts, weather: true });
+    }
+    /* 時刻元件:清晨/日午/風雨/黃昏/夜晚 */
+    [0, 1, 2, 3, 4].forEach(function (pi) {
+      addFiller("t" + pi, TIME_NAMES[pi], function (d) { return d.pi === pi; });
+    });
+    /* 基底元件:這個故事出現過的場景 */
+    Object.keys(BASE_NAMES).forEach(function (b) {
+      addFiller("b_" + b, BASE_NAMES[b], function (d) { return d.spec.base === b; });
+    });
+    /* 自然小物 */
+    addFiller("w_birds", "飛鳥", function (d) { return d.pi === 1 || d.pi === 3; });
+    addFiller("w_cloud", "白雲", function () { return true; });
+    addFiller("n_grass", "小草", function (d) { return d.spec.base !== "interior"; });
+    addFiller("n_pebbles", "石子", function (d) { return d.spec.base !== "interior"; });
+    gameTiles = gameTiles.slice(0, 10);
+    var rnd = makeRng(data[0].seed + 17);
+    for (var i = gameTiles.length - 1; i > 0; i--) {
+      var j = Math.floor(rnd() * (i + 1));
+      var tmp = gameTiles[i]; gameTiles[i] = gameTiles[j]; gameTiles[j] = tmp;
+    }
+    gameTiles.forEach(function (t) {
+      var el = document.createElement("button");
+      el.type = "button";
+      el.className = "tile";
+      el.setAttribute("aria-label", "插圖元件:" + t.name);
+      el.innerHTML = '<canvas></canvas><span class="tile-name">' + t.name + "</span>";
+      tray.appendChild(el);
+      drawTile(el.querySelector("canvas"), t.key);
+      t.dom = el;
+      t.tries = 0;
+      t.done = false;
+      wireTile(t);
+    });
+    matchNote.textContent = "拖曳下面的插圖到上面的分鏡卡;也可以先點一下插圖,再點一張分鏡卡。";
+    updateMatchCount();
+    $("matchSec").classList.add("show");
+  }
+
+  function updateMatchCount() {
+    matchCount.textContent = "已配對 " + matchedCount + " / " + gameTiles.length;
+  }
+
+  function frameCards() {
+    return Array.prototype.slice.call(document.querySelectorAll("#boardGrid .frame-card"));
+  }
+
+  function attemptMatch(tile, actIdx) {
+    if (tile.done) return;
+    clearSelection();
+    if (tile.acts.indexOf(actIdx) !== -1) {
+      tile.done = true;
+      tile.dom.classList.add("done");
+      matchedCount++;
+      updateMatchCount();
+      var d = currentData[actIdx];
+      var already = d.chosen.bg.concat(d.chosen.structures, d.chosen.veg, d.chosen.props, d.chosen.sky, d.extras);
+      if (!tile.weather && already.indexOf(tile.key) === -1) {
+        d.extras.push(tile.key);
+        var cv = document.querySelectorAll("#boardGrid canvas")[actIdx];
+        if (cv) renderScene(cv, d.spec, d.chosen, d.seed, actIdx, d.pi, d.extras);
+      }
+      var praise = PRAISES[matchedCount % PRAISES.length];
+      if (matchedCount === gameTiles.length) {
+        matchNote.textContent = "太棒了!" + gameTiles.length + " 件記憶都回到故事裡了。想再玩一次,就再按一次「生成分鏡」。";
+      } else {
+        matchNote.textContent = praise + "「" + tile.name + "」回到了第" + "一二三四"[actIdx] + "幕(" + STAGES[actIdx].glyph + ")。";
+      }
+    } else {
+      tile.tries++;
+      tile.dom.classList.remove("shake");
+      void tile.dom.offsetWidth;
+      tile.dom.classList.add("shake");
+      if (tile.tries >= 2) {
+        var hintIdx = tile.acts[0];
+        var card = frameCards()[hintIdx];
+        if (card) {
+          card.classList.remove("hint-glow");
+          void card.offsetWidth;
+          card.classList.add("hint-glow");
+        }
+        matchNote.textContent = "再想想看——亮起來的那一幕,就是「" + tile.name + "」的家。";
+      } else {
+        matchNote.textContent = "再想想看,「" + tile.name + "」好像屬於別的一幕。";
+      }
+    }
+  }
+
+  function clearSelection() {
+    if (selectedTile) { selectedTile.dom.classList.remove("selected"); selectedTile = null; }
+  }
+
+  function wireTile(tile) {
+    var startX = 0, startY = 0, dragging = false, ghost = null;
+    tile.dom.addEventListener("pointerdown", function (ev) {
+      if (tile.done) return;
+      try { tile.dom.setPointerCapture(ev.pointerId); } catch (e) { /* 無作用中指標時略過 */ }
+      startX = ev.clientX; startY = ev.clientY; dragging = false;
+    });
+    tile.dom.addEventListener("pointermove", function (ev) {
+      if (tile.done || ev.buttons === 0) return;
+      if (!dragging && Math.hypot(ev.clientX - startX, ev.clientY - startY) > 8) {
+        dragging = true;
+        ghost = tile.dom.cloneNode(true);
+        ghost.className = "tile tile-ghost";
+        document.body.appendChild(ghost);
+        drawTile(ghost.querySelector("canvas"), tile.key);
+      }
+      if (dragging && ghost) {
+        ghost.style.left = ev.clientX + "px";
+        ghost.style.top = ev.clientY + "px";
+        var over = cardFromPoint(ev.clientX, ev.clientY);
+        frameCards().forEach(function (cd, i) { cd.classList.toggle("drop-hint", cd === over); });
+      }
+    });
+    tile.dom.addEventListener("pointerup", function (ev) {
+      if (tile.done) return;
+      if (dragging) {
+        var over = cardFromPoint(ev.clientX, ev.clientY);
+        frameCards().forEach(function (cd) { cd.classList.remove("drop-hint"); });
+        if (ghost) { ghost.remove(); ghost = null; }
+        dragging = false;
+        if (over) attemptMatch(tile, frameCards().indexOf(over));
+      } else {
+        /* 點選模式:先選元件,再點分鏡卡 */
+        if (selectedTile === tile) { clearSelection(); return; }
+        clearSelection();
+        selectedTile = tile;
+        tile.dom.classList.add("selected");
+        matchNote.textContent = "已選「" + tile.name + "」——現在點一張分鏡卡,把它放回去。";
+      }
+    });
+    tile.dom.addEventListener("pointercancel", function () {
+      if (ghost) { ghost.remove(); ghost = null; }
+      dragging = false;
+      frameCards().forEach(function (cd) { cd.classList.remove("drop-hint"); });
+    });
+  }
+
+  function cardFromPoint(x, y) {
+    var el = document.elementFromPoint(x, y);
+    return el ? el.closest(".frame-card") : null;
+  }
+
+  $("boardGrid").addEventListener("click", function (ev) {
+    if (!selectedTile) return;
+    var card = ev.target.closest(".frame-card");
+    if (!card) return;
+    attemptMatch(selectedTile, frameCards().indexOf(card));
+  });
 
   window.__test = {
     draw: function (canvas, text, act, pi) {
