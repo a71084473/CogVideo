@@ -615,6 +615,23 @@
     opacity: 0.92;
     transform: translate(-50%, -60%);
   }
+  .scene-sprite {
+    position: absolute;
+    width: 28%;
+    transform: translate(-50%, -55%);
+    cursor: grab;
+    touch-action: none;
+    z-index: 3;
+    filter: drop-shadow(0 3px 5px rgba(18, 14, 8, 0.35));
+    transition: filter 0.2s;
+  }
+  .scene-sprite canvas { display: block; width: 100%; height: auto; }
+  .scene-sprite.lift {
+    cursor: grabbing;
+    filter: drop-shadow(0 7px 10px rgba(18, 14, 8, 0.45));
+    z-index: 4;
+  }
+
   .frame-card.drop-hint { border-color: var(--indigo); box-shadow: 0 0 0 2px var(--indigo-soft), var(--shadow); }
   .frame-card.hint-glow { animation: hintGlow 1.6s ease; }
   @keyframes hintGlow {
@@ -721,7 +738,7 @@
     </div>
     <div class="match-bar">
       <span class="match-count" id="matchCount"></span>
-      <span class="match-note" id="matchNote">拖曳下面的插圖到上面的分鏡卡;也可以先點一下插圖,再點一張分鏡卡。</span>
+      <span class="match-note" id="matchNote">拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。</span>
     </div>
     <div class="tile-tray" id="tileTray"></div>
   </section>
@@ -1960,6 +1977,7 @@
         spec: spec,
         chosen: chosen,
         extras: [],
+        sprites: [],
         pi: pi,
         seed: hashText(actText) + i * 131,
         desc: describeScene(spec, chosen, pi),
@@ -2169,11 +2187,13 @@
   var BASE_NAMES = { sea: "大海", river: "小溪", field: "稻田", mountain: "山巒", street: "老街", plain: "原野", interior: "屋內" };
   var PRAISES = ["答對了!", "很好!", "就是這裡!", "沒錯!"];
 
-  function drawTile(canvas, key) {
+  function drawTile(canvas, key, transparent) {
     var P = new Painter(canvas, hashText(key), 1, 1, 116, 84);
     var W = P.W, H = P.H, p = P.p, c = P.ctx;
-    P.rect(0, 0, W, H, "#f6f1e6");
-    P.rect(0, H - 13, W, 13, "#e9e1cd");
+    if (!transparent) {
+      P.rect(0, 0, W, H, "#f6f1e6");
+      P.rect(0, H - 13, W, 13, "#e9e1cd");
+    }
     P.gy = H - 13; P.hy = H * 0.5; P.waterY = H - 18;
     switch (key) {
       case "train":
@@ -2398,7 +2418,7 @@
       t.done = false;
       wireTile(t);
     });
-    matchNote.textContent = "拖曳下面的插圖到上面的分鏡卡;也可以先點一下插圖,再點一張分鏡卡。";
+    matchNote.textContent = "拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。";
     updateMatchCount();
     $("matchSec").classList.add("show");
   }
@@ -2411,7 +2431,55 @@
     return Array.prototype.slice.call(document.querySelectorAll("#boardGrid .frame-card"));
   }
 
-  function attemptMatch(tile, actIdx) {
+  function spriteable(key) {
+    return !/^t\d$/.test(key) && key.indexOf("b_") !== 0;
+  }
+
+  function addSprite(actIdx, key, rx, ry) {
+    var card = frameCards()[actIdx];
+    if (!card) return;
+    var box = card.querySelector(".frame-preview");
+    var sp = document.createElement("div");
+    sp.className = "scene-sprite";
+    sp.innerHTML = "<canvas></canvas>";
+    box.appendChild(sp);
+    drawTile(sp.querySelector("canvas"), key, true);
+    var d = currentData[actIdx];
+    var rec = { key: key, rx: rx, ry: ry };
+    d.sprites.push(rec);
+    positionSprite(sp, rec);
+    wireSprite(sp, rec, box);
+  }
+
+  function positionSprite(sp, rec) {
+    sp.style.left = (rec.rx * 100).toFixed(2) + "%";
+    sp.style.top = (rec.ry * 100).toFixed(2) + "%";
+  }
+
+  function wireSprite(sp, rec, box) {
+    sp.addEventListener("pointerdown", function (ev) {
+      ev.stopPropagation();
+      ev.preventDefault();
+      try { sp.setPointerCapture(ev.pointerId); } catch (e) { /* 無作用中指標時略過 */ }
+      sp.classList.add("lift");
+    });
+    sp.addEventListener("pointermove", function (ev) {
+      if (!sp.classList.contains("lift") || ev.buttons === 0) return;
+      var r = box.getBoundingClientRect();
+      rec.rx = Math.min(0.94, Math.max(0.06, (ev.clientX - r.left) / r.width));
+      rec.ry = Math.min(0.92, Math.max(0.1, (ev.clientY - r.top) / r.height));
+      positionSprite(sp, rec);
+    });
+    function drop(ev) {
+      ev.stopPropagation();
+      sp.classList.remove("lift");
+    }
+    sp.addEventListener("pointerup", drop);
+    sp.addEventListener("pointercancel", drop);
+    sp.addEventListener("click", function (ev) { ev.stopPropagation(); });
+  }
+
+  function attemptMatch(tile, actIdx, clientX, clientY) {
     if (tile.done) return;
     clearSelection();
     if (tile.acts.indexOf(actIdx) !== -1) {
@@ -2419,18 +2487,28 @@
       tile.dom.classList.add("done");
       matchedCount++;
       updateMatchCount();
-      var d = currentData[actIdx];
-      var already = d.chosen.bg.concat(d.chosen.structures, d.chosen.veg, d.chosen.props, d.chosen.sky, d.extras);
-      if (!tile.weather && already.indexOf(tile.key) === -1) {
-        d.extras.push(tile.key);
-        var cv = document.querySelectorAll("#boardGrid canvas")[actIdx];
-        if (cv) renderScene(cv, d.spec, d.chosen, d.seed, actIdx, d.pi, d.extras);
+      var placed = "";
+      if (spriteable(tile.key)) {
+        var rx = 0.5, ry = 0.68;
+        var card = frameCards()[actIdx];
+        var box = card && card.querySelector(".frame-preview");
+        if (box && clientX != null) {
+          var r = box.getBoundingClientRect();
+          if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom + 40) {
+            rx = Math.min(0.94, Math.max(0.06, (clientX - r.left) / r.width));
+            ry = Math.min(0.92, Math.max(0.1, (clientY - r.top) / r.height));
+          }
+        } else {
+          rx = 0.3 + (currentData[actIdx].sprites.length % 3) * 0.22;
+        }
+        addSprite(actIdx, tile.key, rx, ry);
+        placed = "可以直接拖動它,擺到喜歡的位置。";
       }
       var praise = PRAISES[matchedCount % PRAISES.length];
       if (matchedCount === gameTiles.length) {
-        matchNote.textContent = "太棒了!" + gameTiles.length + " 件記憶都回到故事裡了。想再玩一次,就再按一次「生成分鏡」。";
+        matchNote.textContent = "太棒了!" + gameTiles.length + " 件記憶都回到故事裡了。" + (placed ? "每一件都還能在畫面裡拖動調整。" : "") + "想再玩一次,就再按一次「生成分鏡」。";
       } else {
-        matchNote.textContent = praise + "「" + tile.name + "」回到了第" + "一二三四"[actIdx] + "幕(" + STAGES[actIdx].glyph + ")。";
+        matchNote.textContent = praise + "「" + tile.name + "」回到了第" + "一二三四"[actIdx] + "幕(" + STAGES[actIdx].glyph + ")。" + placed;
       }
     } else {
       tile.tries++;
@@ -2486,7 +2564,7 @@
         frameCards().forEach(function (cd) { cd.classList.remove("drop-hint"); });
         if (ghost) { ghost.remove(); ghost = null; }
         dragging = false;
-        if (over) attemptMatch(tile, frameCards().indexOf(over));
+        if (over) attemptMatch(tile, frameCards().indexOf(over), ev.clientX, ev.clientY);
       } else {
         /* 點選模式:先選元件,再點分鏡卡 */
         if (selectedTile === tile) { clearSelection(); return; }
