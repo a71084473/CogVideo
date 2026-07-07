@@ -374,17 +374,16 @@
   .board-grid {
     margin-top: 30px;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
   }
-  @media (max-width: 1080px) { .board-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 620px) { .board-grid { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 700px) { .board-grid { grid-template-columns: minmax(0, 1fr); } }
 
   .frame-card {
     background: var(--card);
     border: 1px solid var(--line);
     box-shadow: var(--shadow);
-    padding: 18px 18px 24px;
+    padding: 20px 20px 26px;
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -448,10 +447,10 @@
   }
 
   .frame-summary {
-    font-size: 16.5px;
+    font-size: 17.5px;
     line-height: 1.85;
     margin: 14px 0 0;
-    min-height: 3.6em;
+    min-height: auto;
     letter-spacing: 0.03em;
     text-wrap: balance;
   }
@@ -552,34 +551,67 @@
   /* ── 記憶配對 ─────────────────────── */
   #matchSec { display: none; }
   #matchSec.show { display: block; }
-  .match-bar {
+  .match-static {
     max-width: 720px;
-    margin: 24px auto 0;
+    margin: 22px auto 0;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    line-height: 1.9;
+  }
+  #tileDock {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 14px;
+    width: min(1100px, calc(100vw - 28px));
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 18px 44px -14px rgba(20, 15, 8, 0.4);
+    padding: 10px 16px 12px;
+    z-index: 30;
+    display: none;
+  }
+  #tileDock.on { display: block; }
+  body.dock-space { padding-bottom: 200px; }
+  .dock-head {
     display: flex;
     align-items: baseline;
-    gap: 18px;
-    flex-wrap: wrap;
+    gap: 14px;
     font-family: var(--sans);
+    margin-bottom: 8px;
+    overflow: hidden;
   }
   .match-count {
-    font-size: 14px;
+    font-size: 13.5px;
     color: var(--indigo);
     letter-spacing: 0.12em;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  .match-note { font-size: 13px; color: var(--ink-soft); letter-spacing: 0.04em; min-height: 1.5em; }
+  .match-note {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
   .tile-tray {
-    margin-top: 22px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-    gap: 14px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
   }
   .tile {
-    background: var(--card);
+    flex: 0 0 82px;
+    background: var(--paper);
     border: 1px solid var(--line);
     box-shadow: var(--shadow);
-    padding: 8px 8px 10px;
+    padding: 6px 6px 7px;
     text-align: center;
     cursor: grab;
     user-select: none;
@@ -594,11 +626,12 @@
   .tile canvas { width: 100%; height: auto; display: block; }
   .tile .tile-name {
     font-family: var(--sans);
-    font-size: 13px;
+    font-size: 11.5px;
     color: var(--ink-soft);
-    letter-spacing: 0.1em;
-    margin-top: 6px;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
     display: block;
+    white-space: nowrap;
   }
   .tile.done .tile-name::after { content: " ✓"; color: var(--indigo); }
   .tile.shake { animation: tileShake 0.4s; }
@@ -611,13 +644,13 @@
     position: fixed;
     z-index: 50;
     pointer-events: none;
-    width: 104px;
+    width: 92px;
     opacity: 0.92;
     transform: translate(-50%, -60%);
   }
   .scene-sprite {
     position: absolute;
-    width: 28%;
+    width: 20%;
     transform: translate(-50%, -55%);
     cursor: grab;
     touch-action: none;
@@ -736,12 +769,16 @@
       <h2 id="h-match">記憶配對</h2>
       <span class="hint">把插圖元件,放回它所屬的那一幕</span>
     </div>
-    <div class="match-bar">
+    <p class="match-static">插圖元件收在畫面下方的「元件盒」裡,永遠在手邊。拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。</p>
+  </section>
+
+  <div id="tileDock" role="region" aria-label="插圖元件盒">
+    <div class="dock-head">
       <span class="match-count" id="matchCount"></span>
-      <span class="match-note" id="matchNote">拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。</span>
+      <span class="match-note" id="matchNote">拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能自由拖動。</span>
     </div>
     <div class="tile-tray" id="tileTray"></div>
-  </section>
+  </div>
 
   <footer class="colophon">
     <span>拾光分鏡 — 給失智長輩與家人的記憶練習</span>
@@ -2418,9 +2455,11 @@
       t.done = false;
       wireTile(t);
     });
-    matchNote.textContent = "拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。";
+    matchNote.textContent = "拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能自由拖動。";
     updateMatchCount();
     $("matchSec").classList.add("show");
+    $("tileDock").classList.add("on");
+    document.body.classList.add("dock-space");
   }
 
   function updateMatchCount() {
@@ -2553,6 +2592,8 @@
       if (dragging && ghost) {
         ghost.style.left = ev.clientX + "px";
         ghost.style.top = ev.clientY + "px";
+        if (ev.clientY < 110) window.scrollBy(0, -16);
+        else if (ev.clientY > window.innerHeight - 230 && ev.clientY < window.innerHeight - 160) window.scrollBy(0, 16);
         var over = cardFromPoint(ev.clientX, ev.clientY);
         frameCards().forEach(function (cd, i) { cd.classList.toggle("drop-hint", cd === over); });
       }
