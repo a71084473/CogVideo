@@ -556,7 +556,7 @@
     z-index: 40;
     display: none;
     flex-direction: column;
-    padding: 16px 20px 22px;
+    padding: 14px 20px 200px;
   }
   body.walk-on #walkOverlay { display: flex; }
   body.walk-on { overflow: hidden; }
@@ -636,8 +636,13 @@
     background: var(--frame-bg);
     border: 1px solid var(--line-strong);
     box-shadow: var(--shadow);
-    width: min(100%, calc((100vh - 320px) * 1.625));
+    width: min(100%, calc((100vh - 480px) * 1.625));
     margin: 0 auto;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .walk-preview.drop-hint {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px var(--indigo-soft), var(--shadow);
   }
   .walk-preview canvas { display: block; width: 100%; height: auto; }
   .walk-info { max-width: 640px; margin: 0 auto; text-align: center; }
@@ -781,7 +786,7 @@
     border: 1px solid var(--line-strong);
     box-shadow: 0 18px 44px -14px rgba(20, 15, 8, 0.4);
     padding: 10px 16px 12px;
-    z-index: 30;
+    z-index: 45;
     display: none;
   }
   #tileDock.on { display: block; }
@@ -2725,21 +2730,39 @@
     return !/^t\d$/.test(key) && key.indexOf("b_") !== 0;
   }
 
-  function addSprite(actIdx, key, rx, ry) {
-    var card = frameCards()[actIdx];
-    if (!card) return;
-    var box = card.querySelector(".frame-preview");
+  function spawnSprite(rec, box) {
     var sp = document.createElement("div");
     sp.className = "scene-sprite";
     sp.innerHTML = "<canvas></canvas>";
     box.appendChild(sp);
-    drawTile(sp.querySelector("canvas"), key, true);
-    var d = currentData[actIdx];
-    var rec = { key: key, rx: rx, ry: ry, scale: 1, hue: 0, flip: false, actIdx: actIdx };
-    d.sprites.push(rec);
+    drawTile(sp.querySelector("canvas"), rec.key, true);
     positionSprite(sp, rec);
     applySpriteFx(sp, rec);
     wireSprite(sp, rec, box);
+    return sp;
+  }
+
+  function clearSprites(box) {
+    if (!box) return;
+    box.querySelectorAll(".scene-sprite").forEach(function (s) { s.remove(); });
+    hideTools();
+  }
+
+  function activeBoxFor(actIdx) {
+    if (document.body.classList.contains("walk-on")) {
+      return walkIdx === actIdx ? document.querySelector(".walk-preview") : null;
+    }
+    var card = frameCards()[actIdx];
+    return card ? card.querySelector(".frame-preview") : null;
+  }
+
+  function addSprite(actIdx, key, rx, ry) {
+    var d = currentData[actIdx];
+    var rec = { key: key, rx: rx, ry: ry, scale: 1, hue: 0, flip: false, actIdx: actIdx };
+    d.sprites.push(rec);
+    var box = activeBoxFor(actIdx);
+    if (!box) return null;
+    return { sp: spawnSprite(rec, box), rec: rec, box: box };
   }
 
   var SPRITE_HUES = ["none", "hue-rotate(45deg) saturate(1.15)", "hue-rotate(130deg)", "hue-rotate(210deg)", "hue-rotate(300deg) saturate(1.1)", "saturate(0.15) brightness(1.08)"];
@@ -2877,6 +2900,7 @@
       prog.appendChild(dot);
     });
     document.body.classList.add("walk-on");
+    showDock();
     renderWalk(false);
   }
 
@@ -2884,6 +2908,9 @@
     var d = walkData[walkIdx];
     function paint() {
       renderScene($("walkCanvas"), d.spec, d.chosen, d.seed, walkIdx, d.pi, d.extras);
+      var wp = document.querySelector(".walk-preview");
+      clearSprites(wp);
+      d.sprites.forEach(function (rec) { spawnSprite(rec, wp); });
       $("walkGlyph").textContent = d.stage.glyph;
       $("walkAct").textContent = d.stage.act;
       $("walkName").textContent = d.stage.name;
@@ -2914,7 +2941,13 @@
   function endWalk() {
     if (!document.body.classList.contains("walk-on")) return;
     document.body.classList.remove("walk-on");
-    showDock();
+    clearSprites(document.querySelector(".walk-preview"));
+    /* 導覽中放的貼紙,同步回四張分鏡卡 */
+    frameCards().forEach(function (card, ai) {
+      var box = card.querySelector(".frame-preview");
+      clearSprites(box);
+      currentData[ai].sprites.forEach(function (rec) { spawnSprite(rec, box); });
+    });
     $("board").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   }
 
@@ -2983,8 +3016,7 @@
       var placed = "";
       if (spriteable(tile.key)) {
         var rx = 0.5, ry = 0.68;
-        var card = frameCards()[actIdx];
-        var box = card && card.querySelector(".frame-preview");
+        var box = activeBoxFor(actIdx);
         if (box && clientX != null) {
           var r = box.getBoundingClientRect();
           if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom + 40) {
@@ -2994,12 +3026,13 @@
         } else {
           rx = 0.3 + (currentData[actIdx].sprites.length % 3) * 0.22;
         }
-        addSprite(actIdx, tile.key, rx, ry);
-        placed = "可以直接拖動它,擺到喜歡的位置。";
+        var made = addSprite(actIdx, tile.key, rx, ry);
+        placed = "點一下它可以放大、縮小、換色、翻轉;按住可以拖動位置。";
+        if (made) showTools(made.sp, made.rec, made.box);
       }
       var praise = PRAISES[matchedCount % PRAISES.length];
       if (matchedCount === gameTiles.length) {
-        matchNote.textContent = "太棒了!" + gameTiles.length + " 件記憶都回到故事裡了。" + (placed ? "每一件都還能在畫面裡拖動調整。" : "") + "想再玩一次,就再按一次「生成分鏡」。";
+        matchNote.textContent = "太棒了!" + gameTiles.length + " 件記憶都回到故事裡了。" + (placed ? "每一件都還能拖動、放大、換色。" : "") + "想再玩一次,就再按一次「生成分鏡」。";
       } else {
         matchNote.textContent = praise + "「" + tile.name + "」回到了第" + "一二三四"[actIdx] + "幕(" + STAGES[actIdx].glyph + ")。" + placed;
       }
@@ -3008,17 +3041,24 @@
       tile.dom.classList.remove("shake");
       void tile.dom.offsetWidth;
       tile.dom.classList.add("shake");
+      var inWalk = document.body.classList.contains("walk-on");
       if (tile.tries >= 2) {
         var hintIdx = tile.acts[0];
-        var card = frameCards()[hintIdx];
-        if (card) {
-          card.classList.remove("hint-glow");
-          void card.offsetWidth;
-          card.classList.add("hint-glow");
+        if (inWalk) {
+          matchNote.textContent = "放錯囉——「" + tile.name + "」屬於第" + "一二三四"[hintIdx] + "幕(" + STAGES[hintIdx].glyph + "),先用箭頭翻到那一幕再放。";
+        } else {
+          var card = frameCards()[hintIdx];
+          if (card) {
+            card.classList.remove("hint-glow");
+            void card.offsetWidth;
+            card.classList.add("hint-glow");
+          }
+          matchNote.textContent = "再想想看——亮起來的那一幕,就是「" + tile.name + "」的家。";
         }
-        matchNote.textContent = "再想想看——亮起來的那一幕,就是「" + tile.name + "」的家。";
       } else {
-        matchNote.textContent = "再想想看,「" + tile.name + "」好像屬於別的一幕。";
+        matchNote.textContent = inWalk
+          ? "放錯囉,「" + tile.name + "」不屬於這一幕,再想想看。"
+          : "再想想看,「" + tile.name + "」好像屬於別的一幕。";
       }
     }
   }
@@ -3046,20 +3086,30 @@
       if (dragging && ghost) {
         ghost.style.left = ev.clientX + "px";
         ghost.style.top = ev.clientY + "px";
-        if (ev.clientY < 110) window.scrollBy(0, -16);
-        else if (ev.clientY > window.innerHeight - 230 && ev.clientY < window.innerHeight - 160) window.scrollBy(0, 16);
-        var over = cardFromPoint(ev.clientX, ev.clientY);
-        frameCards().forEach(function (cd, i) { cd.classList.toggle("drop-hint", cd === over); });
+        if (document.body.classList.contains("walk-on")) {
+          var wp = walkPreviewFromPoint(ev.clientX, ev.clientY);
+          document.querySelector(".walk-preview").classList.toggle("drop-hint", !!wp);
+        } else {
+          if (ev.clientY < 110) window.scrollBy(0, -16);
+          else if (ev.clientY > window.innerHeight - 230 && ev.clientY < window.innerHeight - 160) window.scrollBy(0, 16);
+          var over = cardFromPoint(ev.clientX, ev.clientY);
+          frameCards().forEach(function (cd, i) { cd.classList.toggle("drop-hint", cd === over); });
+        }
       }
     });
     tile.dom.addEventListener("pointerup", function (ev) {
       if (tile.done) return;
       if (dragging) {
-        var over = cardFromPoint(ev.clientX, ev.clientY);
+        var inWalk = document.body.classList.contains("walk-on");
+        var over = inWalk ? null : cardFromPoint(ev.clientX, ev.clientY);
+        var overWalk = inWalk ? walkPreviewFromPoint(ev.clientX, ev.clientY) : null;
         frameCards().forEach(function (cd) { cd.classList.remove("drop-hint"); });
+        var wpEl = document.querySelector(".walk-preview");
+        if (wpEl) wpEl.classList.remove("drop-hint");
         if (ghost) { ghost.remove(); ghost = null; }
         dragging = false;
-        if (over) attemptMatch(tile, frameCards().indexOf(over), ev.clientX, ev.clientY);
+        if (overWalk) attemptMatch(tile, walkIdx, ev.clientX, ev.clientY);
+        else if (over) attemptMatch(tile, frameCards().indexOf(over), ev.clientX, ev.clientY);
       } else {
         /* 點選模式:先選元件,再點分鏡卡 */
         if (selectedTile === tile) { clearSelection(); return; }
@@ -3081,11 +3131,24 @@
     return el ? el.closest(".frame-card") : null;
   }
 
+  function walkPreviewFromPoint(x, y) {
+    if (!document.body.classList.contains("walk-on")) return null;
+    var el = document.elementFromPoint(x, y);
+    return el ? el.closest(".walk-preview") : null;
+  }
+
   $("boardGrid").addEventListener("click", function (ev) {
     if (!selectedTile) return;
     var card = ev.target.closest(".frame-card");
     if (!card) return;
     attemptMatch(selectedTile, frameCards().indexOf(card));
+  });
+  document.addEventListener("click", function (ev) {
+    if (!selectedTile) return;
+    if (!document.body.classList.contains("walk-on")) return;
+    if (ev.target.closest && ev.target.closest(".walk-preview")) {
+      attemptMatch(selectedTile, walkIdx, ev.clientX, ev.clientY);
+    }
   });
 
   window.__test = {
