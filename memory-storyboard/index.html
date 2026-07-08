@@ -548,6 +548,92 @@
     letter-spacing: 0.05em;
   }
 
+  /* ── 全螢幕創作模式 ───────────────── */
+  #fsOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 25;
+    display: none;
+    flex-direction: column;
+    padding: 12px 22px 196px;
+  }
+  body.fs-on #fsOverlay { display: flex; }
+  body.fs-on { overflow: hidden; }
+  .fs-bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .fs-title {
+    font-size: 17px;
+    letter-spacing: 0.16em;
+    color: var(--ink);
+  }
+  .fs-hint {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+    margin-right: auto;
+  }
+  #fsExit { padding: 9px 20px; font-size: 13px; }
+  .fs-stage { flex: 1; min-height: 0; }
+  .fs-stage .board-grid {
+    height: 100%;
+    margin-top: 12px;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .fs-stage .frame-card {
+    padding: 10px 14px 12px;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fs-stage .frame-preview { width: var(--fsw, 480px); max-width: 100%; }
+  .fs-stage .frame-summary,
+  .fs-stage .frame-field,
+  .fs-stage .stage-shot,
+  .fs-stage .stage-name { display: none; }
+  .fs-stage .frame-head { margin-top: 8px; align-self: flex-start; align-items: center; }
+  .fs-stage .stage-glyph { font-size: 22px; }
+  .fs-stage .stage-meta { flex-direction: row; align-items: center; gap: 10px; }
+
+  /* ── 貼紙互動工具列 ───────────────── */
+  .sprite-tools {
+    position: absolute;
+    display: none;
+    transform: translate(-50%, -140%);
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 10px 26px -10px rgba(20, 15, 8, 0.45);
+    border-radius: 999px;
+    padding: 5px 8px;
+    gap: 4px;
+    z-index: 6;
+    white-space: nowrap;
+  }
+  .sprite-tools.on { display: flex; }
+  .sprite-tools button {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .sprite-tools button:hover { background: var(--paper-2); }
+  .sprite-tools button:focus-visible { outline: 2px solid var(--indigo); }
+
   /* ── 記憶配對 ─────────────────────── */
   #matchSec { display: none; }
   #matchSec.show { display: block; }
@@ -751,6 +837,7 @@
       <span class="hint">起・承・轉・合 — 只以背景敘事</span>
     </div>
     <div class="board-mode">
+      <button class="ghost-btn" id="fsBtn">⛶ 全螢幕創作</button>
       <button class="ghost-btn" id="aiBtn">✦ 以 AI 生成精緻插圖</button>
       <span class="board-note" id="aiNote">AI 模式把每一幕的故事原文直接交給繪圖模型即時創作,不受任何圖庫限制;需要網路連線。</span>
     </div>
@@ -771,6 +858,15 @@
     </div>
     <p class="match-static">插圖元件收在畫面下方的「元件盒」裡,永遠在手邊。拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。</p>
   </section>
+
+  <div id="fsOverlay" role="dialog" aria-label="全螢幕創作模式">
+    <div class="fs-bar">
+      <span class="fs-title">四幕分鏡・全螢幕創作</span>
+      <span class="fs-hint">點一下場景上的插圖,可以放大、縮小、換色、翻轉</span>
+      <button class="ghost-btn" id="fsExit">離開全螢幕</button>
+    </div>
+    <div class="fs-stage" id="fsStage"></div>
+  </div>
 
   <div id="tileDock" role="region" aria-label="插圖元件盒">
     <div class="dock-head">
@@ -2484,39 +2580,168 @@
     box.appendChild(sp);
     drawTile(sp.querySelector("canvas"), key, true);
     var d = currentData[actIdx];
-    var rec = { key: key, rx: rx, ry: ry };
+    var rec = { key: key, rx: rx, ry: ry, scale: 1, hue: 0, flip: false, actIdx: actIdx };
     d.sprites.push(rec);
     positionSprite(sp, rec);
+    applySpriteFx(sp, rec);
     wireSprite(sp, rec, box);
   }
+
+  var SPRITE_HUES = ["none", "hue-rotate(45deg) saturate(1.15)", "hue-rotate(130deg)", "hue-rotate(210deg)", "hue-rotate(300deg) saturate(1.1)", "saturate(0.15) brightness(1.08)"];
 
   function positionSprite(sp, rec) {
     sp.style.left = (rec.rx * 100).toFixed(2) + "%";
     sp.style.top = (rec.ry * 100).toFixed(2) + "%";
+    sp.style.width = (20 * (rec.scale || 1)).toFixed(1) + "%";
+  }
+  function applySpriteFx(sp, rec) {
+    var cv = sp.querySelector("canvas");
+    cv.style.filter = SPRITE_HUES[rec.hue || 0];
+    cv.style.transform = rec.flip ? "scaleX(-1)" : "";
   }
 
   function wireSprite(sp, rec, box) {
+    var sx = 0, sy = 0, moved = false;
     sp.addEventListener("pointerdown", function (ev) {
       ev.stopPropagation();
       ev.preventDefault();
       try { sp.setPointerCapture(ev.pointerId); } catch (e) { /* 無作用中指標時略過 */ }
-      sp.classList.add("lift");
+      sx = ev.clientX; sy = ev.clientY; moved = false;
     });
     sp.addEventListener("pointermove", function (ev) {
-      if (!sp.classList.contains("lift") || ev.buttons === 0) return;
+      if (ev.buttons === 0) return;
+      if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) > 6) {
+        moved = true;
+        sp.classList.add("lift");
+        hideTools();
+      }
+      if (!moved) return;
       var r = box.getBoundingClientRect();
       rec.rx = Math.min(0.94, Math.max(0.06, (ev.clientX - r.left) / r.width));
       rec.ry = Math.min(0.92, Math.max(0.1, (ev.clientY - r.top) / r.height));
       positionSprite(sp, rec);
     });
-    function drop(ev) {
+    sp.addEventListener("pointerup", function (ev) {
       ev.stopPropagation();
       sp.classList.remove("lift");
-    }
-    sp.addEventListener("pointerup", drop);
-    sp.addEventListener("pointercancel", drop);
+      if (!moved) toggleTools(sp, rec, box);
+    });
+    sp.addEventListener("pointercancel", function () {
+      sp.classList.remove("lift");
+    });
     sp.addEventListener("click", function (ev) { ev.stopPropagation(); });
   }
+
+  /* ── 貼紙工具列:放大 / 縮小 / 換色 / 翻轉 / 收回 ── */
+  var tools = null, toolsFor = null;
+  function ensureTools() {
+    if (tools) return;
+    tools = document.createElement("div");
+    tools.className = "sprite-tools";
+    tools.innerHTML =
+      '<button data-act="smaller" title="縮小" aria-label="縮小">−</button>' +
+      '<button data-act="bigger" title="放大" aria-label="放大">＋</button>' +
+      '<button data-act="hue" title="換色" aria-label="換色">◐</button>' +
+      '<button data-act="flip" title="左右翻轉" aria-label="左右翻轉">⇋</button>' +
+      '<button data-act="remove" title="收回元件盒" aria-label="收回元件盒">↩</button>';
+    tools.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); });
+    tools.addEventListener("pointerup", function (ev) { ev.stopPropagation(); });
+    tools.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      var b = ev.target.closest("button");
+      if (b && toolsFor) applyTool(b.dataset.act);
+    });
+  }
+  function toggleTools(sp, rec, box) {
+    if (toolsFor && toolsFor.sp === sp) { hideTools(); return; }
+    showTools(sp, rec, box);
+  }
+  function showTools(sp, rec, box) {
+    ensureTools();
+    box.appendChild(tools);
+    toolsFor = { sp: sp, rec: rec, box: box };
+    placeTools();
+    tools.classList.add("on");
+  }
+  function placeTools() {
+    if (!toolsFor) return;
+    tools.style.left = (Math.min(0.82, Math.max(0.18, toolsFor.rec.rx)) * 100) + "%";
+    tools.style.top = (Math.max(0.16, toolsFor.rec.ry) * 100) + "%";
+  }
+  function hideTools() {
+    if (tools) { tools.classList.remove("on"); }
+    toolsFor = null;
+  }
+  function applyTool(act) {
+    var sp = toolsFor.sp, rec = toolsFor.rec;
+    if (act === "bigger") rec.scale = Math.min(2.4, (rec.scale || 1) * 1.18);
+    else if (act === "smaller") rec.scale = Math.max(0.45, (rec.scale || 1) / 1.18);
+    else if (act === "hue") rec.hue = ((rec.hue || 0) + 1) % SPRITE_HUES.length;
+    else if (act === "flip") rec.flip = !rec.flip;
+    else if (act === "remove") {
+      var d = currentData[rec.actIdx];
+      d.sprites = d.sprites.filter(function (r) { return r !== rec; });
+      sp.remove();
+      hideTools();
+      var t = null;
+      for (var i = 0; i < gameTiles.length; i++) {
+        if (gameTiles[i].key === rec.key && gameTiles[i].done) { t = gameTiles[i]; break; }
+      }
+      if (t) {
+        t.done = false;
+        t.tries = 0;
+        t.dom.classList.remove("done");
+        matchedCount = Math.max(0, matchedCount - 1);
+        updateMatchCount();
+        matchNote.textContent = "「" + t.name + "」收回元件盒了,可以再放一次。";
+      }
+      return;
+    }
+    positionSprite(sp, rec);
+    applySpriteFx(sp, rec);
+    placeTools();
+  }
+  document.addEventListener("pointerdown", function (ev) {
+    if (!toolsFor) return;
+    if (ev.target.closest && (ev.target.closest(".sprite-tools") || ev.target.closest(".scene-sprite"))) return;
+    hideTools();
+  });
+
+  /* ── 全螢幕創作模式 ── */
+  var fsBtn = $("fsBtn"), fsExit = $("fsExit"), fsStage = $("fsStage");
+  var gridHome = null;
+  function fsResize() {
+    if (!document.body.classList.contains("fs-on")) return;
+    var r = fsStage.getBoundingClientRect();
+    var cellW = (r.width - 16) / 2 - 32;
+    var cellH = (r.height - 16) / 2 - 64;
+    var w = Math.max(240, Math.min(cellW, cellH * 1.625));
+    document.documentElement.style.setProperty("--fsw", w.toFixed(0) + "px");
+  }
+  fsBtn.addEventListener("click", function () {
+    var grid = $("boardGrid");
+    gridHome = { parent: grid.parentNode, next: grid.nextSibling };
+    fsStage.appendChild(grid);
+    document.body.classList.add("fs-on");
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(function () { /* 環境不允許時仍以覆蓋層呈現 */ });
+    }
+    fsResize();
+    setTimeout(fsResize, 120);
+  });
+  function exitFs() {
+    if (!document.body.classList.contains("fs-on")) return;
+    document.body.classList.remove("fs-on");
+    if (gridHome) gridHome.parent.insertBefore($("boardGrid"), gridHome.next);
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(function () { /* 忽略 */ });
+    }
+  }
+  fsExit.addEventListener("click", exitFs);
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") exitFs();
+  });
+  window.addEventListener("resize", fsResize);
 
   function attemptMatch(tile, actIdx, clientX, clientY) {
     if (tile.done) return;
