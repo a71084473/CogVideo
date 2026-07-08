@@ -548,6 +548,131 @@
     letter-spacing: 0.05em;
   }
 
+  /* ── 分鏡放映導覽 ─────────────────── */
+  #walkOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 40;
+    display: none;
+    flex-direction: column;
+    padding: 16px 20px 22px;
+  }
+  body.walk-on #walkOverlay { display: flex; }
+  body.walk-on { overflow: hidden; }
+  .walk-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .walk-progress { display: flex; gap: 14px; font-size: 17px; letter-spacing: 0; }
+  .walk-progress span {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--ink-faint);
+    transition: all 0.3s;
+  }
+  .walk-progress span.cur {
+    background: var(--indigo);
+    border-color: var(--indigo);
+    color: var(--paper);
+  }
+  .walk-progress span.seen { color: var(--indigo); border-color: var(--indigo-soft); }
+  #walkSkip { padding: 9px 18px; font-size: 12.5px; }
+  .walk-main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+  }
+  .walk-arrow {
+    flex: none;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: 1.5px solid var(--indigo-soft);
+    background: var(--card);
+    color: var(--indigo);
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s, opacity 0.2s;
+    box-shadow: var(--shadow);
+  }
+  .walk-arrow:hover { border-color: var(--indigo); transform: scale(1.06); }
+  .walk-arrow:focus-visible { outline: 2px solid var(--indigo); outline-offset: 3px; }
+  .walk-arrow[disabled] { opacity: 0.25; cursor: default; transform: none; }
+  .walk-arrow.next { animation: nudgePulse 1.8s ease-in-out infinite; }
+  .walk-arrow.next.finish {
+    background: var(--indigo);
+    color: var(--paper);
+    border-color: var(--indigo);
+    font-size: 18px;
+    animation: none;
+  }
+  @keyframes nudgePulse {
+    0%, 100% { box-shadow: var(--shadow); }
+    50% { box-shadow: 0 0 0 7px rgba(108, 128, 147, 0.28); }
+  }
+  .walk-card {
+    min-width: 0;
+    width: min(880px, calc(100vw - 220px));
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    opacity: 1;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .walk-card.swap { opacity: 0; transform: translateX(18px); }
+  .walk-preview {
+    position: relative;
+    background: var(--frame-bg);
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--shadow);
+    width: min(100%, calc((100vh - 320px) * 1.625));
+    margin: 0 auto;
+  }
+  .walk-preview canvas { display: block; width: 100%; height: auto; }
+  .walk-info { max-width: 640px; margin: 0 auto; text-align: center; }
+  .walk-stagerow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .walk-glyph { font-size: 34px; font-weight: 600; color: var(--indigo); line-height: 1; }
+  .walk-actname { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .walk-name { font-size: 14px; color: var(--ink-soft); letter-spacing: 0.1em; }
+  .walk-summary {
+    font-size: 19px;
+    line-height: 1.85;
+    letter-spacing: 0.03em;
+    margin: 12px 0 4px;
+    text-wrap: balance;
+  }
+  .walk-desc {
+    font-size: 13.5px;
+    color: var(--ink-faint);
+    line-height: 1.8;
+    margin: 0 0 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .walk-arrow.next { animation: none; }
+    .walk-card.swap { transition: none; }
+  }
+  @media (max-width: 720px) {
+    .walk-main { gap: 10px; }
+    .walk-arrow { width: 48px; height: 48px; font-size: 20px; }
+    .walk-card { max-width: calc(100vw - 130px); }
+  }
+
   /* ── 全螢幕創作模式 ───────────────── */
   #fsOverlay {
     position: fixed;
@@ -858,6 +983,32 @@
     </div>
     <p class="match-static">插圖元件收在畫面下方的「元件盒」裡,永遠在手邊。拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。</p>
   </section>
+
+  <div id="walkOverlay" role="dialog" aria-label="分鏡放映導覽">
+    <div class="walk-top">
+      <span class="walk-progress" id="walkProgress" aria-hidden="true"></span>
+      <button class="ghost-btn" id="walkSkip">跳過,直接看全部</button>
+    </div>
+    <div class="walk-main">
+      <button class="walk-arrow" id="walkPrev" aria-label="上一幕">←</button>
+      <div class="walk-card" id="walkCard">
+        <div class="walk-preview">
+          <canvas id="walkCanvas" aria-label="本幕插畫場景,僅有背景,無人物"></canvas>
+          <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+        </div>
+        <div class="walk-info">
+          <div class="walk-stagerow">
+            <span class="walk-glyph" id="walkGlyph"></span>
+            <span class="walk-actname"><span class="stage-act" id="walkAct"></span><span id="walkName" class="walk-name"></span></span>
+            <span class="mood-pill" id="walkMood"></span>
+          </div>
+          <p class="walk-summary" id="walkSummary"></p>
+          <p class="walk-desc" id="walkDesc"></p>
+        </div>
+      </div>
+      <button class="walk-arrow next" id="walkNext" aria-label="下一幕">→</button>
+    </div>
+  </div>
 
   <div id="fsOverlay" role="dialog" aria-label="全螢幕創作模式">
     <div class="fs-bar">
@@ -2120,6 +2271,7 @@
     currentData = data;
     renderBoard(data);
     buildGame(data);
+    startWalk(data);
   }
 
   function renderBoard(data) {
@@ -2554,6 +2706,9 @@
     matchNote.textContent = "拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能自由拖動。";
     updateMatchCount();
     $("matchSec").classList.add("show");
+  }
+
+  function showDock() {
     $("tileDock").classList.add("on");
     document.body.classList.add("dock-space");
   }
@@ -2705,6 +2860,80 @@
     if (!toolsFor) return;
     if (ev.target.closest && (ev.target.closest(".sprite-tools") || ev.target.closest(".scene-sprite"))) return;
     hideTools();
+  });
+
+  /* ── 分鏡放映導覽:一次一幕,箭頭引導 ── */
+  var walkIdx = 0, walkData = null;
+  var walkPrev = $("walkPrev"), walkNext = $("walkNext"), walkCard = $("walkCard");
+
+  function startWalk(data) {
+    walkData = data;
+    walkIdx = 0;
+    var prog = $("walkProgress");
+    prog.innerHTML = "";
+    STAGES.forEach(function (s) {
+      var dot = document.createElement("span");
+      dot.textContent = s.glyph;
+      prog.appendChild(dot);
+    });
+    document.body.classList.add("walk-on");
+    renderWalk(false);
+  }
+
+  function renderWalk(animate) {
+    var d = walkData[walkIdx];
+    function paint() {
+      renderScene($("walkCanvas"), d.spec, d.chosen, d.seed, walkIdx, d.pi, d.extras);
+      $("walkGlyph").textContent = d.stage.glyph;
+      $("walkAct").textContent = d.stage.act;
+      $("walkName").textContent = d.stage.name;
+      $("walkSummary").textContent = d.summary;
+      $("walkDesc").textContent = d.desc;
+      $("walkMood").textContent = d.mood;
+      var dots = $("walkProgress").children;
+      for (var i = 0; i < dots.length; i++) {
+        dots[i].className = i === walkIdx ? "cur" : (i < walkIdx ? "seen" : "");
+      }
+      walkPrev.disabled = walkIdx === 0;
+      var last = walkIdx === walkData.length - 1;
+      walkNext.classList.toggle("finish", last);
+      walkNext.textContent = last ? "✓ 完成" : "→";
+      walkNext.setAttribute("aria-label", last ? "完成導覽,開始配對創作" : "下一幕");
+    }
+    if (animate && !reduceMotion) {
+      walkCard.classList.add("swap");
+      setTimeout(function () {
+        paint();
+        walkCard.classList.remove("swap");
+      }, 320);
+    } else {
+      paint();
+    }
+  }
+
+  function endWalk() {
+    if (!document.body.classList.contains("walk-on")) return;
+    document.body.classList.remove("walk-on");
+    showDock();
+    $("board").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  walkNext.addEventListener("click", function () {
+    if (walkIdx >= walkData.length - 1) { endWalk(); return; }
+    walkIdx++;
+    renderWalk(true);
+  });
+  walkPrev.addEventListener("click", function () {
+    if (walkIdx === 0) return;
+    walkIdx--;
+    renderWalk(true);
+  });
+  $("walkSkip").addEventListener("click", endWalk);
+  document.addEventListener("keydown", function (ev) {
+    if (!document.body.classList.contains("walk-on")) return;
+    if (ev.key === "ArrowRight") walkNext.click();
+    else if (ev.key === "ArrowLeft") walkPrev.click();
+    else if (ev.key === "Escape") endWalk();
   });
 
   /* ── 全螢幕創作模式 ── */
