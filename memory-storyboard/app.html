@@ -2814,6 +2814,26 @@
     }
     requestAnimationFrame(tick);
   }
+  /* 配對失敗:元件沿弧線飛回元件盒,絕不留在分鏡上 */
+  function flyGhostBack(x, y, tile) {
+    if (reduceMotion) return;
+    var g = tile.dom.cloneNode(true);
+    g.className = "tile tile-ghost";
+    drawTile(g.querySelector("canvas"), tile.key);
+    g.style.left = x + "px";
+    g.style.top = y + "px";
+    document.body.appendChild(g);
+    var r = tile.dom.getBoundingClientRect();
+    var tx = r.left + r.width / 2, ty = r.top + r.height / 2;
+    requestAnimationFrame(function () {
+      g.style.transition = "left 0.5s cubic-bezier(0.4, 0.7, 0.5, 1), top 0.5s cubic-bezier(0.4, 0.7, 0.5, 1), opacity 0.5s ease";
+      g.style.left = tx + "px";
+      g.style.top = ty + "px";
+      g.style.opacity = "0.25";
+    });
+    setTimeout(function () { g.remove(); }, 560);
+  }
+
   function flashBox(box, good) {
     if (!box) return;
     var cls = good ? "flash-good" : "flash-bad";
@@ -3315,7 +3335,8 @@
       tile.dom.classList.add("shake");
       var badBox = activeBoxFor(actIdx);
       var bpt = fxPoint(badBox, clientX, clientY);
-      fxToast(bpt.x, bpt.y, "再試一次", false);
+      flyGhostBack(bpt.x, bpt.y, tile);
+      fxToast(bpt.x, bpt.y, "✕ 放錯囉", false);
       flashBox(badBox, false);
       var inWalk = document.body.classList.contains("walk-on");
       if (tile.tries >= 2) {
