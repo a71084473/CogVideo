@@ -1,0 +1,3204 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拾光分鏡・把故事變成四幕風景</title>
+</head>
+<body>
+<style>
+  :root {
+    --paper: #f2f0ea;
+    --paper-2: #eceae2;
+    --card: #f7f5f0;
+    --ink: #2b2a25;
+    --ink-soft: #56534b;
+    --ink-faint: #8b867b;
+    --line: #d8d4c9;
+    --line-strong: #b8b3a5;
+    --indigo: #44596b;
+    --indigo-soft: #6c8093;
+    --seal: #a8462f;
+    --draw: #33322c;
+    --frame-bg: #faf9f5;
+    --shadow: 0 1px 0 rgba(43, 42, 37, 0.04), 0 10px 30px -18px rgba(43, 42, 37, 0.25);
+    --serif: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", "Times New Roman", serif;
+    --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #191a17;
+      --paper-2: #151613;
+      --card: #201f1b;
+      --ink: #e9e5d9;
+      --ink-soft: #b5b0a2;
+      --ink-faint: #7d786c;
+      --line: #37352e;
+      --line-strong: #4a473e;
+      --indigo: #93aabb;
+      --indigo-soft: #6c8093;
+      --seal: #c96a4f;
+      --draw: #d9d5c8;
+      --frame-bg: #23221d;
+      --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 12px 30px -18px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #191a17;
+    --paper-2: #151613;
+    --card: #201f1b;
+    --ink: #e9e5d9;
+    --ink-soft: #b5b0a2;
+    --ink-faint: #7d786c;
+    --line: #37352e;
+    --line-strong: #4a473e;
+    --indigo: #93aabb;
+    --indigo-soft: #6c8093;
+    --seal: #c96a4f;
+    --draw: #d9d5c8;
+    --frame-bg: #23221d;
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 12px 30px -18px rgba(0, 0, 0, 0.6);
+  }
+  :root[data-theme="light"] {
+    --paper: #f2f0ea;
+    --paper-2: #eceae2;
+    --card: #f7f5f0;
+    --ink: #2b2a25;
+    --ink-soft: #56534b;
+    --ink-faint: #8b867b;
+    --line: #d8d4c9;
+    --line-strong: #b8b3a5;
+    --indigo: #44596b;
+    --indigo-soft: #6c8093;
+    --seal: #a8462f;
+    --draw: #33322c;
+    --frame-bg: #faf9f5;
+    --shadow: 0 1px 0 rgba(43, 42, 37, 0.04), 0 10px 30px -18px rgba(43, 42, 37, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.9;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .side-rail {
+    position: fixed;
+    top: 50%;
+    right: 26px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--ink-faint);
+    user-select: none;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .side-rail .rail-div {
+    width: 1px;
+    height: 22px;
+    background: var(--line-strong);
+    margin: 4px 0;
+  }
+  @media (max-width: 900px) { .side-rail { display: none; } }
+
+  .page {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 28px 90px;
+  }
+
+  /* ── Header ─────────────────────────── */
+  header.masthead {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 84px 0 64px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.38em;
+    color: var(--indigo);
+    text-transform: uppercase;
+    margin: 0 0 26px;
+  }
+  h1.title {
+    font-size: clamp(38px, 6vw, 58px);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+    margin: 0 0 22px;
+    text-wrap: balance;
+  }
+  .title .dot { color: var(--seal); }
+  .lede {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 34em;
+    margin: 0 0 18px;
+  }
+  .thesis {
+    font-size: 15px;
+    color: var(--ink-faint);
+    border-left: 2px solid var(--line-strong);
+    padding-left: 16px;
+    margin: 28px 0 0;
+    max-width: 32em;
+  }
+  .seal-mark {
+    position: absolute;
+    top: 92px;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid var(--seal);
+    border-radius: 3px;
+    color: var(--seal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
+    transform: rotate(3deg);
+    opacity: 0.9;
+  }
+
+  /* ── Sections ───────────────────────── */
+  .section-head {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-top: 58px;
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+  }
+  .section-no {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--indigo);
+  }
+  .section-head h2 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    margin: 0;
+  }
+  .section-head .hint {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-left: auto;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Story input ────────────────────── */
+  .story-desk {
+    max-width: 720px;
+    margin: 26px auto 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 34px 36px 30px;
+  }
+  textarea#story {
+    width: 100%;
+    min-height: 220px;
+    resize: vertical;
+    border: none;
+    outline: none;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0, transparent 37px, var(--line) 37px, var(--line) 38px);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 38px;
+    letter-spacing: 0.04em;
+    padding: 0;
+  }
+  textarea#story::placeholder { color: var(--ink-faint); }
+  textarea#story:focus-visible { box-shadow: 0 2px 0 var(--indigo); }
+
+  .desk-tools {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-family: var(--sans);
+  }
+
+  .rec-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 12px 22px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .rec-btn:hover { border-color: var(--ink-soft); }
+  .rec-btn:focus-visible, .go-btn:focus-visible, .ghost-btn:focus-visible, .chip:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 3px;
+  }
+  .rec-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--seal);
+    flex: none;
+  }
+  .rec-btn[data-state="recording"] {
+    border-color: var(--seal);
+    color: var(--seal);
+  }
+  .rec-btn[data-state="recording"] .rec-dot { animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.45); opacity: 0.45; }
+  }
+
+  .wave {
+    display: none;
+    align-items: flex-end;
+    gap: 3px;
+    height: 26px;
+  }
+  .wave.on { display: inline-flex; }
+  .wave i {
+    width: 3px;
+    background: var(--seal);
+    border-radius: 2px;
+    animation: wave 0.9s ease-in-out infinite;
+  }
+  .wave i:nth-child(1) { height: 10px; animation-delay: 0s; }
+  .wave i:nth-child(2) { height: 20px; animation-delay: 0.15s; }
+  .wave i:nth-child(3) { height: 14px; animation-delay: 0.3s; }
+  .wave i:nth-child(4) { height: 24px; animation-delay: 0.1s; }
+  .wave i:nth-child(5) { height: 12px; animation-delay: 0.25s; }
+  .wave i:nth-child(6) { height: 18px; animation-delay: 0.4s; }
+  @keyframes wave { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+
+  .rec-status {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
+    min-height: 1.5em;
+  }
+  .rec-status .timer { font-variant-numeric: tabular-nums; color: var(--seal); }
+
+  .samples {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .samples-label { font-size: 12.5px; color: var(--ink-faint); letter-spacing: 0.08em; }
+  .chip {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .chip:hover { border-color: var(--indigo-soft); color: var(--indigo); }
+
+  .go-row {
+    max-width: 720px;
+    margin: 34px auto 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .go-btn {
+    font-family: var(--sans);
+    font-size: 16px;
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+    color: var(--paper);
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 17px 44px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .go-btn:hover { opacity: 0.86; }
+  .go-btn:active { transform: translateY(1px); }
+  .go-btn[disabled] { opacity: 0.5; cursor: wait; }
+  .go-note {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+  .go-note.warn { color: var(--seal); }
+
+  /* ── Storyboard ─────────────────────── */
+  #board { display: none; }
+  #board.show { display: block; }
+
+  .board-rule {
+    max-width: 720px;
+    margin: 70px auto 0;
+    border: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .board-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
+  }
+  @media (max-width: 700px) { .board-grid { grid-template-columns: minmax(0, 1fr); } }
+
+  .frame-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 20px 20px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .frame-card.in { opacity: 1; transform: none; }
+
+  .frame-preview {
+    position: relative;
+    background: var(--frame-bg);
+    border: 1px solid var(--line-strong);
+  }
+  .frame-preview canvas { display: block; width: 100%; max-width: 100%; height: auto; }
+  .frame-preview .tick {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-color: var(--ink-faint);
+    border-style: solid;
+    border-width: 0;
+  }
+  .tick.tl { top: 4px; left: 4px; border-top-width: 1px; border-left-width: 1px; }
+  .tick.tr { top: 4px; right: 4px; border-top-width: 1px; border-right-width: 1px; }
+  .tick.bl { bottom: 4px; left: 4px; border-bottom-width: 1px; border-left-width: 1px; }
+  .tick.br { bottom: 4px; right: 4px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  .frame-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .stage-glyph {
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--indigo);
+    line-height: 1;
+  }
+  .stage-meta { display: flex; flex-direction: column; gap: 2px; }
+  .stage-act {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .stage-name { font-size: 15px; color: var(--ink-soft); letter-spacing: 0.1em; white-space: nowrap; }
+  .stage-shot {
+    margin-left: auto;
+    align-self: flex-start;
+    font-family: var(--sans);
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.12em;
+    text-align: right;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  .frame-summary {
+    font-size: 17.5px;
+    line-height: 1.85;
+    margin: 14px 0 0;
+    min-height: auto;
+    letter-spacing: 0.03em;
+    text-wrap: balance;
+  }
+
+  .frame-field {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .field-label {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.3em;
+    color: var(--indigo);
+    margin-bottom: 6px;
+  }
+  .field-body {
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+  .mood-pill {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--indigo);
+    border: 1px solid var(--indigo-soft);
+    border-radius: 999px;
+    padding: 5px 16px;
+  }
+
+  .board-mode {
+    max-width: 720px;
+    margin: 26px auto 0;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .board-mode .ghost-btn { border-color: var(--indigo-soft); color: var(--indigo); }
+  .board-mode .ghost-btn:hover { border-color: var(--indigo); }
+  .board-mode .ghost-btn[disabled] { opacity: 0.55; cursor: wait; }
+
+  .ai-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+  }
+  .frame-preview.ai-on .ai-img { opacity: 1; }
+  .gen-badge {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: #f5f2e8;
+    background: rgba(20, 17, 10, 0.62);
+    padding: 4px 10px;
+    border-radius: 3px;
+    pointer-events: none;
+  }
+
+  .board-foot {
+    max-width: 720px;
+    margin: 46px auto 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .ghost-btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    padding: 13px 30px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .ghost-btn:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .board-note {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── 分鏡放映導覽 ─────────────────── */
+  #walkOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 40;
+    display: none;
+    flex-direction: column;
+    padding: 14px 20px 200px;
+  }
+  body.walk-on #walkOverlay { display: flex; }
+  body.walk-on { overflow: hidden; }
+  .walk-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .walk-progress { display: flex; gap: 14px; font-size: 17px; letter-spacing: 0; }
+  .walk-progress span {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--ink-faint);
+    transition: all 0.3s;
+  }
+  .walk-progress span.cur {
+    background: var(--indigo);
+    border-color: var(--indigo);
+    color: var(--paper);
+  }
+  .walk-progress span.seen { color: var(--indigo); border-color: var(--indigo-soft); }
+  #walkSkip { padding: 9px 18px; font-size: 12.5px; }
+  .walk-main {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .walk-arrow {
+    position: absolute;
+    top: 44%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: 1.5px solid var(--indigo-soft);
+    background: var(--card);
+    opacity: 0.94;
+    color: var(--indigo);
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s, opacity 0.2s;
+    box-shadow: var(--shadow);
+  }
+  #walkPrev { left: 12px; }
+  #walkNext { right: 12px; }
+  .walk-arrow:hover { border-color: var(--indigo); transform: translateY(-50%) scale(1.06); opacity: 1; }
+  .walk-arrow:focus-visible { outline: 2px solid var(--indigo); outline-offset: 3px; }
+  .walk-arrow[disabled] { opacity: 0.25; cursor: default; }
+  .walk-arrow.next { animation: nudgePulse 1.8s ease-in-out infinite; }
+  .walk-arrow.next.finish {
+    background: var(--indigo);
+    color: var(--paper);
+    border-color: var(--indigo);
+    font-size: 18px;
+    animation: none;
+  }
+  @keyframes nudgePulse {
+    0%, 100% { box-shadow: var(--shadow); }
+    50% { box-shadow: 0 0 0 7px rgba(108, 128, 147, 0.28); }
+  }
+  .walk-card {
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .walk-card.swap { opacity: 0; transform: translateX(18px); }
+  .walk-preview {
+    position: relative;
+    background: var(--frame-bg);
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--shadow);
+    width: var(--wkw, 760px);
+    max-width: calc(100vw - 56px);
+    margin: 0 auto;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .walk-preview.drop-hint {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px var(--indigo-soft), var(--shadow);
+  }
+  .walk-preview canvas { display: block; width: 100%; height: auto; }
+  .walk-info { max-width: 640px; margin: 0 auto; text-align: center; }
+  .walk-stagerow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .walk-glyph { font-size: 34px; font-weight: 600; color: var(--indigo); line-height: 1; }
+  .walk-actname { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .walk-name { font-size: 14px; color: var(--ink-soft); letter-spacing: 0.1em; }
+  .walk-summary {
+    font-size: 17.5px;
+    line-height: 1.7;
+    letter-spacing: 0.03em;
+    margin: 8px 0 2px;
+    text-wrap: balance;
+  }
+  .walk-desc {
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    line-height: 1.7;
+    margin: 0;
+  }
+  .walk-glyph { font-size: 28px; }
+  @media (prefers-reduced-motion: reduce) {
+    .walk-arrow.next { animation: none; }
+    .walk-card.swap { transition: none; }
+  }
+  @media (max-width: 720px) {
+    .walk-main { gap: 10px; }
+    .walk-arrow { width: 48px; height: 48px; font-size: 20px; }
+    .walk-card { max-width: calc(100vw - 130px); }
+  }
+
+  /* ── 全螢幕創作模式 ───────────────── */
+  #fsOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 25;
+    display: none;
+    flex-direction: column;
+    padding: 12px 22px 196px;
+  }
+  body.fs-on #fsOverlay { display: flex; }
+  body.fs-on { overflow: hidden; }
+  .fs-bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .fs-title {
+    font-size: 17px;
+    letter-spacing: 0.16em;
+    color: var(--ink);
+  }
+  .fs-hint {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+    margin-right: auto;
+  }
+  #fsExit { padding: 9px 20px; font-size: 13px; }
+  .fs-stage { flex: 1; min-height: 0; }
+  .fs-stage .board-grid {
+    height: 100%;
+    margin-top: 12px;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .fs-stage .frame-card {
+    padding: 10px 14px 12px;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .fs-stage .frame-preview { width: var(--fsw, 480px); max-width: 100%; }
+  .fs-stage .frame-summary,
+  .fs-stage .frame-field,
+  .fs-stage .stage-shot,
+  .fs-stage .stage-name { display: none; }
+  .fs-stage .frame-head { margin-top: 8px; align-self: flex-start; align-items: center; }
+  .fs-stage .stage-glyph { font-size: 22px; }
+  .fs-stage .stage-meta { flex-direction: row; align-items: center; gap: 10px; }
+
+  /* ── 貼紙互動工具列 ───────────────── */
+  .sprite-tools {
+    position: absolute;
+    display: none;
+    transform: translate(-50%, -140%);
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 10px 26px -10px rgba(20, 15, 8, 0.45);
+    border-radius: 999px;
+    padding: 5px 8px;
+    gap: 4px;
+    z-index: 6;
+    white-space: nowrap;
+  }
+  .sprite-tools.on { display: flex; }
+  .sprite-tools button {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .sprite-tools button:hover { background: var(--paper-2); }
+  .sprite-tools button:focus-visible { outline: 2px solid var(--indigo); }
+
+  /* ── 記憶配對 ─────────────────────── */
+  #matchSec { display: none; }
+  #matchSec.show { display: block; }
+  .match-static {
+    max-width: 720px;
+    margin: 22px auto 0;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    line-height: 1.9;
+  }
+  #tileDock {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 14px;
+    width: min(1100px, calc(100vw - 28px));
+    background: var(--card);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 18px 44px -14px rgba(20, 15, 8, 0.4);
+    padding: 10px 16px 12px;
+    z-index: 45;
+    display: none;
+  }
+  #tileDock.on { display: block; }
+  body.dock-space { padding-bottom: 200px; }
+  .dock-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    font-family: var(--sans);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .match-count {
+    font-size: 13.5px;
+    color: var(--indigo);
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .match-note {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .tile-tray {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .tile {
+    flex: 0 0 82px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 6px 6px 7px;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    transition: transform 0.15s, border-color 0.2s, opacity 0.3s;
+  }
+  .tile:hover { border-color: var(--indigo-soft); }
+  .tile:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+  .tile.selected { border-color: var(--indigo); transform: translateY(-3px); }
+  .tile.done { opacity: 0.38; cursor: default; }
+  .tile canvas { width: 100%; height: auto; display: block; }
+  .tile .tile-name {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+    display: block;
+    white-space: nowrap;
+  }
+  .tile.done .tile-name::after { content: " ✓"; color: var(--indigo); }
+  .tile.shake { animation: tileShake 0.4s; }
+  @keyframes tileShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .tile-ghost {
+    position: fixed;
+    z-index: 50;
+    pointer-events: none;
+    width: 92px;
+    opacity: 0.92;
+    transform: translate(-50%, -60%);
+  }
+  .scene-sprite {
+    position: absolute;
+    width: 20%;
+    transform: translate(-50%, -55%);
+    cursor: grab;
+    touch-action: none;
+    z-index: 3;
+    filter: drop-shadow(0 3px 5px rgba(18, 14, 8, 0.35));
+    transition: filter 0.2s;
+  }
+  .scene-sprite canvas { display: block; width: 100%; height: auto; }
+  .scene-sprite.lift {
+    cursor: grabbing;
+    filter: drop-shadow(0 7px 10px rgba(18, 14, 8, 0.45));
+    z-index: 4;
+  }
+
+  .frame-card.drop-hint { border-color: var(--indigo); box-shadow: 0 0 0 2px var(--indigo-soft), var(--shadow); }
+  .frame-card.hint-glow { animation: hintGlow 1.6s ease; }
+  @keyframes hintGlow {
+    0%, 100% { box-shadow: var(--shadow); }
+    40% { box-shadow: 0 0 0 3px var(--indigo); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile.shake, .frame-card.hint-glow { animation: none; }
+  }
+
+  footer.colophon {
+    max-width: 720px;
+    margin: 90px auto 0;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rec-btn[data-state="recording"] .rec-dot, .wave i { animation: none; }
+    .frame-card { transition: none; }
+  }
+</style>
+
+<div class="side-rail" aria-hidden="true"><span>記</span><span>憶</span><span class="rail-div"></span><span>是</span><span>最</span><span>溫</span><span>柔</span><span>的</span><span>分</span><span>鏡</span></div>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Memory Storyboard — 記憶分鏡計畫</p>
+    <h1 class="title">拾光分鏡<span class="dot">。</span></h1>
+    <p class="lede">請長輩說一段往事,我們把它慢慢鋪成「起、承、轉、合」四幕電影分鏡——像翻開一本安靜的腳本。</p>
+    <p class="thesis">畫面裡不會出現任何人物。只有海、老屋、稻田與燈火——讓看的人,自己走回故事裡。</p>
+    <div class="seal-mark" aria-hidden="true">憶</div>
+  </header>
+
+  <!-- ── 01 說故事 ── -->
+  <section aria-labelledby="h-story">
+    <div class="section-head">
+      <span class="section-no">壹</span>
+      <h2 id="h-story">說一段故事</h2>
+      <span class="hint">用寫的,或用說的,都可以</span>
+    </div>
+
+    <div class="story-desk">
+      <label for="story" class="field-label" style="margin-bottom:14px;">故事原稿</label>
+      <textarea id="story" placeholder="說一段你想被記住的故事……&#10;例如:小時候住的地方、一趟遠行、一頓飯、一個人。"></textarea>
+
+      <div class="desk-tools">
+        <button class="rec-btn" id="recBtn" data-state="idle" aria-live="polite">
+          <span class="rec-dot" aria-hidden="true"></span>
+          <span id="recLabel">按此開始錄音</span>
+        </button>
+        <span class="wave" id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="rec-status" id="recStatus"></span>
+        <span class="samples">
+          <span class="samples-label">或聽聽別人的故事:</span>
+          <button class="chip" data-sample="0">討海人家</button>
+          <button class="chip" data-sample="1">北上的火車</button>
+          <button class="chip" data-sample="2">屋後的稻田</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="go-row">
+      <button class="go-btn" id="goBtn">生成分鏡</button>
+      <span class="go-note" id="goNote">系統會把故事整理成四幕,不會更動您的原文。</span>
+    </div>
+  </section>
+
+  <!-- ── 02 分鏡表 ── -->
+  <section id="board" aria-labelledby="h-board">
+    <hr class="board-rule" />
+    <div class="section-head">
+      <span class="section-no">貳</span>
+      <h2 id="h-board">四幕分鏡表</h2>
+      <span class="hint">起・承・轉・合 — 只以背景敘事</span>
+    </div>
+    <div class="board-mode">
+      <button class="ghost-btn" id="fsBtn">⛶ 全螢幕創作</button>
+      <button class="ghost-btn" id="aiBtn">✦ 以 AI 生成精緻插圖</button>
+      <span class="board-note" id="aiNote">AI 模式把每一幕的故事原文直接交給繪圖模型即時創作,不受任何圖庫限制;需要網路連線。</span>
+    </div>
+    <div class="board-grid" id="boardGrid"></div>
+    <div class="board-foot">
+      <button class="ghost-btn" id="againBtn">回到故事,再說一次</button>
+      <span class="board-note">每一幕依故事內容生成場景與時刻——清晨、日午、風雨、暮色或夜晚。畫面中不出現人物、臉孔或身影。</span>
+    </div>
+  </section>
+
+  <!-- ── 03 記憶配對 ── -->
+  <section id="matchSec" aria-labelledby="h-match">
+    <hr class="board-rule" />
+    <div class="section-head">
+      <span class="section-no">參</span>
+      <h2 id="h-match">記憶配對</h2>
+      <span class="hint">把插圖元件,放回它所屬的那一幕</span>
+    </div>
+    <p class="match-static">插圖元件收在畫面下方的「元件盒」裡,永遠在手邊。拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能在畫面裡自由拖動。也可以先點插圖、再點分鏡卡。</p>
+  </section>
+
+  <div id="walkOverlay" role="dialog" aria-label="分鏡放映導覽">
+    <div class="walk-top">
+      <span class="walk-progress" id="walkProgress" aria-hidden="true"></span>
+      <button class="ghost-btn" id="walkSkip">跳過,直接看全部</button>
+    </div>
+    <div class="walk-main">
+      <button class="walk-arrow" id="walkPrev" aria-label="上一幕">←</button>
+      <div class="walk-card" id="walkCard">
+        <div class="walk-preview">
+          <canvas id="walkCanvas" aria-label="本幕插畫場景,僅有背景,無人物"></canvas>
+          <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+        </div>
+        <div class="walk-info">
+          <div class="walk-stagerow">
+            <span class="walk-glyph" id="walkGlyph"></span>
+            <span class="walk-actname"><span class="stage-act" id="walkAct"></span><span id="walkName" class="walk-name"></span></span>
+            <span class="mood-pill" id="walkMood"></span>
+          </div>
+          <p class="walk-summary" id="walkSummary"></p>
+          <p class="walk-desc" id="walkDesc"></p>
+        </div>
+      </div>
+      <button class="walk-arrow next" id="walkNext" aria-label="下一幕">→</button>
+    </div>
+  </div>
+
+  <div id="fsOverlay" role="dialog" aria-label="全螢幕創作模式">
+    <div class="fs-bar">
+      <span class="fs-title">四幕分鏡・全螢幕創作</span>
+      <span class="fs-hint">點一下場景上的插圖,可以放大、縮小、換色、翻轉</span>
+      <button class="ghost-btn" id="fsExit">離開全螢幕</button>
+    </div>
+    <div class="fs-stage" id="fsStage"></div>
+  </div>
+
+  <div id="tileDock" role="region" aria-label="插圖元件盒">
+    <div class="dock-head">
+      <span class="match-count" id="matchCount"></span>
+      <span class="match-note" id="matchNote">拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能自由拖動。</span>
+    </div>
+    <div class="tile-tray" id="tileTray"></div>
+  </div>
+
+  <footer class="colophon">
+    <span>拾光分鏡 — 給失智長輩與家人的記憶練習</span>
+    <span>示範版本・語音轉文字為模擬流程</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  function $(id) { return document.getElementById(id); }
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── 資料:四幕定義 ─────────────────── */
+  var STAGES = [
+    { glyph: "起", act: "第一幕 · ACT I", name: "故事的開端", shot: "遠景・定場鏡頭" },
+    { glyph: "承", act: "第二幕 · ACT II", name: "日子的延續", shot: "中景・日常鏡頭" },
+    { glyph: "轉", act: "第三幕 · ACT III", name: "命運的轉折", shot: "近景・風雨鏡頭" },
+    { glyph: "合", act: "第四幕 · ACT IV", name: "記憶的歸處", shot: "遠景・暮色鏡頭" }
+  ];
+
+  var DEFAULT_MOODS = ["寧靜,帶著期待", "溫暖而熱鬧", "沉默,微微不安", "釋然,安穩落地"];
+
+  var EMOTIONS = [
+    { kw: ["笑", "開心", "快樂", "高興", "歡喜"], mood: "明亮的喜悅" },
+    { kw: ["哭", "難過", "傷心", "眼淚", "捨不得"], mood: "低迴的不捨" },
+    { kw: ["想念", "懷念", "想家", "思念"], mood: "綿長的思念" },
+    { kw: ["怕", "颱風", "戰", "逃", "大水", "生病"], mood: "屏息的不安" },
+    { kw: ["溫暖", "愛", "照顧", "陪"], mood: "貼近的溫暖" },
+    { kw: ["努力", "打拚", "認真", "重新"], mood: "沉穩的堅持" }
+  ];
+
+  /* ── 範例故事 ───────────────────────── */
+  var SAMPLES = [
+    "我十歲以前住在南方澳,阿爸是討海人。每天天還沒亮,我就跟著阿母到港邊等船回來。有一年颱風,船三天沒有消息,全家人守在廟裡不敢睡。後來船回來了,阿爸曬得黑黑的,笑著說:海不會虧待認真的人。",
+    "民國五十幾年,我一個人坐火車北上,到台北做裁縫學徒。月台上,阿母塞給我一包滷蛋,叫我要好好照顧自己。頭幾年日子很苦,常常想家想到睡不著。後來我開了自己的裁縫店,做的第一件旗袍,就是寄回家給阿母的。",
+    "以前我們家在嘉義種田,屋後就是一大片稻田。農忙的時候,全村的人互相幫忙割稻,中午就坐在田埂上吃飯配菜脯。有一年大水把稻子全淹了,阿公蹲在田邊抽菸,一句話也沒說。隔年春天,他還是牽著牛,把每一畦田重新犁過。"
+  ];
+
+  /* ── 文字處理 ───────────────────────── */
+  function splitSentences(text) {
+    var parts = text.replace(/\s+/g, " ").split(/(?<=[。!?!?;;])|\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    return parts;
+  }
+
+  function groupIntoActs(sentences) {
+    var n = sentences.length;
+    var acts = [[], [], [], []];
+    if (n === 0) return acts;
+    for (var i = 0; i < n; i++) {
+      var idx = Math.min(3, Math.floor(i * 4 / n));
+      acts[idx].push(sentences[i]);
+    }
+    for (var a = 0; a < 4; a++) {
+      if (acts[a].length === 0) {
+        for (var b = a - 1; b >= 0; b--) {
+          if (acts[b].length > 0) { acts[a].push(acts[b][acts[b].length - 1]); break; }
+        }
+      }
+    }
+    return acts;
+  }
+
+  function detectMood(text, actIndex) {
+    for (var i = 0; i < EMOTIONS.length; i++) {
+      for (var k = 0; k < EMOTIONS[i].kw.length; k++) {
+        if (text.indexOf(EMOTIONS[i].kw[k]) !== -1) return EMOTIONS[i].mood;
+      }
+    }
+    return DEFAULT_MOODS[actIndex];
+  }
+
+  function summarize(sentences) {
+    if (sentences.length === 0) return "(這一段還空著,等故事補上。)";
+    var s = sentences.reduce(function (a, b) { return b.length > a.length ? b : a; }, sentences[0]);
+    s = s.replace(/[。!?!?;;]$/, "");
+    if (s.length > 34) s = s.slice(0, 33) + "……";
+    return s + "。";
+  }
+
+  function hashText(t) {
+    var h = 7;
+    for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) % 233280;
+    return h || 7;
+  }
+  function makeRng(seed) {
+    return function () {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+  }
+
+  /* ── 色彩工具 ───────────────────────── */
+  function hex3(c) { var n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function mix(c1, c2, t) {
+    var a = hex3(c1), b = hex3(c2);
+    var r = Math.round(a[0] + (b[0] - a[0]) * t);
+    var g = Math.round(a[1] + (b[1] - a[1]) * t);
+    var bl = Math.round(a[2] + (b[2] - a[2]) * t);
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1);
+  }
+  function tint(c, t) { return mix(c, "#ffffff", t); }
+  function shade(c, t) { return mix(c, "#141109", t); }
+  function rgba(c, a) { var v = hex3(c); return "rgba(" + v[0] + "," + v[1] + "," + v[2] + "," + a + ")"; }
+
+  /* 五種時空色盤:晨 / 日 / 風雨 / 暮 / 夜 */
+  var PAL = [
+    { skyT: "#c9dde6", skyB: "#f4e9d6", sun: "#fdf6e0", sunA: 0.5, sunPos: [0.26, 0.28], sunR: 20,
+      far: "#a6bdbe", mid: "#7c998f", near: "#4a685c", dark: "#31453d",
+      cloud: "#ffffff", cloudA: 0.6, warm: "#e8b878", water: "#b9cdd2", sand: "#e6d7bb", rain: null },
+    { skyT: "#a9ccd6", skyB: "#eff0da", sun: "#f9eec6", sunA: 0.35, sunPos: [0.76, 0.18], sunR: 17,
+      far: "#9cb9a9", mid: "#6d947e", near: "#3e6252", dark: "#2b4539",
+      cloud: "#ffffff", cloudA: 0.75, warm: "#e2a55e", water: "#a5c5c6", sand: "#ead9b8", rain: null },
+    { skyT: "#57677a", skyB: "#9aa7a6", sun: null, sunA: 0, sunPos: [0.5, 0.2], sunR: 0,
+      far: "#79858c", mid: "#525f67", near: "#343f46", dark: "#222b32",
+      cloud: "#414c57", cloudA: 0.5, warm: "#dda45c", water: "#5e7079", sand: "#b2ab98", rain: "#e3ebf0" },
+    { skyT: "#514f7c", skyB: "#e7a06b", sun: "#f7c76f", sunA: 0.65, sunPos: [0.72, 0.5], sunR: 26,
+      far: "#8f7386", mid: "#655a74", near: "#3d3752", dark: "#282540",
+      cloud: "#f0bd8c", cloudA: 0.42, warm: "#f4b45f", water: "#d29a72", sand: "#dbb590", rain: null },
+    { skyT: "#252c48", skyB: "#48577c", sun: "#f2ead2", sunA: 0.5, sunPos: [0.74, 0.18], sunR: 18,
+      far: "#5a6480", mid: "#3e4763", near: "#2a3048", dark: "#1a1f30",
+      cloud: "#39415a", cloudA: 0.5, warm: "#f0c576", water: "#3d4a66", sand: "#8d8a7e", rain: null }
+  ];
+
+  /* 從段落文字判斷時空:0 晨 / 1 日 / 2 風雨 / 3 暮 / 4 夜;沒線索則依幕次推進 */
+  function pickPalette(text, actIndex) {
+    if (/颱風|風颱|暴雨|大雨|下雨|下起雨|風雨|大水|淹|梅雨/.test(text)) return 2;
+    if (/清晨|天還沒亮|天未亮|一早|早晨|黎明|天剛亮|早上/.test(text)) return 0;
+    if (/黃昏|夕陽|傍晚|日落|暮色|天黑前/.test(text)) return 3;
+    if (/半夜|深夜|夜裡|夜晚|晚上|月光|月亮|星空|星星|睡不著|夜市|守夜|不敢睡|煙火|螢火蟲/.test(text)) return 4;
+    if (/中午|正午|大太陽|白天|日頭/.test(text)) return 1;
+    return actIndex;
+  }
+
+  /* ── 畫家:精緻插圖引擎 ─────────────── */
+  function Painter(canvas, seed, act, pi, w, h, res) {
+    var dpr = Math.min((window.devicePixelRatio || 1) * (res || 1), 3);
+    var W = w || 520, H = h || 320;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    var ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    this.ctx = ctx; this.W = W; this.H = H;
+    this.rnd = makeRng(seed);
+    this.act = act;
+    this.pi = pi == null ? act : pi;
+    this.p = PAL[this.pi];
+    this.gy = H * 0.78;      /* 元素放置的地面線,由基底設定 */
+    this.waterY = null;      /* 水面高度(海/溪) */
+    this.interior = false;
+  }
+  Painter.prototype.rect = function (x, y, w, h, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.fillRect(x, y, w, h); c.restore();
+  };
+  Painter.prototype.poly = function (pts, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.beginPath();
+    c.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]);
+    c.closePath(); c.fill(); c.restore();
+  };
+  Painter.prototype.circle = function (x, y, r, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.beginPath();
+    c.arc(x, y, r, 0, Math.PI * 2); c.fill(); c.restore();
+  };
+  Painter.prototype.ellipse = function (x, y, rx, ry, fill, a) {
+    var c = this.ctx; c.save();
+    if (a != null) c.globalAlpha = a;
+    c.fillStyle = fill; c.beginPath();
+    c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fill(); c.restore();
+  };
+  Painter.prototype.stroke = function (pts, color, lw, a) {
+    var c = this.ctx; c.save();
+    c.globalAlpha = a == null ? 1 : a;
+    c.strokeStyle = color; c.lineWidth = lw || 1.2;
+    c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]);
+    c.stroke(); c.restore();
+  };
+  Painter.prototype.arcStroke = function (x, y, r, a1, a2, color, lw, a) {
+    var c = this.ctx; c.save();
+    c.globalAlpha = a == null ? 1 : a;
+    c.strokeStyle = color; c.lineWidth = lw || 1.2;
+    c.beginPath(); c.arc(x, y, r, a1, a2); c.stroke(); c.restore();
+  };
+  Painter.prototype.lgrad = function (y0, y1, c0, c1) {
+    var g = this.ctx.createLinearGradient(0, y0, 0, y1);
+    g.addColorStop(0, c0); g.addColorStop(1, c1);
+    return g;
+  };
+  Painter.prototype.glow = function (x, y, r, color, a) {
+    var c = this.ctx;
+    var g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, rgba(color, a));
+    g.addColorStop(1, rgba(color, 0));
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, r * 2, r * 2);
+  };
+  /* 三段式天空 + 地平線霧氣 */
+  Painter.prototype.sky = function (hy) {
+    var c = this.ctx, p = this.p;
+    var g = c.createLinearGradient(0, 0, 0, hy);
+    g.addColorStop(0, p.skyT);
+    g.addColorStop(0.55, mix(p.skyT, p.skyB, 0.55));
+    g.addColorStop(1, p.skyB);
+    c.fillStyle = g;
+    c.fillRect(0, 0, this.W, hy + 1);
+    var haze = tint(p.skyB, 0.4);
+    var hz = c.createLinearGradient(0, hy * 0.6, 0, hy);
+    hz.addColorStop(0, rgba(haze, 0));
+    hz.addColorStop(1, rgba(haze, this.pi === 4 ? 0.16 : 0.4));
+    c.fillStyle = hz;
+    c.fillRect(0, hy * 0.6, this.W, hy * 0.4 + 1);
+    this.hy = hy;
+  };
+  /* 太陽 / 月亮:雙層光暈 + 立體核心 */
+  Painter.prototype.celestial = function (x, y) {
+    var p = this.p, c = this.ctx;
+    if (!p.sun) return;
+    if (x == null) { x = this.W * p.sunPos[0]; y = this.H * p.sunPos[1]; }
+    this.glow(x, y, p.sunR * 5, p.sun, p.sunA * 0.5);
+    this.glow(x, y, p.sunR * 2.2, p.sun, p.sunA);
+    var g = c.createRadialGradient(x - p.sunR * 0.3, y - p.sunR * 0.3, p.sunR * 0.1, x, y, p.sunR);
+    g.addColorStop(0, tint(p.sun, 0.55));
+    g.addColorStop(1, p.sun);
+    c.save(); c.globalAlpha = 0.97; c.fillStyle = g;
+    c.beginPath(); c.arc(x, y, p.sunR, 0, Math.PI * 2); c.fill(); c.restore();
+    if (this.pi === 4) {
+      this.circle(x - p.sunR * 0.34, y - p.sunR * 0.2, p.sunR * 0.2, mix(p.sun, p.skyT, 0.4), 0.6);
+      this.circle(x + p.sunR * 0.3, y + p.sunR * 0.3, p.sunR * 0.13, mix(p.sun, p.skyT, 0.4), 0.5);
+    }
+    this.sunX = x; this.sunY = y;
+  };
+  /* 立體雲朵:主體 + 受光面 + 陰影底 */
+  Painter.prototype.cloudBlob = function (cx, cy, s) {
+    var p = this.p, c = this.ctx;
+    var lobes = [[-0.75, 0, 0.48], [0, -0.28, 0.6], [0.7, -0.05, 0.46], [0.05, 0.14, 0.5]];
+    c.save();
+    c.globalAlpha = p.cloudA * 0.4;
+    c.fillStyle = shade(p.cloud, 0.22);
+    c.beginPath(); c.ellipse(cx + s * 0.05, cy + s * 0.32, s * 1.02, s * 0.24, 0, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = p.cloudA;
+    c.fillStyle = p.cloud;
+    c.beginPath();
+    lobes.forEach(function (l) { c.moveTo(cx + (l[0] + l[2]) * s, cy + l[1] * s); c.arc(cx + l[0] * s, cy + l[1] * s, l[2] * s, 0, Math.PI * 2); });
+    c.fill();
+    c.globalAlpha = p.cloudA * 0.8;
+    c.fillStyle = tint(p.cloud, 0.45);
+    c.beginPath();
+    lobes.slice(0, 3).forEach(function (l) {
+      var r = l[2] * s * 0.55, ox = cx + l[0] * s - s * 0.06, oy = cy + l[1] * s - s * 0.18;
+      c.moveTo(ox + r, oy); c.arc(ox, oy, r, 0, Math.PI * 2);
+    });
+    c.fill();
+    c.restore();
+  };
+  Painter.prototype.clouds = function () {
+    var W = this.W;
+    if (this.pi === 0) { this.cloudBlob(W * 0.7, 52, 24); this.cloudBlob(W * 0.34, 82, 15); }
+    else if (this.pi === 1) { this.cloudBlob(W * 0.28, 56, 20); this.cloudBlob(W * 0.84, 86, 13); }
+    else if (this.pi === 2) { this.cloudBlob(W * 0.28, 48, 30); this.cloudBlob(W * 0.6, 40, 34); this.cloudBlob(W * 0.88, 62, 24); }
+    else if (this.pi === 3) { this.cloudBlob(W * 0.3, 58, 20); }
+    else { this.cloudBlob(W * 0.24, 62, 16); }
+  };
+  Painter.prototype.rainFx = function () {
+    var p = this.p;
+    if (!p.rain) return;
+    var c = this.ctx;
+    c.fillStyle = this.lgrad(0, this.H * 0.5, rgba(p.dark, 0.22), rgba(p.dark, 0));
+    c.fillRect(0, 0, this.W, this.H * 0.5);
+    for (var i = 0; i < 52; i++) {
+      var x = this.rnd() * this.W, y = this.rnd() * this.H * 0.9;
+      this.stroke([[x, y], [x - 4, y + 15]], p.rain, 1.2, 0.16 + this.rnd() * 0.2);
+    }
+  };
+  Painter.prototype.birds = function (cx, cy, n) {
+    for (var i = 0; i < n; i++) {
+      var x = cx + (this.rnd() - 0.5) * 110, y = cy + (this.rnd() - 0.5) * 34, w = 5 + this.rnd() * 4;
+      this.arcStroke(x - w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85, this.p.dark, 1.3, 0.8);
+      this.arcStroke(x + w / 2, y, w / 2, Math.PI * 1.15, Math.PI * 1.85, this.p.dark, 1.3, 0.8);
+    }
+  };
+  /* 山稜:空氣透視 + 稜線受光 */
+  Painter.prototype.ridge = function (baseY, amp, phase, fill, aerial, rim) {
+    var pts = [];
+    for (var x = -12; x <= this.W + 12; x += 24) {
+      var yy = baseY - (Math.sin(x * 0.012 + phase) * 0.5 + 0.5) * amp - this.rnd() * 5;
+      pts.push([x, yy]);
+    }
+    var col = aerial ? mix(fill, this.p.skyB, aerial) : fill;
+    var body = pts.concat([[this.W + 12, this.H + 12], [-12, this.H + 12]]);
+    this.poly(body, col);
+    if (rim && this.p.sun) {
+      this.stroke(pts, tint(this.p.sun, 0.25), 1.6, 0.4);
+    }
+  };
+  Painter.prototype.mist = function (y, h, a) {
+    var c = this.ctx;
+    var g = c.createLinearGradient(0, y, 0, y + h);
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    g.addColorStop(0.45, "rgba(255,255,255," + a + ")");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle = g;
+    c.fillRect(0, y, this.W, h);
+  };
+  /* 立體圓形(樹叢、圓物):受光左上 → 陰影右下 */
+  Painter.prototype.shadeCircle = function (x, y, r, base, a) {
+    var c = this.ctx;
+    var g = c.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.15, x, y, r);
+    g.addColorStop(0, tint(base, 0.3));
+    g.addColorStop(0.72, base);
+    g.addColorStop(1, shade(base, 0.25));
+    c.save(); if (a != null) c.globalAlpha = a;
+    c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); c.restore();
+  };
+  Painter.prototype.foliage = function (x, y, s, base) {
+    var spots = [[-0.42, -0.5, 0.5], [0.38, -0.42, 0.44], [0, -0.8, 0.48], [-0.08, -0.34, 0.52], [0.2, -0.62, 0.38]];
+    for (var i = 0; i < spots.length; i++) {
+      this.shadeCircle(x + spots[i][0] * s, y + spots[i][1] * s, spots[i][2] * s, base, 0.97);
+    }
+    for (var d = 0; d < 8; d++) {
+      this.circle(x + (this.rnd() - 0.5) * s, y - s * (0.25 + this.rnd() * 0.6), 1.4, tint(base, 0.45), 0.5);
+    }
+  };
+  Painter.prototype.softShadow = function (x, y, rx, a) {
+    var c = this.ctx;
+    var g = c.createRadialGradient(x, y, 0, x, y, rx);
+    g.addColorStop(0, rgba(this.p.dark, a == null ? 0.26 : a));
+    g.addColorStop(1, rgba(this.p.dark, 0));
+    c.save(); c.fillStyle = g; c.translate(x, y); c.scale(1, 0.3); c.translate(-x, -y);
+    c.beginPath(); c.arc(x, y, rx, 0, Math.PI * 2); c.fill(); c.restore();
+  };
+  Painter.prototype.ripples = function (y0, y1, color) {
+    for (var i = 0; i < 26; i++) {
+      var y = y0 + this.rnd() * (y1 - y0);
+      var x = 14 + this.rnd() * (this.W - 40), len = 8 + this.rnd() * 26;
+      this.stroke([[x, y], [x + len, y]], color, 1.1, 0.1 + this.rnd() * 0.2);
+    }
+  };
+  Painter.prototype.grassTufts = function (y0, n, base) {
+    for (var g = 0; g < n; g++) {
+      var gx = 14 + this.rnd() * (this.W - 28), gy2 = y0 + this.rnd() * (this.H - y0 - 6);
+      this.stroke([[gx, gy2], [gx - 2 + this.rnd() * 4, gy2 - 7 - this.rnd() * 5]], shade(base, 0.3), 1.3, 0.5);
+      this.stroke([[gx + 3, gy2], [gx + 5, gy2 - 6 - this.rnd() * 4]], shade(base, 0.3), 1.3, 0.4);
+    }
+  };
+  Painter.prototype.finish = function () {
+    var c = this.ctx, p = this.p;
+    /* 時刻色調統一 */
+    c.fillStyle = this.lgrad(0, this.H, rgba(p.skyT, 0.08), rgba(p.skyB, 0.12));
+    c.fillRect(0, 0, this.W, this.H);
+    if (this.pi === 2) this.rect(0, 0, this.W, this.H, p.dark, 0.05);
+    /* 陽光側暖色渲染 */
+    if (p.sun && this.sunX != null) {
+      this.glow(this.sunX, this.sunY, this.W * 0.55, p.sun, 0.1);
+    }
+    /* 紙紋雜點 */
+    for (var i = 0; i < 700; i++) {
+      var x = this.rnd() * this.W, y = this.rnd() * this.H;
+      this.rect(x, y, 1, 1, i % 3 ? "#241f16" : "#ffffff", 0.04);
+    }
+    /* 暗角 */
+    var g = c.createRadialGradient(this.W / 2, this.H / 2, this.H * 0.42, this.W / 2, this.H / 2, this.W * 0.72);
+    g.addColorStop(0, "rgba(24,19,12,0)");
+    g.addColorStop(1, "rgba(24,19,12,0.17)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, this.W, this.H);
+  };
+
+  /* ── 基底環境 ───────────────────────── */
+  var BASES = {
+    plain: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, hy = H * 0.52;
+      P.sky(hy);
+      P.celestial();
+      P.clouds();
+      P.ridge(hy - 4, 24, 1.6, p.far, 0.35);
+      var grass = mix(p.mid, "#7f975f", 0.4);
+      c.fillStyle = P.lgrad(hy, H, tint(grass, 0.16), shade(grass, 0.24));
+      c.fillRect(0, hy, W, H - hy);
+      P.poly([[0, hy + 24], [W * 0.3, hy + 10], [W * 0.62, hy + 26], [W, hy + 12], [W, hy + 44], [0, hy + 44]], tint(grass, 0.1), 0.55);
+      for (var b = 0; b < 3; b++) {
+        P.ellipse(W * (0.2 + b * 0.3), H * (0.72 + b * 0.06), 90, 10, tint(grass, 0.14), 0.25);
+      }
+      P.grassTufts(H * 0.82, 14, grass);
+      P.gy = H * 0.8;
+    },
+    sea: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, hy = H * 0.55;
+      P.sky(hy);
+      var sx = W * p.sunPos[0], sy = P.pi === 3 ? hy - 4 : H * p.sunPos[1];
+      P.celestial(sx, sy);
+      P.clouds();
+      P.poly([[0, hy], [W * 0.07, hy - 15], [W * 0.19, hy - 7], [W * 0.26, hy]], mix(p.far, p.skyB, 0.35), 0.95);
+      var g = c.createLinearGradient(0, hy, 0, H);
+      g.addColorStop(0, tint(p.water, 0.3));
+      g.addColorStop(0.4, p.water);
+      g.addColorStop(1, shade(p.water, 0.34));
+      c.fillStyle = g;
+      c.fillRect(0, hy, W, H - hy);
+      if (p.sun) {
+        for (var i = 0; i < 11; i++) {
+          var ry = hy + 6 + i * 9 + P.rnd() * 5, rw = 30 - i * 1.6 + P.rnd() * 12;
+          P.rect(sx - rw / 2 + (P.rnd() - 0.5) * 12, ry, rw, 2, p.sun, 0.24);
+        }
+      }
+      for (var r = 0; r < 5; r++) {
+        var y = hy + 16 + r * 20;
+        for (var x = 16 + r * 14; x < W - 16; x += 46 + r * 6) {
+          P.arcStroke(x, y, 10 + r * 2, Math.PI * 0.08, Math.PI * 0.92, tint(p.water, 0.5), 1.3, 0.3 + r * 0.07);
+        }
+      }
+      P.ripples(hy + 6, H - 30, tint(p.water, 0.6));
+      if (P.pi === 2) {
+        for (var w2 = 0; w2 < 14; w2++) {
+          P.rect(P.rnd() * W, hy + 10 + P.rnd() * (H - hy - 40), 14 + P.rnd() * 18, 2.2, "#e9eef0", 0.5);
+        }
+      }
+      c.fillStyle = P.lgrad(H - 56, H, tint(p.sand, 0.12), shade(p.sand, 0.14));
+      c.beginPath(); c.moveTo(0, H); c.lineTo(0, H - 52);
+      c.quadraticCurveTo(W * 0.3, H - 42, W * 0.55, H);
+      c.closePath(); c.fill();
+      c.strokeStyle = "#ffffff"; c.globalAlpha = 0.7; c.lineWidth = 2.6;
+      c.beginPath(); c.moveTo(0, H - 49);
+      c.quadraticCurveTo(W * 0.3, H - 39, W * 0.55, H);
+      c.stroke(); c.globalAlpha = 1;
+      for (var f = 0; f < 10; f++) {
+        P.circle(W * 0.05 + P.rnd() * W * 0.4, H - 20 - P.rnd() * 24, 1.2, "#ffffff", 0.5);
+      }
+      P.waterY = hy;
+      P.gy = H - 26;
+    },
+    river: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, hy = H * 0.5;
+      P.sky(hy);
+      P.celestial();
+      P.clouds();
+      P.ridge(hy - 6, 26, 2.1, p.far, 0.35);
+      var grass = mix(p.mid, "#7f975f", 0.4);
+      c.fillStyle = P.lgrad(hy, H, tint(grass, 0.16), shade(grass, 0.22));
+      c.fillRect(0, hy, W, H - hy);
+      c.save();
+      c.beginPath();
+      c.moveTo(W * 0.55, hy + 2);
+      c.bezierCurveTo(W * 0.4, H * 0.66, W * 0.72, H * 0.78, W * 0.5, H);
+      c.lineTo(W * 0.86, H);
+      c.bezierCurveTo(W * 0.92, H * 0.78, W * 0.56, H * 0.68, W * 0.62, hy + 2);
+      c.closePath();
+      var g = c.createLinearGradient(0, hy, 0, H);
+      g.addColorStop(0, tint(p.water, 0.32));
+      g.addColorStop(1, shade(p.water, 0.24));
+      c.fillStyle = g; c.fill();
+      c.clip();
+      P.ripples(hy + 10, H - 8, tint(p.water, 0.6));
+      if (p.sun) P.rect(W * 0.5, hy + 8, 60, H - hy - 20, p.sun, 0.08);
+      c.restore();
+      P.stroke([[W * 0.55, hy + 4], [W * 0.45, H * 0.64], [W * 0.62, H * 0.8], [W * 0.52, H]], tint(p.sand, 0.2), 2, 0.5);
+      P.stroke([[W * 0.62, hy + 4], [W * 0.58, H * 0.66], [W * 0.86, H * 0.82], [W * 0.84, H]], tint(p.sand, 0.2), 2, 0.5);
+      P.grassTufts(H * 0.78, 10, grass);
+      P.waterY = H * 0.72;
+      P.riverMidX = W * 0.58;
+      P.gy = H * 0.78;
+    },
+    field: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, hy = H * 0.42;
+      P.sky(hy + 4);
+      P.celestial();
+      P.clouds();
+      P.ridge(hy - 4, 28, 1.5, p.far, 0.35);
+      var rows = 5;
+      for (var r = 0; r < rows; r++) {
+        var t0 = Math.pow(r / rows, 1.35), t1 = Math.pow((r + 1) / rows, 1.35);
+        var yT = hy + t0 * (H - hy), yB = hy + t1 * (H - hy) + 1;
+        var col = r % 2 ? mix(p.mid, p.near, 0.4) : tint(p.mid, 0.18);
+        if (P.pi === 2 && r % 2 === 0) col = tint(p.water, 0.3);
+        c.fillStyle = P.lgrad(yT, yB, tint(col, 0.1), shade(col, 0.1));
+        c.fillRect(0, yT, W, yB - yT);
+        P.rect(0, yT, W, 2, tint(p.sand, 0.2), 0.55);
+      }
+      for (var s2 = 0; s2 < 26; s2++) {
+        var sx2 = 10 + P.rnd() * (W - 20), sy2 = H * 0.8 + P.rnd() * (H * 0.17);
+        P.stroke([[sx2, sy2], [sx2, sy2 - 8]], shade(p.near, 0.2), 1.4, 0.5);
+      }
+      P.gy = H * 0.62;
+    },
+    mountain: function (P) {
+      var W = P.W, H = P.H, p = P.p;
+      P.sky(H * 0.9);
+      P.celestial();
+      P.clouds();
+      P.ridge(H * 0.34, 46, 1.1, p.far, 0.5, true);
+      P.mist(H * 0.38, 30, P.pi === 2 ? 0.1 : 0.24);
+      P.ridge(H * 0.5, 52, 2.6, p.mid, 0.25, true);
+      P.mist(H * 0.56, 24, 0.16);
+      P.ridge(H * 0.68, 46, 4.1, p.near, 0);
+      P.rect(0, H * 0.86, W, H * 0.14, p.dark);
+      P.poly([[W * 0.47, H * 0.87], [W * 0.55, H * 0.87], [W * 0.64, H], [W * 0.36, H]], tint(p.water, 0.35), 0.9);
+      P.stroke([[W * 0.51, H * 0.88], [W * 0.5, H]], "#ffffff", 1.6, 0.3);
+      for (var i = 0; i < 5; i++) {
+        var x = 46 + i * 100 + P.rnd() * 24, y = H * (0.78 + P.rnd() * 0.06);
+        P.rect(x - 1.4, y - 8, 2.8, 10, p.dark);
+        P.poly([[x - 10, y - 6], [x, y - 34], [x + 10, y - 6]], shade(p.near, 0.25));
+        P.poly([[x - 7, y - 20], [x, y - 42], [x + 7, y - 20]], shade(p.near, 0.18));
+      }
+      P.gy = H * 0.84;
+    },
+    street: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, gy = H * 0.68;
+      P.sky(gy);
+      P.celestial();
+      P.clouds();
+      var wallC = mix("#d9c9ae", p.dark, P.pi === 2 ? 0.26 : 0.02);
+      c.fillStyle = P.lgrad(H * 0.2, gy, tint(wallC, 0.12), shade(wallC, 0.06));
+      c.fillRect(0, H * 0.2, W * 0.6, gy - H * 0.2);
+      P.rect(0, H * 0.2, W * 0.6, 7, shade(wallC, 0.28));
+      for (var wn = 0; wn < 3; wn++) {
+        var wx2 = 24 + wn * 92;
+        if (wx2 + 34 > W * 0.6) break;
+        P.rect(wx2 - 2, H * 0.26 - 2, 38, 30, shade(wallC, 0.3));
+        P.rect(wx2, H * 0.26, 34, 26, P.pi >= 2 ? p.warm : mix(p.skyT, wallC, 0.4), 0.95);
+        if (P.pi >= 2) P.glow(wx2 + 17, H * 0.26 + 13, 24, p.warm, 0.3);
+      }
+      var g = c.createLinearGradient(0, gy, 0, H);
+      g.addColorStop(0, mix(p.sand, "#b5a98f", 0.5));
+      g.addColorStop(1, shade("#b5a98f", 0.3));
+      c.fillStyle = g;
+      c.fillRect(0, gy, W, H - gy);
+      P.stroke([[0, gy + 18], [W, gy + 14]], shade(p.sand, 0.4), 1, 0.25);
+      P.stroke([[0, gy + 40], [W, gy + 36]], shade(p.sand, 0.4), 1, 0.2);
+      if (P.pi === 2) {
+        P.ellipse(W * 0.36, H * 0.9, 46, 7, tint(p.skyT, 0.3), 0.5);
+        P.ellipse(W * 0.72, H * 0.84, 30, 5, tint(p.skyT, 0.3), 0.4);
+      }
+      P.gy = H * 0.8;
+    },
+    interior: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, fy = H * 0.78;
+      var wallC = mix("#e6d8bd", p.skyT, P.pi === 2 ? 0.3 : 0.12);
+      c.fillStyle = P.lgrad(0, fy, tint(wallC, 0.14), wallC);
+      c.fillRect(0, 0, W, fy);
+      var floorC = mix("#9a7b58", p.dark, P.pi === 2 ? 0.3 : 0.08);
+      c.fillStyle = P.lgrad(fy, H, floorC, shade(floorC, 0.28));
+      c.fillRect(0, fy, W, H - fy);
+      P.stroke([[0, fy], [W, fy]], shade(floorC, 0.3), 2, 0.6);
+      for (var pl = 1; pl < 4; pl++) {
+        P.stroke([[0, fy + pl * 14], [W, fy + pl * 14]], shade(floorC, 0.3), 1, 0.25);
+      }
+      var wx = W * 0.6, wy = H * 0.14, ww = 150, wh = 128;
+      P.rect(wx - 8, wy - 8, ww + 16, wh + 16, "#54432f");
+      c.save();
+      c.beginPath(); c.rect(wx, wy, ww, wh); c.clip();
+      c.fillStyle = P.lgrad(wy, wy + wh, p.skyT, p.skyB);
+      c.fillRect(wx, wy, ww, wh);
+      if (p.sun) {
+        var vsx = wx + ww * (P.pi === 3 ? 0.62 : 0.34), vsy = wy + wh * 0.3;
+        P.glow(vsx, vsy, 34, p.sun, p.sunA);
+        P.circle(vsx, vsy, 11, p.sun, 0.95);
+      }
+      var vpts = [];
+      for (var vx2 = wx - 6; vx2 <= wx + ww + 6; vx2 += 18) {
+        vpts.push([vx2, wy + wh * 0.62 - (Math.sin(vx2 * 0.03) * 0.5 + 0.5) * 20]);
+      }
+      vpts.push([wx + ww + 6, wy + wh + 6]); vpts.push([wx - 6, wy + wh + 6]);
+      P.poly(vpts, mix(p.far, p.skyB, 0.25), 0.95);
+      P.rect(wx, wy + wh * 0.78, ww, wh * 0.22, p.mid, 0.9);
+      if (P.pi === 2) {
+        for (var rr = 0; rr < 16; rr++) {
+          var rx2 = wx + P.rnd() * ww, ry3 = wy + P.rnd() * wh;
+          P.stroke([[rx2, ry3], [rx2 - 3, ry3 + 11]], p.rain, 1.1, 0.4);
+        }
+      }
+      c.restore();
+      P.stroke([[wx + ww / 2, wy], [wx + ww / 2, wy + wh]], "#54432f", 4, 1);
+      P.stroke([[wx, wy + wh / 2], [wx + ww, wy + wh / 2]], "#54432f", 4, 1);
+      /* 從窗灑進的光束 */
+      if (p.sun && P.pi !== 2) {
+        P.poly([[wx, wy + 10], [wx + ww, wy], [wx - 150, fy + 10], [wx - 240, fy + 10]], p.sun, 0.08);
+      }
+      /* 窗簾 */
+      c.fillStyle = P.lgrad(wy - 14, wy + wh + 14, tint("#c9b391", 0.25), mix("#c9b391", p.skyB, 0.2));
+      c.globalAlpha = 0.94;
+      c.beginPath();
+      c.moveTo(wx - 26, wy - 14);
+      c.quadraticCurveTo(wx + 14, wy + wh * 0.4, wx - 4, wy + wh + 14);
+      c.lineTo(wx - 30, wy + wh + 14);
+      c.closePath(); c.fill(); c.globalAlpha = 1;
+      P.stroke([[wx - 20, wy + 10], [wx - 14, wy + wh * 0.5]], shade("#c9b391", 0.2), 1.2, 0.35);
+      P.stroke([[wx - 26, wy + 6], [wx - 22, wy + wh * 0.44]], "#ffffff", 1.2, 0.3);
+      /* 桌与茶 */
+      var tx3 = W * 0.13, ty3 = fy - 52;
+      P.softShadow(tx3 + 64, fy + 6, 90, 0.2);
+      c.fillStyle = P.lgrad(ty3, ty3 + 7, tint("#6b5136", 0.25), "#6b5136");
+      c.fillRect(tx3 - 12, ty3, 150, 7);
+      P.rect(tx3 - 6, ty3 + 7, 8, 45, "#5d4632");
+      P.rect(tx3 + 124, ty3 + 7, 8, 45, "#5d4632");
+      var potC = mix("#9db4a6", p.dark, P.pi === 2 ? 0.2 : 0);
+      P.shadeCircle(tx3 + 34, ty3 - 13, 13, potC);
+      P.rect(tx3 + 22, ty3 - 13, 24, 12, potC);
+      P.stroke([[tx3 + 46, ty3 - 16], [tx3 + 56, ty3 - 22]], potC, 4, 1);
+      P.rect(tx3 + 30, ty3 - 30, 8, 5, potC);
+      P.rect(tx3 + 74, ty3 - 10, 18, 10, "#f2ead8");
+      P.arcStroke(tx3 + 83, ty3 - 22, 5, Math.PI * 0.2, Math.PI * 1.2, "#ffffff", 2, 0.5);
+      P.arcStroke(tx3 + 86, ty3 - 32, 6, Math.PI * 1.1, Math.PI * 2.1, "#ffffff", 2, 0.35);
+      if (P.pi >= 2) {
+        var lx3 = W * 0.9, ly3 = fy - 64;
+        P.rect(lx3 - 2, ly3 + 18, 4, 46, "#54432f");
+        P.poly([[lx3 - 16, ly3 + 18], [lx3 + 16, ly3 + 18], [lx3 + 10, ly3], [lx3 - 10, ly3]], p.warm, 0.95);
+        P.glow(lx3, ly3 + 22, 46, p.warm, 0.5);
+      }
+      P.interior = true;
+      P.gy = fy - 4;
+    }
+  };
+  BASES.night = BASES.plain;
+
+  /* ── 可組合元素(全部只有物與景,無人物)── */
+  var ELS = {
+    skyline: { z: 0, phrase: "遠處城市的輪廓靜靜排開", draw: function (P, x) {
+      var W = P.W, hy = (P.hy || P.H * 0.52);
+      var col = mix(P.p.far, P.p.skyB, 0.45);
+      for (var b = 0; b < 9; b++) {
+        var bw = 16 + P.rnd() * 22, bh = 14 + P.rnd() * 42, bx = W * 0.08 + b * W * 0.1;
+        P.rect(bx, hy - bh, bw, bh, col, 0.9);
+        if (P.pi >= 2) {
+          for (var wl = 0; wl < 3; wl++) {
+            P.rect(bx + 3 + P.rnd() * (bw - 7), hy - bh + 4 + P.rnd() * (bh - 10), 3, 3, P.p.warm, 0.8);
+          }
+        }
+      }
+    } },
+    house: { z: 1, w: 150, phrase: "一幢紅瓦老屋靜靜立著,屋簷壓得低低的", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var hw = 64 * s, hh = 46 * s;
+      var wallC = mix("#e9dcbf", p.dark, P.pi === 2 ? 0.24 : (P.pi === 4 ? 0.3 : 0));
+      var roofC = mix("#8a5a48", p.dark, P.pi === 2 ? 0.4 : (P.pi >= 3 ? 0.16 : 0.05));
+      P.softShadow(x, y + 3, hw * 1.3);
+      c.fillStyle = P.lgrad(y - hh, y, tint(wallC, 0.14), shade(wallC, 0.1));
+      c.fillRect(x - hw, y - hh, hw * 2, hh);
+      P.poly([[x - hw - 12 * s, y - hh], [x, y - hh - 26 * s], [x + hw + 12 * s, y - hh]], roofC);
+      P.poly([[x - hw - 12 * s, y - hh], [x, y - hh - 26 * s], [x, y - hh - 20 * s], [x - hw - 6 * s, y - hh + 3 * s]], tint(roofC, 0.16));
+      for (var t = 1; t < 4; t++) {
+        var ty = y - hh - 26 * s + t * 6.5 * s, half = (t / 4) * (hw + 12 * s);
+        P.stroke([[x - half, ty], [x + half, ty]], shade(roofC, 0.25), 1, 0.5);
+      }
+      P.rect(x - 11 * s, y - 30 * s, 22 * s, 30 * s, shade("#5d4636", 0.1));
+      P.rect(x - 8 * s, y - 27 * s, 16 * s, 27 * s, "#5d4636");
+      P.rect(x - 12 * s, y, 24 * s, 3, shade(wallC, 0.3), 0.7);
+      var winC = P.pi >= 2 ? p.warm : mix(p.skyT, "#c8d6d4", 0.5);
+      [x - hw + 12 * s, x + hw - 34 * s].forEach(function (wx) {
+        P.rect(wx - 2, y - 34 * s - 2, 22 * s + 4, 18 * s + 4, shade(wallC, 0.35));
+        P.rect(wx, y - 34 * s, 22 * s, 18 * s, winC, 0.95);
+        if (P.pi >= 2) P.glow(wx + 11 * s, y - 25 * s, 22 * s, p.warm, 0.4);
+        P.stroke([[wx + 11 * s, y - 34 * s], [wx + 11 * s, y - 16 * s]], shade(wallC, 0.4), 1.3, 0.9);
+      });
+    } },
+    temple: { z: 1, w: 190, phrase: "廟簷翹向天空,燈籠一盞盞垂掛著", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var rw = 78 * s, bh = 62 * s, ry = y - bh;
+      var roofC = mix("#7d3b2e", p.dark, P.pi === 2 ? 0.42 : 0.06);
+      var wallC = mix("#a34a36", p.dark, P.pi === 2 ? 0.38 : 0.04);
+      P.softShadow(x, y + 3, rw * 1.5);
+      c.fillStyle = P.lgrad(ry, y, tint(wallC, 0.1), shade(wallC, 0.14));
+      c.fillRect(x - rw, ry, rw * 2, bh);
+      [x - rw + 8 * s, x - rw * 0.36, x + rw * 0.28, x + rw - 14 * s].forEach(function (colX) {
+        P.rect(colX, ry + 6 * s, 6 * s, bh - 6 * s, shade(wallC, 0.3));
+      });
+      c.fillStyle = shade(wallC, 0.5);
+      c.beginPath();
+      c.moveTo(x - 15 * s, y); c.lineTo(x - 15 * s, ry + 28 * s);
+      c.quadraticCurveTo(x, ry + 16 * s, x + 15 * s, ry + 28 * s);
+      c.lineTo(x + 15 * s, y); c.closePath(); c.fill();
+      P.poly([[x - rw - 22 * s, ry + 2 * s], [x - rw - 8 * s, ry - 12 * s], [x, ry - 26 * s], [x + rw + 8 * s, ry - 12 * s], [x + rw + 22 * s, ry + 2 * s], [x + rw - 2 * s, ry + 8 * s], [x - rw + 2 * s, ry + 8 * s]], roofC);
+      P.stroke([[x - rw - 22 * s, ry + 2 * s], [x - rw - 8 * s, ry - 12 * s], [x, ry - 26 * s], [x + rw + 8 * s, ry - 12 * s], [x + rw + 22 * s, ry + 2 * s]], tint(roofC, 0.35), 2, 0.8);
+      P.rect(x - 2 * s, ry - 34 * s, 4 * s, 9 * s, roofC);
+      var swing = P.pi === 2 ? 4 : 0;
+      [x - rw * 0.7, x + rw * 0.62].forEach(function (lx) {
+        var ly = ry + 22 * s;
+        P.stroke([[lx, ry + 6 * s], [lx + swing, ly]], shade(wallC, 0.4), 1.3, 0.9);
+        var lampC = mix("#d4593f", p.warm, P.pi >= 3 ? 0.5 : 0.15);
+        if (P.pi >= 2) P.glow(lx + swing, ly + 8 * s, 20 * s, p.warm, 0.55);
+        P.shadeCircle(lx + swing, ly + 8 * s, 8.5 * s, lampC);
+        P.rect(lx + swing - 3 * s, ly - 2, 6 * s, 2.4, shade("#d4593f", 0.3));
+      });
+      P.arcStroke(x - 2, y - bh - 40 * s, 8, Math.PI * 0.2, Math.PI * 1.2, "#ffffff", 2.4, 0.35);
+      P.arcStroke(x + 4, y - bh - 52 * s, 9, Math.PI * 1.1, Math.PI * 2.1, "#ffffff", 2.4, 0.25);
+    } },
+    school: { z: 1, w: 180, phrase: "教室的窗一扇扇排開,旗桿立在操場邊", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var bw = 84 * s, bh = 44 * s;
+      var wallC = mix("#e8ddc3", p.dark, P.pi === 2 ? 0.22 : 0);
+      P.softShadow(x, y + 3, bw * 1.3);
+      c.fillStyle = P.lgrad(y - bh, y, tint(wallC, 0.12), shade(wallC, 0.08));
+      c.fillRect(x - bw, y - bh, bw * 2, bh);
+      P.rect(x - bw, y - bh - 8 * s, bw * 2, 9 * s, mix("#8a5a48", p.dark, P.pi === 2 ? 0.35 : 0.08));
+      for (var wn = 0; wn < 4; wn++) {
+        var wx3 = x - bw + 10 * s + wn * 42 * s;
+        P.rect(wx3, y - bh + 12 * s, 24 * s, 16 * s, P.pi >= 2 ? p.warm : mix(p.skyT, "#c4d2d2", 0.5), 0.95);
+        P.stroke([[wx3 + 12 * s, y - bh + 12 * s], [wx3 + 12 * s, y - bh + 28 * s]], shade(wallC, 0.35), 1.2, 0.8);
+      }
+      P.rect(x - 8 * s, y - 22 * s, 16 * s, 22 * s, shade(wallC, 0.45));
+      var fx = x - bw - 26 * s;
+      P.rect(fx - 1.4, y - 92 * s, 2.8, 92 * s, "#e5e0d2");
+      P.poly([[fx + 2, y - 90 * s], [fx + 30 * s, y - 84 * s], [fx + 2, y - 76 * s]], "#b23a2e", 0.95);
+    } },
+    storefront: { z: 1, w: 150, phrase: "布棚下的攤架擺得整整齊齊,招牌在風裡輕輕晃", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var aw = 60 * s, ay = y - 62 * s;
+      P.softShadow(x, y + 2, aw * 1.4);
+      var wallC = mix("#d9c9ae", p.dark, P.pi === 2 ? 0.26 : 0.02);
+      c.fillStyle = P.lgrad(ay - 22 * s, y, tint(wallC, 0.1), shade(wallC, 0.06));
+      c.fillRect(x - aw, ay - 22 * s, aw * 2, y - ay + 22 * s);
+      var awnC = mix("#b3604c", p.dark, P.pi === 2 ? 0.3 : 0);
+      P.poly([[x - aw - 6 * s, ay], [x + aw + 6 * s, ay], [x + aw - 2 * s, ay + 18 * s], [x - aw + 2 * s, ay + 18 * s]], awnC);
+      for (var sc = 0; sc < 4; sc++) {
+        var scx = x - aw + 2 * s + (aw - 2 * s) / 2 * sc + 8 * s;
+        c.save(); c.fillStyle = sc % 2 ? tint(awnC, 0.3) : awnC;
+        c.beginPath(); c.arc(scx, ay + 18 * s, 10 * s, 0, Math.PI); c.fill(); c.restore();
+      }
+      P.poly([[x - aw - 6 * s, ay], [x + aw + 6 * s, ay], [x + aw + 2 * s, ay + 4 * s], [x - aw - 2 * s, ay + 4 * s]], tint(awnC, 0.25));
+      P.rect(x - aw + 4 * s, ay + 18 * s, 3, y - ay - 18 * s, shade(wallC, 0.45), 0.9);
+      P.rect(x + aw - 7 * s, ay + 18 * s, 3, y - ay - 18 * s, shade(wallC, 0.45), 0.9);
+      c.fillStyle = P.lgrad(y - 20 * s, y, tint("#8a6f4d", 0.2), shade("#8a6f4d", 0.15));
+      c.fillRect(x - aw + 10 * s, y - 20 * s, aw * 2 - 20 * s, 20 * s);
+      for (var it = 0; it < 3; it++) {
+        var ix = x - aw + 16 * s + it * 22 * s;
+        P.shadeCircle(ix, y - 24 * s, 5 * s, ["#b98a54", "#9db4a6", "#c98f6e"][it]);
+      }
+      var gx = x + aw + 18 * s;
+      P.rect(gx - 2, ay - 16 * s, 4, y - ay + 16 * s, "#5b4a38");
+      P.rect(gx - 12 * s, ay - 14 * s, 24 * s, 34 * s, "#f0e8d6");
+      P.rect(gx - 7 * s, ay - 8 * s, 14 * s, 3, "#5b4a38", 0.7);
+      P.rect(gx - 7 * s, ay - 2 * s, 14 * s, 3, "#5b4a38", 0.55);
+      P.rect(gx - 5 * s, ay + 6 * s, 10 * s, 10 * s, "#a8462f", 0.85);
+    } },
+    train: { z: 1, full: true, phrase: "鐵軌筆直伸向遠方,站牌在月台邊發亮", draw: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx, gy = P.gy;
+      var y0 = gy - 14, vx = W * 0.6;
+      P.poly([[W * 0.2, H], [vx - 8, y0], [vx + 9, y0], [W * 1.04, H]], shade(p.sand, 0.32), 0.9);
+      for (var i = 0; i < 8; i++) {
+        var t = Math.pow(i / 8, 1.5), y = H - t * (H - y0 - 6);
+        var half = (1 - t) * W * 0.3;
+        P.rect(vx - half * 0.92, y, half * 1.9, 3.2 - t * 2, shade(p.dark, 0.2), 0.75);
+      }
+      P.stroke([[W * 0.27, H], [vx - 5, y0]], shade(p.dark, 0.3), 3, 0.95);
+      P.stroke([[W * 0.92, H], [vx + 6, y0]], shade(p.dark, 0.3), 3, 0.95);
+      P.stroke([[W * 0.27, H], [vx - 5, y0]], tint(p.skyB, 0.35), 1, 0.7);
+      P.stroke([[W * 0.92, H], [vx + 6, y0]], tint(p.skyB, 0.35), 1, 0.7);
+      var sx2 = W * 0.13;
+      P.softShadow(sx2, gy + 4, 46);
+      P.rect(sx2 - 2.4, gy - 74, 4.8, 78, "#5b4a38");
+      c.fillStyle = P.lgrad(gy - 92, gy - 66, "#f7f2e4", "#e8e0cc");
+      c.fillRect(sx2 - 34, gy - 92, 68, 26);
+      P.rect(sx2 - 34, gy - 92, 68, 5, "#a8462f", 0.9);
+      P.stroke([[sx2 - 24, gy - 80], [sx2 + 24, gy - 80]], "#5b4a38", 2, 0.8);
+      P.stroke([[sx2 - 18, gy - 73], [sx2 + 18, gy - 73]], "#5b4a38", 1.4, 0.6);
+      var lamp = P.pi === 2 ? "#c25548" : (P.pi >= 3 ? p.warm : "#8ea08f");
+      P.rect(W * 0.33 - 1.8, gy - 52, 3.6, 52, p.dark);
+      if (P.pi >= 2) P.glow(W * 0.33, gy - 58, 20, lamp, 0.5);
+      P.shadeCircle(W * 0.33, gy - 58, 6, lamp);
+    } },
+    lighthouse: { z: 1, w: 90, phrase: "燈塔立在岬角上,燈光一明一滅", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var th = 84 * s, tw = 15 * s;
+      P.poly([[x - 34 * s, y + 8], [x - 20 * s, y - 10 * s], [x + 24 * s, y - 8 * s], [x + 36 * s, y + 8]], shade(p.near, 0.2));
+      c.fillStyle = P.lgrad(y - 10 * s - th, y - 8 * s, "#f4efe2", "#d8d2c0");
+      c.beginPath();
+      c.moveTo(x - tw, y - 8 * s); c.lineTo(x - tw * 0.62, y - 8 * s - th);
+      c.lineTo(x + tw * 0.62, y - 8 * s - th); c.lineTo(x + tw, y - 8 * s);
+      c.closePath(); c.fill();
+      P.rect(x - tw * 0.94, y - 34 * s, tw * 1.88, 9 * s, "#b23a2e", 0.92);
+      P.rect(x - tw * 0.78, y - 62 * s, tw * 1.56, 9 * s, "#b23a2e", 0.92);
+      var ly = y - 8 * s - th - 7 * s;
+      P.rect(x - 7 * s, ly, 14 * s, 9 * s, shade(p.dark, 0.1));
+      if (P.pi >= 2) {
+        P.glow(x, ly + 4 * s, 30 * s, p.warm, 0.7);
+        P.circle(x, ly + 4 * s, 4 * s, tint(p.warm, 0.4));
+      } else {
+        P.rect(x - 4 * s, ly + 2 * s, 8 * s, 5 * s, mix(p.skyT, "#c8d6d4", 0.5));
+      }
+      P.poly([[x - 8 * s, ly], [x, ly - 7 * s], [x + 8 * s, ly]], shade(p.dark, 0.2));
+    } },
+    bridge: { z: 1, water: true, phrase: "一座小橋跨過水面,倒影輕輕搖", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var w = 96 * s, by = y - 26 * s;
+      var stone = mix("#9a8f78", p.dark, P.pi === 2 ? 0.3 : 0.12);
+      c.fillStyle = P.lgrad(by - 8 * s, by + 20 * s, tint(stone, 0.18), shade(stone, 0.22));
+      c.beginPath();
+      c.moveTo(x - w, by + 18 * s);
+      c.quadraticCurveTo(x, by - 14 * s, x + w, by + 18 * s);
+      c.lineTo(x + w, by + 26 * s);
+      c.quadraticCurveTo(x, by - 4 * s, x - w, by + 26 * s);
+      c.closePath(); c.fill();
+      c.save(); c.strokeStyle = shade(stone, 0.3); c.lineWidth = 2; c.globalAlpha = 0.8;
+      c.beginPath(); c.moveTo(x - w, by + 18 * s); c.quadraticCurveTo(x, by - 14 * s, x + w, by + 18 * s); c.stroke();
+      c.restore();
+      for (var r = 0; r < 7; r++) {
+        var t = r / 6, rx = x - w + t * w * 2;
+        var ry = by + 18 * s - Math.sin(t * Math.PI) * 30 * s;
+        P.stroke([[rx, ry], [rx, ry - 10 * s]], shade(stone, 0.3), 1.6, 0.85);
+      }
+      P.stroke([[x - w, by + 8 * s - 10 * s], [x, by - 24 * s], [x + w, by + 8 * s]], tint(stone, 0.2), 2, 0.7);
+      P.ellipse(x, y + 10 * s, w * 0.7, 7 * s, shade(p.water, 0.1), 0.35);
+    } },
+    boat: { z: 1, water: true, phrase: "一艘小船安安靜靜地泊著", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      c.fillStyle = P.lgrad(y - 4, y + 11 * s, tint(p.dark, 0.15), shade(p.dark, 0.2));
+      c.beginPath();
+      c.moveTo(x - 30 * s, y); c.lineTo(x + 30 * s, y);
+      c.lineTo(x + 20 * s, y + 11 * s); c.lineTo(x - 20 * s, y + 11 * s);
+      c.closePath(); c.fill();
+      P.stroke([[x - 30 * s, y], [x + 30 * s, y]], tint(p.sand, 0.3), 1.6, 0.7);
+      P.rect(x - 1.2, y - 34 * s, 2.4, 34 * s, shade(p.dark, 0.15));
+      P.poly([[x + 2, y - 32 * s], [x + 25 * s, y - 7 * s], [x + 2, y - 7 * s]], P.pi >= 3 ? p.warm : (P.pi === 2 ? tint(p.mid, 0.3) : "#f4efe2"), 0.95);
+      P.ellipse(x, y + 14 * s, 26 * s, 4 * s, shade(p.water || p.mid, 0.2), 0.4);
+    } },
+    tree: { z: 2, w: 90, phrase: "老樹撐開一大片綠蔭", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var leafC = mix("#5c7a4f", p.dark, P.pi === 2 ? 0.3 : (P.pi === 4 ? 0.42 : 0));
+      P.softShadow(x, y + 2, 46 * s);
+      c.fillStyle = P.lgrad(y - 60 * s, y, tint("#4e3b2c", 0.15), "#4e3b2c");
+      c.beginPath();
+      c.moveTo(x - 4 * s, y); c.lineTo(x - 2 * s, y - 42 * s);
+      c.lineTo(x + 2 * s, y - 42 * s); c.lineTo(x + 5 * s, y);
+      c.closePath(); c.fill();
+      P.stroke([[x, y - 30 * s], [x - 12 * s, y - 46 * s]], "#4e3b2c", 3 * s, 1);
+      P.stroke([[x, y - 36 * s], [x + 12 * s, y - 52 * s]], "#4e3b2c", 2.6 * s, 1);
+      P.foliage(x, y - 40 * s, 52 * s, leafC);
+    } },
+    pines: { z: 2, w: 110, phrase: "成排的松树沿著坡地立著", draw: function (P, x, y, s) {
+      var p = P.p;
+      for (var i = 0; i < 3; i++) {
+        var px = x + (i - 1) * 30 * s, py = y + (i % 2) * 4, ph = (44 - i * 6) * s;
+        P.softShadow(px, py + 2, 20 * s, 0.18);
+        P.rect(px - 1.6 * s, py - 10 * s, 3.2 * s, 12 * s, "#4e3b2c");
+        var col = mix(shade(p.near, 0.15), p.dark, i * 0.12);
+        P.poly([[px - 13 * s, py - 8 * s], [px, py - ph * 0.62 - 8 * s], [px + 13 * s, py - 8 * s]], col);
+        P.poly([[px - 10 * s, py - ph * 0.4 - 8 * s], [px, py - ph - 8 * s], [px + 10 * s, py - ph * 0.4 - 8 * s]], tint(col, 0.08));
+      }
+    } },
+    bamboo: { z: 2, w: 70, phrase: "竹叢被風吹得沙沙作響", draw: function (P, x, y, s) {
+      var p = P.p;
+      var col = mix("#6f8f5a", p.dark, P.pi === 2 ? 0.28 : (P.pi === 4 ? 0.4 : 0));
+      P.softShadow(x, y + 2, 30 * s, 0.18);
+      for (var i = 0; i < 5; i++) {
+        var bx = x + (i - 2) * 8 * s, lean = (i - 2) * 4 * s + (P.pi === 2 ? 8 : 0);
+        P.stroke([[bx, y], [bx + lean, y - 74 * s]], col, 2.6 * s, 0.95);
+        for (var seg = 1; seg < 4; seg++) {
+          P.stroke([[bx + lean * seg / 4 - 2, y - seg * 18 * s], [bx + lean * seg / 4 + 2, y - seg * 18 * s]], shade(col, 0.25), 1.4, 0.8);
+        }
+        for (var lf = 0; lf < 4; lf++) {
+          var ly = y - 40 * s - lf * 10 * s + P.rnd() * 8;
+          P.stroke([[bx + lean * 0.7, ly], [bx + lean * 0.7 + 12 * s, ly - 5 * s]], tint(col, 0.15), 2, 0.8);
+          P.stroke([[bx + lean * 0.7, ly], [bx + lean * 0.7 - 11 * s, ly - 4 * s]], col, 2, 0.7);
+        }
+      }
+    } },
+    flowers: { z: 3, w: 70, phrase: "花圃開得正好,顏色一叢叢地亮", draw: function (P, x, y, s) {
+      var p = P.p;
+      P.ellipse(x, y, 36 * s, 9 * s, mix("#5c7a4f", p.dark, P.pi >= 2 ? 0.25 : 0), 0.9);
+      var hues = ["#d98a94", "#e6c56e", "#c97b5e", "#b56a9c"];
+      for (var i = 0; i < 12; i++) {
+        var fx = x + (P.rnd() - 0.5) * 62 * s, fy = y - 2 - P.rnd() * 12 * s;
+        P.stroke([[fx, y + 2], [fx, fy]], shade("#5c7a4f", 0.15), 1.2, 0.7);
+        P.shadeCircle(fx, fy, (2.4 + P.rnd() * 1.6) * s, hues[i % 4], 0.95);
+      }
+    } },
+    lanterns: { z: 3, sky: true, phrase: "燈籠一串串掛起,光暈染得暖暖的", draw: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx;
+      c.save(); c.strokeStyle = shade(p.dark, 0.15); c.lineWidth = 1.2; c.globalAlpha = 0.75;
+      c.beginPath(); c.moveTo(0, H * 0.13);
+      c.quadraticCurveTo(W * 0.5, H * 0.22, W, H * 0.11); c.stroke(); c.restore();
+      for (var g2 = 0; g2 < 6; g2++) {
+        var t = (g2 + 0.5) / 6, gx2 = t * W;
+        var gy2 = H * 0.13 + Math.sin(t * Math.PI) * H * 0.085;
+        var lampC = mix("#d4593f", p.warm, P.pi >= 3 ? 0.5 : 0.15);
+        if (P.pi >= 2) P.glow(gx2, gy2 + 8, 20, p.warm, 0.6);
+        P.shadeCircle(gx2, gy2 + 8, 7.5, lampC);
+        P.rect(gx2 - 2.6, gy2 - 2, 5.2, 2.4, shade("#d4593f", 0.3));
+        P.stroke([[gx2, gy2 + 15], [gx2, gy2 + 20]], shade("#d4593f", 0.2), 1.2, 0.8);
+      }
+    } },
+    lamp: { z: 3, w: 40, phrase: "一盞路燈安安靜靜地亮著", draw: function (P, x, y, s) {
+      var p = P.p;
+      P.softShadow(x, y + 2, 20 * s, 0.2);
+      P.rect(x - 2 * s, y - 78 * s, 4 * s, 78 * s, mix("#3a3a38", p.dark, 0.3));
+      P.stroke([[x, y - 78 * s], [x + 16 * s, y - 78 * s]], mix("#3a3a38", p.dark, 0.3), 3 * s, 1);
+      if (P.pi >= 2) {
+        P.glow(x + 16 * s, y - 72 * s, 30 * s, p.warm, 0.6);
+        P.ellipse(x + 14 * s, y + 2, 30 * s, 6 * s, p.warm, 0.12);
+      }
+      P.shadeCircle(x + 16 * s, y - 72 * s, 5 * s, P.pi >= 2 ? tint(p.warm, 0.2) : "#c8ccc0");
+    } },
+    poles: { z: 2, w: 60, phrase: "電線桿沿著路一根根排開", draw: function (P, x, y, s) {
+      var p = P.p;
+      for (var i = 0; i < 3; i++) {
+        var px = x + i * 52 * s, py = y - i * 6 * s, ph = (58 - i * 12) * s;
+        P.rect(px - 1.5, py - ph, 3, ph, mix("#5b4a38", p.dark, 0.2), 0.95);
+        P.rect(px - 10 * s + i, py - ph + 7 * s, 20 * s - i * 3, 2.4, mix("#5b4a38", p.dark, 0.2), 0.95);
+        if (i < 2) {
+          P.arcStroke(px + 26 * s, py - ph + 40 * s, 34 * s, Math.PI * 1.22, Math.PI * 1.78, p.dark, 1, 0.5);
+        }
+      }
+    } },
+    well: { z: 2, w: 60, phrase: "老井守在院角,轆轤還掛著", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      var stone = mix("#b9b2a2", p.dark, P.pi >= 2 ? 0.2 : 0.04);
+      P.softShadow(x, y + 2, 26 * s);
+      c.fillStyle = P.lgrad(y - 18 * s, y, tint(stone, 0.15), shade(stone, 0.12));
+      c.fillRect(x - 18 * s, y - 18 * s, 36 * s, 18 * s);
+      P.stroke([[x - 18 * s, y - 18 * s], [x + 18 * s, y - 18 * s]], shade(stone, 0.3), 2, 0.8);
+      P.ellipse(x, y - 18 * s, 18 * s, 5 * s, shade(stone, 0.42));
+      P.rect(x - 16 * s, y - 44 * s, 3, 28 * s, "#5b4a38");
+      P.rect(x + 13 * s, y - 44 * s, 3, 28 * s, "#5b4a38");
+      P.poly([[x - 22 * s, y - 42 * s], [x, y - 54 * s], [x + 22 * s, y - 42 * s]], mix("#8a5a48", p.dark, 0.1));
+      P.stroke([[x, y - 42 * s], [x, y - 26 * s]], shade(stone, 0.4), 1.3, 0.9);
+      P.circle(x, y - 24 * s, 2.4 * s, shade(stone, 0.4));
+    } },
+    swing: { z: 2, w: 60, phrase: "鞦韆還在輕輕地晃", draw: function (P, x, y, s) {
+      var p = P.p;
+      P.softShadow(x, y + 2, 24 * s, 0.18);
+      P.stroke([[x - 16 * s, y], [x - 7 * s, y - 46 * s]], p.dark, 2.6, 0.95);
+      P.stroke([[x + 16 * s, y], [x + 7 * s, y - 46 * s]], p.dark, 2.6, 0.95);
+      P.stroke([[x - 7 * s, y - 46 * s], [x + 7 * s, y - 46 * s]], p.dark, 2.6, 0.95);
+      var sway = P.pi === 2 ? 5 * s : 2 * s;
+      P.stroke([[x - 4 * s, y - 42 * s], [x - 4 * s + sway, y - 14 * s]], shade(p.dark, 0), 1.3, 0.85);
+      P.stroke([[x + 4 * s, y - 42 * s], [x + 4 * s + sway, y - 14 * s]], shade(p.dark, 0), 1.3, 0.85);
+      P.rect(x - 6 * s + sway, y - 15 * s, 12 * s, 3 * s, mix("#8a5a48", p.dark, 0.15));
+    } },
+    clothesline: { z: 2, w: 110, phrase: "曬衣繩上的衣裳被風吹得鼓起來", draw: function (P, x, y, s) {
+      var p = P.p, c = P.ctx;
+      P.rect(x - 52 * s, y - 56 * s, 3, 56 * s, "#5b4a38");
+      P.rect(x + 52 * s, y - 56 * s, 3, 56 * s, "#5b4a38");
+      c.save(); c.strokeStyle = shade(p.dark, 0.1); c.lineWidth = 1.1; c.globalAlpha = 0.8;
+      c.beginPath(); c.moveTo(x - 50 * s, y - 52 * s);
+      c.quadraticCurveTo(x, y - 46 * s, x + 52 * s, y - 52 * s); c.stroke(); c.restore();
+      var cols = ["#d8e2e6", "#e6c56e", "#c98f6e"];
+      for (var i = 0; i < 3; i++) {
+        var cx2 = x - 30 * s + i * 30 * s, cy2 = y - 50 * s + 2;
+        var flap = (P.pi === 2 ? 10 : 5) * s;
+        c.save(); c.fillStyle = mix(cols[i], p.dark, P.pi >= 2 ? 0.18 : 0);
+        c.globalAlpha = 0.95;
+        c.beginPath();
+        c.moveTo(cx2 - 8 * s, cy2);
+        c.lineTo(cx2 + 8 * s, cy2);
+        c.quadraticCurveTo(cx2 + 10 * s + flap, cy2 + 12 * s, cx2 + 6 * s + flap, cy2 + 24 * s);
+        c.quadraticCurveTo(cx2, cy2 + 20 * s, cx2 - 6 * s + flap * 0.4, cy2 + 24 * s);
+        c.quadraticCurveTo(cx2 - 10 * s, cy2 + 12 * s, cx2 - 8 * s, cy2);
+        c.closePath(); c.fill(); c.restore();
+      }
+    } },
+    kite: { z: 4, phrase: "一只風箏高高地飄在天上", draw: function (P) {
+      var W = P.W, H = P.H, p = P.p, c = P.ctx;
+      var kx = W * 0.32, ky = H * 0.16;
+      c.save(); c.translate(kx, ky); c.rotate(0.3);
+      c.fillStyle = "#c9584a";
+      c.beginPath(); c.moveTo(0, -16); c.lineTo(11, 0); c.lineTo(0, 20); c.lineTo(-11, 0); c.closePath(); c.fill();
+      c.fillStyle = tint("#c9584a", 0.3);
+      c.beginPath(); c.moveTo(0, -16); c.lineTo(11, 0); c.lineTo(0, 0); c.closePath(); c.fill();
+      c.strokeStyle = shade("#c9584a", 0.3); c.lineWidth = 1;
+      c.beginPath(); c.moveTo(0, -16); c.lineTo(0, 20); c.moveTo(-11, 0); c.lineTo(11, 0); c.stroke();
+      c.restore();
+      c.save(); c.strokeStyle = p.dark; c.globalAlpha = 0.5; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(kx - 4, ky + 22);
+      c.quadraticCurveTo(kx - 30, ky + 60, kx - 20, H * 0.5); c.stroke(); c.restore();
+      for (var b = 0; b < 3; b++) {
+        var bt = (b + 1) / 4;
+        P.stroke([[kx - 4 - bt * 20, ky + 22 + bt * 36], [kx + 4 - bt * 20, ky + 30 + bt * 36]], "#e6c56e", 2, 0.85);
+      }
+    } },
+    fireworks: { z: 4, night: true, phrase: "煙火在夜空裡一朵一朵地開", draw: function (P) {
+      var W = P.W, H = P.H;
+      var spots = [[W * 0.3, H * 0.18, 30, "#e8b878"], [W * 0.56, H * 0.12, 22, "#d98a94"], [W * 0.44, H * 0.3, 16, "#9db4d8"]];
+      for (var i = 0; i < spots.length; i++) {
+        var fx = spots[i][0], fy = spots[i][1], fr = spots[i][2], col = spots[i][3];
+        P.glow(fx, fy, fr * 2, col, 0.35);
+        for (var r = 0; r < 14; r++) {
+          var a = r / 14 * Math.PI * 2;
+          P.stroke([[fx + Math.cos(a) * fr * 0.3, fy + Math.sin(a) * fr * 0.3], [fx + Math.cos(a) * fr, fy + Math.sin(a) * fr]], col, 1.4, 0.8);
+          P.circle(fx + Math.cos(a) * fr, fy + Math.sin(a) * fr, 1.4, tint(col, 0.3), 0.9);
+        }
+      }
+    } },
+    fireflies: { z: 4, night: true, phrase: "螢火蟲在草叢間明明滅滅", draw: function (P) {
+      var W = P.W, H = P.H;
+      for (var ff = 0; ff < 9; ff++) {
+        var fx = 36 + P.rnd() * (W - 72), fy = H * 0.55 + P.rnd() * H * 0.36;
+        P.glow(fx, fy, 9, "#d8e084", 0.6);
+        P.circle(fx, fy, 1.7, "#eef2b0", 0.9);
+      }
+    } },
+    smoke: { z: 3, w: 40, phrase: "炊煙從屋後細細地升起", draw: function (P, x, y) {
+      for (var i = 0; i < 4; i++) {
+        P.arcStroke(x + (i % 2 === 0 ? 4 : -4), y - 46 - i * 14, 6 + i * 2, Math.PI * (0.2 + (i % 2) * 0.9), Math.PI * (1.1 + (i % 2) * 0.9), "#ffffff", 2.6, 0.4 - i * 0.07);
+      }
+    } },
+    keepsakes: { z: 3, indoor: true, phrase: "牆上掛著相框,收音機低低地唱著", draw: function (P) {
+      var W = P.W, H = P.H, p = P.p;
+      P.rect(W * 0.3, H * 0.18, 40, 52, "#6b5136");
+      P.rect(W * 0.3 + 5, H * 0.18 + 5, 30, 42, "#f2ead8");
+      P.rect(W * 0.3 + 9, H * 0.18 + 10, 22, 30, mix(p.far, "#f2ead8", 0.4), 0.8);
+      P.rect(W * 0.12, H * 0.16, 30, 38, "#6b5136");
+      P.rect(W * 0.12 + 4, H * 0.16 + 4, 22, 30, "#f2ead8");
+      var cx3 = W * 0.22, cy3 = H * 0.52;
+      P.shadeCircle(cx3, cy3, 17, "#f4eede");
+      P.arcStroke(cx3, cy3, 17, 0, Math.PI * 2, "#54432f", 2.2, 1);
+      P.stroke([[cx3, cy3], [cx3, cy3 - 10]], "#54432f", 1.8, 0.9);
+      P.stroke([[cx3, cy3], [cx3 + 7, cy3 + 3]], "#54432f", 1.4, 0.9);
+      var rx = W * 0.36, ry = P.gy - 26;
+      P.rect(rx, ry - 4, 34, 22, mix("#8a5a48", p.dark, 0.1));
+      P.shadeCircle(rx + 10, ry + 7, 6, "#f2ead8");
+      P.rect(rx + 20, ry, 10, 3, "#f2ead8", 0.7);
+      P.rect(rx + 20, ry + 6, 10, 3, "#f2ead8", 0.55);
+    } },
+    sewing: { z: 3, indoor: true, phrase: "縫紉機停在窗邊,布料摺得整整齊齊", draw: function (P) {
+      var W = P.W, p = P.p, y = P.gy - 30, x = W * 0.4;
+      P.rect(x - 30, y + 22, 64, 5, "#6b5136");
+      P.rect(x - 24, y + 27, 6, 26, "#5d4632");
+      P.rect(x + 22, y + 27, 6, 26, "#5d4632");
+      var mc = mix("#3a3a38", p.dark, 0.2);
+      P.rect(x - 16, y + 6, 36, 6, mc);
+      P.poly([[x - 14, y + 6], [x - 14, y - 10], [x - 4, y - 14], [x + 12, y - 14], [x + 12, y + 6]], mc);
+      P.rect(x + 8, y - 12, 4, 14, tint(mc, 0.2));
+      P.shadeCircle(x - 20, y - 2, 6, tint(mc, 0.25));
+      P.rect(x + 26, y + 14, 18, 8, "#9db4a6", 0.95);
+      P.rect(x + 26, y + 10, 18, 4, "#d98a94", 0.95);
+    } }
+  };
+
+  /* ── 詞彙 → 場景組合 ────────────────── */
+  var BASE_VOCAB = {
+    sea: ["海", "港", "浪", "沙灘", "漁", "島", "澎湖", "外海", "討海"],
+    river: ["河", "溪", "圳", "潭", "湖"],
+    field: ["田", "稻", "農", "菜園", "果園", "割稻", "插秧", "田埂"],
+    mountain: ["山", "嶺", "森林", "瀑布", "山路"],
+    street: ["街", "市場", "夜市", "店", "攤", "巷", "騎樓", "城市", "台北", "眷村"],
+    interior: ["房間", "屋裡", "屋內", "床", "客廳", "廚房", "灶", "飯桌", "縫紉機", "收音機", "相片", "照片"]
+  };
+  var EL_VOCAB = {
+    skyline: ["城市", "台北", "高樓", "都市"],
+    house: ["家", "老屋", "厝", "三合院", "老家", "屋子", "眷村", "屋"],
+    temple: ["廟", "宮", "媽祖", "拜拜", "神明"],
+    school: ["學校", "教室", "操場", "上學", "老師", "同學"],
+    storefront: ["店", "攤", "市場", "夜市", "麵攤", "生意"],
+    train: ["火車", "車站", "鐵路", "月台", "鐵軌", "車票"],
+    lighthouse: ["燈塔"],
+    bridge: ["橋"],
+    boat: ["船", "漁船", "舢舨", "渡輪", "討海"],
+    tree: ["樹", "榕樹", "樹蔭", "樹下"],
+    pines: ["松", "森林"],
+    bamboo: ["竹"],
+    flowers: ["花", "花園", "玫瑰", "桂花", "花圃"],
+    lanterns: ["燈籠", "元宵", "過年"],
+    lamp: ["路燈"],
+    poles: ["電線桿"],
+    well: ["井"],
+    swing: ["鞦韆"],
+    clothesline: ["曬衣", "衣裳", "洗衣"],
+    kite: ["風箏"],
+    fireworks: ["煙火", "鞭炮"],
+    fireflies: ["螢火蟲", "火金姑"],
+    smoke: ["炊煙", "煮飯", "灶"],
+    keepsakes: ["收音機", "相片", "照片", "時鐘", "老歌"],
+    sewing: ["裁縫", "縫紉", "旗袍", "做衣"]
+  };
+  var STRUCTURES = ["house", "temple", "school", "storefront", "train", "lighthouse", "bridge", "boat"];
+  var VEGETATION = ["tree", "pines", "bamboo", "flowers"];
+  var PROPS = ["lanterns", "lamp", "poles", "well", "swing", "clothesline", "smoke", "keepsakes", "sewing"];
+  var SKYELS = ["kite", "fireworks", "fireflies"];
+
+  function scoreVocab(text, vocab) {
+    var out = [];
+    Object.keys(vocab).forEach(function (key) {
+      var score = 0, last = -1;
+      vocab[key].forEach(function (kw) {
+        var pos = -1;
+        while ((pos = text.indexOf(kw, pos + 1)) !== -1) { score++; if (pos > last) last = pos; }
+      });
+      if (score > 0) out.push({ key: key, score: score + last / Math.max(text.length, 1) * 0.9 });
+    });
+    out.sort(function (a, b) { return b.score - a.score; });
+    return out;
+  }
+
+  /* 把一段文字組合成場景規格 {base, els[], hit} */
+  function composeScene(text, ctxText) {
+    text = text.replace(/全家人|全家|大家|家人|人家/g, "\u25cb");
+    var bases = scoreVocab(text, BASE_VOCAB);
+    var base = bases.length ? bases[0].key : null;
+    var els = scoreVocab(text, EL_VOCAB).map(function (e) { return e.key; });
+    /* 元素對基底的修正 */
+    if (els.indexOf("lighthouse") !== -1) base = "sea";
+    else if (els.indexOf("bridge") !== -1 && base !== "sea" && base !== "river") base = "river";
+    else if (els.indexOf("boat") !== -1 && base !== "sea" && base !== "river") base = /海|港|漁/.test(text + (ctxText || "")) ? "sea" : "river";
+    if (els.indexOf("train") !== -1 && (base === "interior" || base === "sea")) base = "plain";
+    if (base === "street") els = els.filter(function (k) { return k !== "skyline"; });
+    if (base === "interior") {
+      els = els.filter(function (k) { return ELS[k].indoor || ELS[k].z === 4; });
+    } else if (base) {
+      els = els.filter(function (k) { return !ELS[k].indoor; });
+    }
+    var hit = !!base || els.length > 0;
+    if (!base) base = els.length ? "plain" : null;
+    return { base: base, els: els, hit: hit };
+  }
+
+  /* 挑選要畫的元素:結構最多 2、植栽 2、小物 2、天空 1 */
+  function layoutScene(spec) {
+    var chosen = { structures: [], veg: [], props: [], sky: [], bg: [] };
+    spec.els.forEach(function (k) {
+      if (k === "skyline") { if (chosen.bg.length < 1) chosen.bg.push(k); }
+      else if (STRUCTURES.indexOf(k) !== -1) { if (chosen.structures.length < 2) chosen.structures.push(k); }
+      else if (VEGETATION.indexOf(k) !== -1) { if (chosen.veg.length < 2) chosen.veg.push(k); }
+      else if (PROPS.indexOf(k) !== -1) { if (chosen.props.length < 2) chosen.props.push(k); }
+      else if (SKYELS.indexOf(k) !== -1) { if (chosen.sky.length < 1) chosen.sky.push(k); }
+    });
+    /* 空景時,給一點溫柔的陪襯 */
+    if (spec.base !== "interior" && chosen.structures.length === 0 && chosen.veg.length === 0 &&
+        ["sea", "mountain", "field"].indexOf(spec.base) === -1) {
+      chosen.veg.push("tree");
+    }
+    return chosen;
+  }
+
+  /* ── 場景描述文字 ───────────────────── */
+  var TIME_PHRASE = ["清晨的薄霧還沒散去", "日頭正好的午後", "風雨壓境的時刻", "暮色四合的黃昏", "星光滿天的夜裡"];
+  var BASE_PHRASE = {
+    sea: "海平線遼闊地展開,浪一層層推上岸",
+    river: "溪水彎彎地流過草地",
+    field: "稻田一望無際,田埂筆直伸向遠方",
+    mountain: "山巒一層層疊向遠方,霧氣浮在半山",
+    street: "老街靜靜地鋪展,騎樓下還留著白日的氣味",
+    plain: "原野緩緩起伏,草香隨風飄過",
+    interior: "屋裡的光線柔柔地落在桌上"
+  };
+
+  function describeScene(spec, chosen, pi) {
+    var parts = [TIME_PHRASE[pi], BASE_PHRASE[spec.base] || BASE_PHRASE.plain];
+    var mentioned = chosen.bg.concat(chosen.structures, chosen.veg, chosen.props, chosen.sky);
+    for (var i = 0; i < Math.min(mentioned.length, 2); i++) {
+      parts.push(ELS[mentioned[i]].phrase);
+    }
+    return parts.join(",") + "。";
+  }
+
+  /* ── 場景渲染 ───────────────────────── */
+  function renderScene(canvas, spec, chosen, seed, act, pi, extras, res) {
+    var P = new Painter(canvas, seed, act, pi, null, null, res);
+    BASES[spec.base || "plain"](P);
+    chosen.bg.forEach(function (k) { ELS[k].draw(P); });
+    var slotXs = [0.46 + P.rnd() * 0.16, P.rnd() < 0.5 ? 0.15 : 0.85];
+    chosen.structures.forEach(function (k, i) {
+      var el = ELS[k];
+      if (el.full) { el.draw(P); return; }
+      var x = P.W * slotXs[i % slotXs.length];
+      var y = P.gy, s = 1;
+      if (el.water && P.waterY != null) {
+        y = spec.base === "sea" ? P.waterY + 18 + P.rnd() * 10 : P.waterY;
+        if (k === "bridge") { x = P.riverMidX || P.W * 0.58; y = P.waterY; }
+        if (spec.base === "sea" && k === "boat") { x = P.W * (0.55 + P.rnd() * 0.25); s = 0.9; }
+        if (k === "lighthouse") { x = P.W * (0.16 + P.rnd() * 0.1); y = P.waterY + 6; s = 0.95; }
+      } else if (spec.base === "field") {
+        s = 0.72; y = P.gy + 6;
+      } else if (spec.base === "mountain") {
+        s = 0.68; y = P.gy;
+      }
+      el.draw(P, x, y, s);
+    });
+    var vegSide = slotXs[0] > 0.5 ? 0.14 : 0.86;
+    chosen.veg.forEach(function (k, i) {
+      var x = P.W * (i === 0 ? vegSide : (vegSide > 0.5 ? 0.3 : 0.7));
+      var s = spec.base === "field" ? 0.7 : 0.9 + P.rnd() * 0.25;
+      if (k === "flowers") s *= 1.5;
+      ELS[k].draw(P, x, P.gy + 4, s);
+    });
+    chosen.props.forEach(function (k, i) {
+      var el = ELS[k];
+      if (el.indoor || !el.w) { el.draw(P); return; }
+      var x = P.W * (i === 0 ? 0.76 : 0.24) + (P.rnd() - 0.5) * 30;
+      if (k === "smoke") {
+        x = P.W * slotXs[0] + 30;
+        el.draw(P, x, P.gy - 40);
+        return;
+      }
+      el.draw(P, x, P.gy + 6, 0.9);
+    });
+    (extras || []).forEach(function (k, i) {
+      var el = ELS[k];
+      if (!el) return;
+      if (el.indoor && !P.interior) return;
+      if (el.full || SKYELS.indexOf(k) !== -1 || el.indoor) { el.draw(P); return; }
+      var x = P.W * [0.3, 0.68, 0.16, 0.86][i % 4] + (P.rnd() - 0.5) * 20;
+      var s = spec.base === "field" ? 0.65 : 0.85;
+      el.draw(P, x, P.gy + 4, s);
+    });
+    chosen.sky.forEach(function (k) { ELS[k].draw(P); });
+    if ((P.pi === 1 || P.pi === 3) && !P.interior) P.birds(P.W * 0.4, P.H * 0.18, 3);
+    if (P.pi === 4 && !P.interior) {
+      for (var st = 0; st < 22; st++) {
+        var sx3 = 14 + P.rnd() * (P.W - 28), sy3 = 8 + P.rnd() * P.H * 0.34;
+        if (P.sunX && Math.hypot(sx3 - P.sunX, sy3 - P.sunY) < 46) continue;
+        P.circle(sx3, sy3, 0.9 + P.rnd() * 0.8, "#ffffff", 0.3 + P.rnd() * 0.5);
+      }
+    }
+    if (!P.interior) P.rainFx();
+    P.finish();
+  }
+
+  /* ── 生成分鏡 ───────────────────────── */
+  function buildBoard(text) {
+    var sentences = splitSentences(text);
+    var acts = groupIntoActs(sentences);
+    var globalSpec = composeScene(text);
+    if (!globalSpec.hit) globalSpec = { base: "plain", els: ["tree"], hit: true };
+    var data = acts.map(function (group, i) {
+      var actText = group.join("");
+      var spec = composeScene(actText, text);
+      if (!spec.hit) spec = globalSpec;
+      var pi = pickPalette(actText, i);
+      spec.els.forEach(function (k) { if (ELS[k].night && pi < 2) pi = 4; });
+      var chosen = layoutScene(spec);
+      return {
+        stage: STAGES[i],
+        summary: summarize(group),
+        text: actText,
+        spec: spec,
+        chosen: chosen,
+        extras: [],
+        sprites: [],
+        pi: pi,
+        seed: hashText(actText) + i * 131,
+        desc: describeScene(spec, chosen, pi),
+        mood: detectMood(actText, i)
+      };
+    });
+    currentData = data;
+    renderBoard(data);
+    buildGame(data);
+    startWalk(data);
+  }
+
+  function renderBoard(data) {
+    var grid = $("boardGrid");
+    grid.innerHTML = "";
+    data.forEach(function (d, i) {
+      var card = document.createElement("article");
+      card.className = "frame-card";
+      card.innerHTML =
+        '<div class="frame-preview">' +
+          '<canvas aria-label="第' + (i + 1) + '幕插畫場景,僅有背景,無人物"></canvas>' +
+          '<img class="ai-img" alt="第' + (i + 1) + '幕 AI 生成插圖,僅有背景,無人物" />' +
+          '<span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>' +
+        '</div>' +
+        '<div class="frame-head">' +
+          '<span class="stage-glyph">' + d.stage.glyph + '</span>' +
+          '<span class="stage-meta"><span class="stage-act">' + d.stage.act + '</span>' +
+          '<span class="stage-name">' + d.stage.name + '</span></span>' +
+          '<span class="stage-shot">' + d.stage.shot + '</span>' +
+        '</div>' +
+        '<p class="frame-summary">' + escapeHtml(d.summary) + '</p>' +
+        '<div class="frame-field"><div class="field-label">背景畫面</div>' +
+          '<div class="field-body">' + d.desc + '</div></div>' +
+        '<div class="frame-field"><div class="field-label">情緒氛圍</div>' +
+          '<span class="mood-pill">' + d.mood + '</span></div>';
+      grid.appendChild(card);
+      var canvas = card.querySelector("canvas");
+      renderScene(canvas, d.spec, d.chosen, d.seed, i, d.pi);
+      var delay = reduceMotion ? 0 : 120 + i * 160;
+      setTimeout(function () { card.classList.add("in"); }, delay);
+    });
+    var board = $("board");
+    board.classList.add("show");
+    board.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  /* ── 生成按鈕 ───────────────────────── */
+  var goBtn = $("goBtn"), goNote = $("goNote"), storyEl = $("story");
+  goBtn.addEventListener("click", function () {
+    var text = storyEl.value.trim();
+    if (text.length < 6) {
+      goNote.textContent = "先寫下或錄下一小段故事,再按「生成分鏡」。";
+      goNote.classList.add("warn");
+      storyEl.focus();
+      return;
+    }
+    goNote.classList.remove("warn");
+    goBtn.disabled = true;
+    goBtn.textContent = "整理分鏡中⋯";
+    goNote.textContent = "正在把故事鋪成起、承、轉、合。";
+    setTimeout(function () {
+      buildBoard(text);
+      goBtn.disabled = false;
+      goBtn.textContent = "生成分鏡";
+      goNote.textContent = "分鏡完成。往下看看這四幕風景。";
+    }, reduceMotion ? 50 : 900);
+  });
+
+  $("againBtn").addEventListener("click", function () {
+    storyEl.focus();
+    storyEl.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+  });
+
+  /* ── 範例故事 ───────────────────────── */
+  document.querySelectorAll(".chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      storyEl.value = SAMPLES[Number(chip.dataset.sample)];
+      goNote.textContent = "已放入範例故事,按「生成分鏡」試試看。";
+      goNote.classList.remove("warn");
+      storyEl.focus();
+    });
+  });
+
+  /* ── 模擬錄音流程 ───────────────────── */
+  var recBtn = $("recBtn"), recLabel = $("recLabel"), recStatus = $("recStatus"), wave = $("wave");
+  var recState = "idle", recTimer = null, recSeconds = 0, sampleIdx = 0;
+
+  function setRec(state) {
+    recState = state;
+    recBtn.dataset.state = state;
+    wave.classList.toggle("on", state === "recording");
+    if (state === "idle") {
+      recLabel.textContent = "按此開始錄音";
+      recStatus.textContent = "";
+    } else if (state === "recording") {
+      recLabel.textContent = "停止錄音";
+      recStatus.innerHTML = '錄音中 <span class="timer">00:00</span> — 慢慢說,不用急。';
+    } else if (state === "processing") {
+      recLabel.textContent = "轉換中⋯";
+      recStatus.textContent = "正在把聲音轉成文字⋯";
+    }
+  }
+
+  recBtn.addEventListener("click", function () {
+    if (recState === "idle") {
+      setRec("recording");
+      recSeconds = 0;
+      recTimer = setInterval(function () {
+        recSeconds++;
+        var m = String(Math.floor(recSeconds / 60)).padStart(2, "0");
+        var sec = String(recSeconds % 60).padStart(2, "0");
+        var t = recStatus.querySelector(".timer");
+        if (t) t.textContent = m + ":" + sec;
+      }, 1000);
+    } else if (recState === "recording") {
+      clearInterval(recTimer);
+      setRec("processing");
+      setTimeout(function () {
+        var text = SAMPLES[sampleIdx % SAMPLES.length];
+        sampleIdx++;
+        typeInto(storyEl, text, function () {
+          setRec("idle");
+          recStatus.textContent = "已把語音轉成文字(示範模式)。可以直接修改,再生成分鏡。";
+        });
+      }, reduceMotion ? 200 : 1600);
+    }
+  });
+
+
+  /* ── AI 生成模式:故事原文 → 繪圖模型,不經任何圖庫 ── */
+  var currentData = null;
+  var aiBtn = $("aiBtn"), aiNote = $("aiNote");
+
+  var TIME_EN = ["misty early morning", "bright mid-day", "storm and heavy rain", "golden dusk", "starry night"];
+  function actPrompt(d) {
+    return "精緻繪本插畫,水彩質感,柔和的光,電影分鏡構圖。場景取材:" + d.text +
+      " 。exquisite storybook illustration, delicate watercolor, cinematic wide establishing shot, " +
+      TIME_EN[d.pi] + ", scenery only, completely empty of people, no people, no humans, no faces, no figures, no animals, background landscape only";
+  }
+  function aiUrl(d) {
+    return "https://image.pollinations.ai/prompt/" + encodeURIComponent(actPrompt(d)) +
+      "?width=1040&height=640&nologo=true&model=flux&seed=" + d.seed;
+  }
+
+  aiBtn.addEventListener("click", function () {
+    if (!currentData) {
+      aiNote.textContent = "請先輸入故事並按「生成分鏡」,再用 AI 重新繪製四幕。";
+      return;
+    }
+    aiBtn.disabled = true;
+    aiNote.textContent = "AI 正依每一幕的原文繪製插圖,約需十幾秒…";
+    var previews = document.querySelectorAll("#boardGrid .frame-preview");
+    var pending = 0, failed = 0;
+    currentData.forEach(function (d, i) {
+      var box = previews[i];
+      if (!box) return;
+      var img = box.querySelector(".ai-img");
+      var badge = box.querySelector(".gen-badge");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "gen-badge";
+        box.appendChild(badge);
+      }
+      badge.textContent = "AI 繪製中…";
+      pending++;
+      img.onload = function () {
+        box.classList.add("ai-on");
+        badge.textContent = "AI 生成";
+        if (--pending === 0) finishAi(failed);
+      };
+      img.onerror = function () {
+        failed++;
+        badge.textContent = "離線・手繪預覽";
+        if (--pending === 0) finishAi(failed);
+      };
+      img.src = aiUrl(d);
+    });
+  });
+
+  function finishAi(failed) {
+    aiBtn.disabled = false;
+    if (failed === 0) {
+      aiNote.textContent = "AI 插圖完成。每一幕都由故事原文即時生成,再按一次可重新繪製。";
+    } else if (failed === 4) {
+      aiNote.textContent = "目前環境無法連線繪圖服務(預覽沙盒會封鎖外部連線)。將頁面下載或部署後,AI 模式即可使用;先以手繪預覽呈現。";
+    } else {
+      aiNote.textContent = "部分插圖生成失敗,已保留手繪預覽;可再按一次重試。";
+    }
+  }
+
+
+  /* ── 記憶配對:故事元件 → 拖回所屬的一幕 ── */
+  var EL_NAMES = {
+    house: "老屋", temple: "廟", school: "學校", storefront: "店攤", train: "火車站",
+    lighthouse: "燈塔", bridge: "小橋", boat: "小船", tree: "大樹", pines: "松樹",
+    bamboo: "竹叢", flowers: "花圃", lanterns: "燈籠", lamp: "路燈", poles: "電線桿",
+    well: "水井", swing: "鞦韆", clothesline: "曬衣繩", kite: "風箏", fireworks: "煙火",
+    fireflies: "螢火蟲", smoke: "炊煙", keepsakes: "老相框", sewing: "縫紉機", skyline: "城市"
+  };
+  var TILE_S = { temple: 0.36, house: 0.46, school: 0.4, storefront: 0.48, lighthouse: 0.56,
+    bridge: 0.48, boat: 0.66, tree: 0.6, pines: 0.5, bamboo: 0.52, flowers: 0.72,
+    lamp: 0.6, poles: 0.44, well: 0.66, swing: 0.66, clothesline: 0.48 };
+  var TIME_NAMES = ["清晨", "日午", "風雨", "黃昏", "夜晚"];
+  var BASE_NAMES = { sea: "大海", river: "小溪", field: "稻田", mountain: "山巒", street: "老街", plain: "原野", interior: "屋內" };
+  var PRAISES = ["答對了!", "很好!", "就是這裡!", "沒錯!"];
+
+  function drawTile(canvas, key, transparent) {
+    var P = new Painter(canvas, hashText(key), 1, 1, 116, 84);
+    var W = P.W, H = P.H, p = P.p, c = P.ctx;
+    if (!transparent) {
+      P.rect(0, 0, W, H, "#f6f1e6");
+      P.rect(0, H - 13, W, 13, "#e9e1cd");
+    }
+    P.gy = H - 13; P.hy = H * 0.5; P.waterY = H - 18;
+    switch (key) {
+      case "train":
+        P.stroke([[8, H - 20], [W - 8, H - 26]], shade(p.dark, 0.2), 2.6, 0.9);
+        P.stroke([[8, H - 10], [W - 8, H - 14]], shade(p.dark, 0.2), 2.6, 0.9);
+        for (var sl = 0; sl < 6; sl++) P.rect(12 + sl * 18, H - 24 + sl * 0.4, 10, 2.4, shade(p.dark, 0.2), 0.6);
+        P.rect(W / 2 - 2, H - 66, 4, 44, "#5b4a38");
+        P.rect(W / 2 - 24, H - 76, 48, 19, "#f3ede0");
+        P.rect(W / 2 - 24, H - 76, 48, 4, "#a8462f", 0.9);
+        P.stroke([[W / 2 - 15, H - 67], [W / 2 + 15, H - 67]], "#5b4a38", 1.8, 0.8);
+        break;
+      case "lanterns":
+        P.stroke([[10, 16], [W - 10, 22]], shade(p.dark, 0.15), 1.2, 0.7);
+        P.stroke([[W / 2, 19], [W / 2, 30]], shade("#d4593f", 0.2), 1.4, 0.9);
+        P.glow(W / 2, 44, 26, p.warm, 0.5);
+        P.shadeCircle(W / 2, 44, 15, mix("#d4593f", p.warm, 0.3));
+        P.rect(W / 2 - 5, 27, 10, 4, shade("#d4593f", 0.3));
+        P.rect(W / 2 - 4, 59, 8, 6, shade("#d4593f", 0.2), 0.9);
+        break;
+      case "kite":
+        c.save(); c.translate(W / 2, 32); c.rotate(0.3);
+        c.fillStyle = "#c9584a";
+        c.beginPath(); c.moveTo(0, -18); c.lineTo(13, 0); c.lineTo(0, 22); c.lineTo(-13, 0); c.closePath(); c.fill();
+        c.fillStyle = tint("#c9584a", 0.3);
+        c.beginPath(); c.moveTo(0, -18); c.lineTo(13, 0); c.lineTo(0, 0); c.closePath(); c.fill();
+        c.strokeStyle = shade("#c9584a", 0.3); c.lineWidth = 1;
+        c.beginPath(); c.moveTo(0, -18); c.lineTo(0, 22); c.moveTo(-13, 0); c.lineTo(13, 0); c.stroke();
+        c.restore();
+        c.save(); c.strokeStyle = p.dark; c.globalAlpha = 0.5;
+        c.beginPath(); c.moveTo(W / 2 - 3, 55); c.quadraticCurveTo(W / 2 - 20, 66, W / 2 - 14, H - 12); c.stroke(); c.restore();
+        break;
+      case "fireworks":
+        P.glow(W / 2, 36, 34, "#e8b878", 0.4);
+        for (var fr = 0; fr < 12; fr++) {
+          var fa = fr / 12 * Math.PI * 2;
+          P.stroke([[W / 2 + Math.cos(fa) * 8, 36 + Math.sin(fa) * 8], [W / 2 + Math.cos(fa) * 26, 36 + Math.sin(fa) * 26]], "#d98a94", 1.6, 0.85);
+          P.circle(W / 2 + Math.cos(fa) * 26, 36 + Math.sin(fa) * 26, 1.6, "#e8b878", 0.9);
+        }
+        break;
+      case "fireflies":
+        [[34, 30], [62, 48], [84, 26], [50, 62]].forEach(function (pt) {
+          P.glow(pt[0], pt[1], 11, "#d8e084", 0.6);
+          P.circle(pt[0], pt[1], 2, "#eef2b0", 0.95);
+        });
+        break;
+      case "skyline":
+        [[20, 40, 18], [44, 56, 22], [72, 34, 18], [94, 48, 16]].forEach(function (b) {
+          P.rect(b[0], H - 13 - b[1], b[2], b[1], mix(p.far, p.skyB, 0.2), 0.95);
+          P.rect(b[0] + 4, H - 13 - b[1] + 6, 4, 4, p.warm, 0.8);
+          P.rect(b[0] + b[2] - 8, H - 13 - b[1] + 14, 4, 4, p.warm, 0.7);
+        });
+        break;
+      case "smoke":
+        P.rect(W / 2 - 10, H - 34, 20, 21, mix("#8a5a48", p.dark, 0.1));
+        for (var sm = 0; sm < 4; sm++) {
+          P.arcStroke(W / 2 + (sm % 2 === 0 ? 4 : -4), H - 40 - sm * 12, 6 + sm * 2, Math.PI * (0.2 + (sm % 2) * 0.9), Math.PI * (1.1 + (sm % 2) * 0.9), "#9a938a", 2.6, 0.6 - sm * 0.1);
+        }
+        break;
+      case "keepsakes":
+        P.rect(24, 16, 32, 42, "#6b5136");
+        P.rect(28, 20, 24, 34, "#f2ead8");
+        P.rect(31, 25, 18, 24, mix(p.far, "#f2ead8", 0.4), 0.85);
+        P.rect(66, 36, 30, 20, mix("#8a5a48", p.dark, 0.1));
+        P.shadeCircle(75, 46, 5.5, "#f2ead8");
+        P.rect(84, 40, 9, 3, "#f2ead8", 0.7);
+        P.rect(84, 46, 9, 3, "#f2ead8", 0.55);
+        break;
+      case "sewing":
+        var mc = mix("#3a3a38", p.dark, 0.2);
+        P.rect(28, H - 26, 60, 5, "#6b5136");
+        P.rect(34, H - 21, 5, 10, "#5d4632");
+        P.rect(78, H - 21, 5, 10, "#5d4632");
+        P.rect(38, H - 38, 36, 6, mc);
+        P.poly([[40, H - 38], [40, H - 54], [50, H - 58], [66, H - 58], [66, H - 38]], mc);
+        P.rect(62, H - 56, 4, 14, tint(mc, 0.2));
+        P.shadeCircle(34, H - 46, 6, tint(mc, 0.25));
+        break;
+      case "t0": case "t1": case "t2": case "t3": case "t4":
+        var tp = PAL[+key[1]];
+        c.fillStyle = P.lgrad(0, H - 13, tp.skyT, tp.skyB);
+        c.fillRect(0, 0, W, H - 13);
+        if (key === "t2") {
+          c.save(); c.fillStyle = tp.cloud; c.globalAlpha = 0.8; c.beginPath();
+          c.arc(W / 2 - 14, 30, 11, 0, Math.PI * 2); c.arc(W / 2 + 2, 24, 14, 0, Math.PI * 2); c.arc(W / 2 + 16, 32, 10, 0, Math.PI * 2); c.fill(); c.restore();
+          for (var rn = 0; rn < 6; rn++) {
+            P.stroke([[W / 2 - 20 + rn * 8, 46], [W / 2 - 23 + rn * 8, 60]], tp.rain, 1.6, 0.8);
+          }
+        } else {
+          P.glow(W * 0.55, key === "t3" ? 52 : 34, 28, tp.sun, tp.sunA + 0.15);
+          P.shadeCircle(W * 0.55, key === "t3" ? 52 : 34, 14, tp.sun);
+          if (key === "t4") {
+            for (var st2 = 0; st2 < 9; st2++) {
+              P.circle(10 + P.rnd() * (W - 20), 8 + P.rnd() * 44, 1 + P.rnd(), "#ffffff", 0.4 + P.rnd() * 0.5);
+            }
+          }
+        }
+        break;
+      case "b_sea":
+        c.fillStyle = P.lgrad(0, 36, p.skyT, p.skyB); c.fillRect(0, 0, W, 36);
+        c.fillStyle = P.lgrad(36, H - 13, tint(p.water, 0.25), shade(p.water, 0.25));
+        c.fillRect(0, 36, W, H - 49);
+        for (var wv = 0; wv < 8; wv++) {
+          P.arcStroke(14 + (wv % 4) * 28, 46 + Math.floor(wv / 4) * 16, 9, Math.PI * 0.1, Math.PI * 0.9, tint(p.water, 0.5), 1.3, 0.6);
+        }
+        break;
+      case "b_river":
+        P.rect(0, 0, W, H - 13, mix(p.mid, "#7f975f", 0.4));
+        c.fillStyle = tint(p.water, 0.3); c.beginPath();
+        c.moveTo(W * 0.42, 0); c.bezierCurveTo(W * 0.2, 30, W * 0.7, 50, W * 0.44, H - 13);
+        c.lineTo(W * 0.72, H - 13); c.bezierCurveTo(W * 0.9, 46, W * 0.5, 28, W * 0.58, 0);
+        c.closePath(); c.fill();
+        break;
+      case "b_field":
+        c.fillStyle = P.lgrad(0, 22, p.skyT, p.skyB); c.fillRect(0, 0, W, 22);
+        for (var fr2 = 0; fr2 < 4; fr2++) {
+          P.rect(0, 22 + fr2 * 13, W, 13, fr2 % 2 ? mix(p.mid, p.near, 0.4) : tint(p.mid, 0.18));
+          P.rect(0, 22 + fr2 * 13, W, 1.6, tint(p.sand, 0.2), 0.6);
+        }
+        break;
+      case "b_mountain":
+        c.fillStyle = P.lgrad(0, H - 13, p.skyT, p.skyB); c.fillRect(0, 0, W, H - 13);
+        P.poly([[0, 46], [26, 22], [52, 40], [82, 16], [116, 42], [116, H - 13], [0, H - 13]], mix(p.far, p.skyB, 0.3));
+        P.poly([[0, 60], [36, 40], [70, 58], [100, 42], [116, 54], [116, H - 13], [0, H - 13]], p.mid);
+        break;
+      case "b_street":
+        P.rect(0, 0, W, H - 13, mix("#d9c9ae", p.dark, 0.02));
+        P.rect(0, 0, W, 8, shade("#d9c9ae", 0.25));
+        P.rect(12, 14, 22, 16, mix(p.skyT, "#c8d6d4", 0.5), 0.95);
+        P.rect(48, 14, 22, 16, mix(p.skyT, "#c8d6d4", 0.5), 0.95);
+        P.poly([[8, 42], [76, 42], [70, 58], [14, 58]], mix("#b3604c", p.dark, 0));
+        P.rect(84, 20, 22, 40, "#f0e8d6");
+        P.rect(88, 26, 14, 3, "#5b4a38", 0.7);
+        P.rect(88, 32, 14, 3, "#5b4a38", 0.55);
+        break;
+      case "b_plain":
+        c.fillStyle = P.lgrad(0, 30, p.skyT, p.skyB); c.fillRect(0, 0, W, 30);
+        P.rect(0, 30, W, H - 43, mix(p.mid, "#7f975f", 0.4));
+        P.poly([[0, 38], [40, 30], [80, 40], [116, 32], [116, 46], [0, 46]], tint(mix(p.mid, "#7f975f", 0.4), 0.12), 0.6);
+        P.grassTufts(H - 34, 6, mix(p.mid, "#7f975f", 0.4));
+        break;
+      case "b_interior":
+        P.rect(0, 0, W, H - 26, mix("#e6d8bd", p.skyT, 0.12));
+        P.rect(0, H - 26, W, 13, mix("#9a7b58", p.dark, 0.08));
+        P.rect(66, 12, 38, 34, "#54432f");
+        P.rect(70, 16, 30, 26, mix(p.skyT, p.skyB, 0.5));
+        P.stroke([[85, 16], [85, 42]], "#54432f", 2.4, 1);
+        P.rect(16, H - 40, 36, 4, "#6b5136");
+        P.rect(20, H - 36, 4, 10, "#5d4632");
+        P.rect(44, H - 36, 4, 10, "#5d4632");
+        break;
+      case "n_grass":
+        P.grassTufts(H * 0.3, 14, mix(p.mid, "#7f975f", 0.4));
+        break;
+      case "n_pebbles":
+        P.shadeCircle(40, 54, 11, "#b9b2a2");
+        P.shadeCircle(62, 58, 8, "#a8a191");
+        P.shadeCircle(78, 50, 6, "#c4bdae");
+        break;
+      case "w_birds":
+        P.birds(W / 2, 34, 3);
+        P.cloudBlob(W * 0.72, 58, 12);
+        break;
+      case "w_cloud":
+        P.cloudBlob(W / 2, 44, 24);
+        break;
+      default:
+        if (ELS[key]) ELS[key].draw(P, W / 2, P.gy, TILE_S[key] || 0.5);
+    }
+  }
+
+  var gameTiles = [], matchedCount = 0, selectedTile = null;
+  var matchNote = $("matchNote"), matchCount = $("matchCount");
+
+  function buildGame(data) {
+    var tray = $("tileTray");
+    tray.innerHTML = "";
+    gameTiles = []; matchedCount = 0; selectedTile = null;
+    var seen = {};
+    data.forEach(function (d, ai) {
+      d.spec.els.forEach(function (k) {
+        if (!EL_NAMES[k]) return;
+        var entry = seen[k];
+        if (!entry) { entry = seen[k] = { key: k, name: EL_NAMES[k], acts: [] }; gameTiles.push(entry); }
+        if (entry.acts.indexOf(ai) === -1) entry.acts.push(ai);
+      });
+    });
+    function addFiller(key, name, actFilter) {
+      if (gameTiles.length >= 10) return;
+      var acts = [];
+      data.forEach(function (d, ai) { if (actFilter(d)) acts.push(ai); });
+      if (acts.length > 0) gameTiles.push({ key: key, name: name, acts: acts, weather: true });
+    }
+    /* 時刻元件:清晨/日午/風雨/黃昏/夜晚 */
+    [0, 1, 2, 3, 4].forEach(function (pi) {
+      addFiller("t" + pi, TIME_NAMES[pi], function (d) { return d.pi === pi; });
+    });
+    /* 基底元件:這個故事出現過的場景 */
+    Object.keys(BASE_NAMES).forEach(function (b) {
+      addFiller("b_" + b, BASE_NAMES[b], function (d) { return d.spec.base === b; });
+    });
+    /* 自然小物 */
+    addFiller("w_birds", "飛鳥", function (d) { return d.pi === 1 || d.pi === 3; });
+    addFiller("w_cloud", "白雲", function () { return true; });
+    addFiller("n_grass", "小草", function (d) { return d.spec.base !== "interior"; });
+    addFiller("n_pebbles", "石子", function (d) { return d.spec.base !== "interior"; });
+    gameTiles = gameTiles.slice(0, 10);
+    var rnd = makeRng(data[0].seed + 17);
+    for (var i = gameTiles.length - 1; i > 0; i--) {
+      var j = Math.floor(rnd() * (i + 1));
+      var tmp = gameTiles[i]; gameTiles[i] = gameTiles[j]; gameTiles[j] = tmp;
+    }
+    gameTiles.forEach(function (t) {
+      var el = document.createElement("button");
+      el.type = "button";
+      el.className = "tile";
+      el.setAttribute("aria-label", "插圖元件:" + t.name);
+      el.innerHTML = '<canvas></canvas><span class="tile-name">' + t.name + "</span>";
+      tray.appendChild(el);
+      drawTile(el.querySelector("canvas"), t.key);
+      t.dom = el;
+      t.tries = 0;
+      t.done = false;
+      wireTile(t);
+    });
+    matchNote.textContent = "拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能自由拖動。";
+    updateMatchCount();
+    $("matchSec").classList.add("show");
+  }
+
+  function showDock() {
+    $("tileDock").classList.add("on");
+    document.body.classList.add("dock-space");
+  }
+
+  function updateMatchCount() {
+    matchCount.textContent = "已配對 " + matchedCount + " / " + gameTiles.length;
+  }
+
+  function frameCards() {
+    return Array.prototype.slice.call(document.querySelectorAll("#boardGrid .frame-card"));
+  }
+
+  function spriteable(key) {
+    return !/^t\d$/.test(key) && key.indexOf("b_") !== 0;
+  }
+
+  function spawnSprite(rec, box) {
+    var sp = document.createElement("div");
+    sp.className = "scene-sprite";
+    sp.innerHTML = "<canvas></canvas>";
+    box.appendChild(sp);
+    drawTile(sp.querySelector("canvas"), rec.key, true);
+    positionSprite(sp, rec);
+    applySpriteFx(sp, rec);
+    wireSprite(sp, rec, box);
+    return sp;
+  }
+
+  function clearSprites(box) {
+    if (!box) return;
+    box.querySelectorAll(".scene-sprite").forEach(function (s) { s.remove(); });
+    hideTools();
+  }
+
+  function activeBoxFor(actIdx) {
+    if (document.body.classList.contains("walk-on")) {
+      return walkIdx === actIdx ? document.querySelector(".walk-preview") : null;
+    }
+    var card = frameCards()[actIdx];
+    return card ? card.querySelector(".frame-preview") : null;
+  }
+
+  function addSprite(actIdx, key, rx, ry) {
+    var d = currentData[actIdx];
+    var rec = { key: key, rx: rx, ry: ry, scale: 1, hue: 0, flip: false, actIdx: actIdx };
+    d.sprites.push(rec);
+    var box = activeBoxFor(actIdx);
+    if (!box) return null;
+    return { sp: spawnSprite(rec, box), rec: rec, box: box };
+  }
+
+  var SPRITE_HUES = ["none", "hue-rotate(45deg) saturate(1.15)", "hue-rotate(130deg)", "hue-rotate(210deg)", "hue-rotate(300deg) saturate(1.1)", "saturate(0.15) brightness(1.08)"];
+
+  function positionSprite(sp, rec) {
+    sp.style.left = (rec.rx * 100).toFixed(2) + "%";
+    sp.style.top = (rec.ry * 100).toFixed(2) + "%";
+    sp.style.width = (20 * (rec.scale || 1)).toFixed(1) + "%";
+  }
+  function applySpriteFx(sp, rec) {
+    var cv = sp.querySelector("canvas");
+    cv.style.filter = SPRITE_HUES[rec.hue || 0];
+    cv.style.transform = rec.flip ? "scaleX(-1)" : "";
+  }
+
+  function wireSprite(sp, rec, box) {
+    var sx = 0, sy = 0, moved = false;
+    sp.addEventListener("pointerdown", function (ev) {
+      ev.stopPropagation();
+      ev.preventDefault();
+      try { sp.setPointerCapture(ev.pointerId); } catch (e) { /* 無作用中指標時略過 */ }
+      sx = ev.clientX; sy = ev.clientY; moved = false;
+    });
+    sp.addEventListener("pointermove", function (ev) {
+      if (ev.buttons === 0) return;
+      if (!moved && Math.hypot(ev.clientX - sx, ev.clientY - sy) > 6) {
+        moved = true;
+        sp.classList.add("lift");
+        hideTools();
+      }
+      if (!moved) return;
+      var r = box.getBoundingClientRect();
+      rec.rx = Math.min(0.94, Math.max(0.06, (ev.clientX - r.left) / r.width));
+      rec.ry = Math.min(0.92, Math.max(0.1, (ev.clientY - r.top) / r.height));
+      positionSprite(sp, rec);
+    });
+    sp.addEventListener("pointerup", function (ev) {
+      ev.stopPropagation();
+      sp.classList.remove("lift");
+      if (!moved) toggleTools(sp, rec, box);
+    });
+    sp.addEventListener("pointercancel", function () {
+      sp.classList.remove("lift");
+    });
+    sp.addEventListener("click", function (ev) { ev.stopPropagation(); });
+  }
+
+  /* ── 貼紙工具列:放大 / 縮小 / 換色 / 翻轉 / 收回 ── */
+  var tools = null, toolsFor = null;
+  function ensureTools() {
+    if (tools) return;
+    tools = document.createElement("div");
+    tools.className = "sprite-tools";
+    tools.innerHTML =
+      '<button data-act="smaller" title="縮小" aria-label="縮小">−</button>' +
+      '<button data-act="bigger" title="放大" aria-label="放大">＋</button>' +
+      '<button data-act="hue" title="換色" aria-label="換色">◐</button>' +
+      '<button data-act="flip" title="左右翻轉" aria-label="左右翻轉">⇋</button>' +
+      '<button data-act="remove" title="收回元件盒" aria-label="收回元件盒">↩</button>';
+    tools.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); });
+    tools.addEventListener("pointerup", function (ev) { ev.stopPropagation(); });
+    tools.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      var b = ev.target.closest("button");
+      if (b && toolsFor) applyTool(b.dataset.act);
+    });
+  }
+  function toggleTools(sp, rec, box) {
+    if (toolsFor && toolsFor.sp === sp) { hideTools(); return; }
+    showTools(sp, rec, box);
+  }
+  function showTools(sp, rec, box) {
+    ensureTools();
+    box.appendChild(tools);
+    toolsFor = { sp: sp, rec: rec, box: box };
+    placeTools();
+    tools.classList.add("on");
+  }
+  function placeTools() {
+    if (!toolsFor) return;
+    tools.style.left = (Math.min(0.82, Math.max(0.18, toolsFor.rec.rx)) * 100) + "%";
+    tools.style.top = (Math.max(0.16, toolsFor.rec.ry) * 100) + "%";
+  }
+  function hideTools() {
+    if (tools) { tools.classList.remove("on"); }
+    toolsFor = null;
+  }
+  function applyTool(act) {
+    var sp = toolsFor.sp, rec = toolsFor.rec;
+    if (act === "bigger") rec.scale = Math.min(2.4, (rec.scale || 1) * 1.18);
+    else if (act === "smaller") rec.scale = Math.max(0.45, (rec.scale || 1) / 1.18);
+    else if (act === "hue") rec.hue = ((rec.hue || 0) + 1) % SPRITE_HUES.length;
+    else if (act === "flip") rec.flip = !rec.flip;
+    else if (act === "remove") {
+      var d = currentData[rec.actIdx];
+      d.sprites = d.sprites.filter(function (r) { return r !== rec; });
+      sp.remove();
+      hideTools();
+      var t = null;
+      for (var i = 0; i < gameTiles.length; i++) {
+        if (gameTiles[i].key === rec.key && gameTiles[i].done) { t = gameTiles[i]; break; }
+      }
+      if (t) {
+        t.done = false;
+        t.tries = 0;
+        t.dom.classList.remove("done");
+        matchedCount = Math.max(0, matchedCount - 1);
+        updateMatchCount();
+        matchNote.textContent = "「" + t.name + "」收回元件盒了,可以再放一次。";
+      }
+      return;
+    }
+    positionSprite(sp, rec);
+    applySpriteFx(sp, rec);
+    placeTools();
+  }
+  document.addEventListener("pointerdown", function (ev) {
+    if (!toolsFor) return;
+    if (ev.target.closest && (ev.target.closest(".sprite-tools") || ev.target.closest(".scene-sprite"))) return;
+    hideTools();
+  });
+
+  /* ── 分鏡放映導覽:一次一幕,箭頭引導 ── */
+  var walkIdx = 0, walkData = null;
+  var walkPrev = $("walkPrev"), walkNext = $("walkNext"), walkCard = $("walkCard");
+
+  function startWalk(data) {
+    walkData = data;
+    walkIdx = 0;
+    var prog = $("walkProgress");
+    prog.innerHTML = "";
+    STAGES.forEach(function (s) {
+      var dot = document.createElement("span");
+      dot.textContent = s.glyph;
+      prog.appendChild(dot);
+    });
+    document.body.classList.add("walk-on");
+    showDock();
+    renderWalk(false);
+    requestAnimationFrame(walkResize);
+    setTimeout(walkResize, 150);
+  }
+
+  function walkResize() {
+    if (!document.body.classList.contains("walk-on")) return;
+    var main = document.querySelector(".walk-main");
+    var info = document.querySelector(".walk-info");
+    if (!main || !info) return;
+    var availH = main.clientHeight - info.offsetHeight - 20;
+    var availW = main.clientWidth - 30;
+    var w = Math.max(280, Math.min(availW, availH * 1.625));
+    document.documentElement.style.setProperty("--wkw", w.toFixed(0) + "px");
+  }
+  window.addEventListener("resize", walkResize);
+
+  function renderWalk(animate) {
+    var d = walkData[walkIdx];
+    function paint() {
+      renderScene($("walkCanvas"), d.spec, d.chosen, d.seed, walkIdx, d.pi, d.extras, 2);
+      var wp = document.querySelector(".walk-preview");
+      clearSprites(wp);
+      d.sprites.forEach(function (rec) { spawnSprite(rec, wp); });
+      $("walkGlyph").textContent = d.stage.glyph;
+      $("walkAct").textContent = d.stage.act;
+      $("walkName").textContent = d.stage.name;
+      $("walkSummary").textContent = d.summary;
+      $("walkDesc").textContent = d.desc;
+      $("walkMood").textContent = d.mood;
+      var dots = $("walkProgress").children;
+      for (var i = 0; i < dots.length; i++) {
+        dots[i].className = i === walkIdx ? "cur" : (i < walkIdx ? "seen" : "");
+      }
+      walkPrev.disabled = walkIdx === 0;
+      var last = walkIdx === walkData.length - 1;
+      walkNext.classList.toggle("finish", last);
+      walkNext.textContent = last ? "✓ 完成" : "→";
+      walkNext.setAttribute("aria-label", last ? "完成導覽,開始配對創作" : "下一幕");
+      walkResize();
+    }
+    if (animate && !reduceMotion) {
+      walkCard.classList.add("swap");
+      setTimeout(function () {
+        paint();
+        walkCard.classList.remove("swap");
+      }, 320);
+    } else {
+      paint();
+    }
+  }
+
+  function endWalk() {
+    if (!document.body.classList.contains("walk-on")) return;
+    document.body.classList.remove("walk-on");
+    clearSprites(document.querySelector(".walk-preview"));
+    /* 導覽中放的貼紙,同步回四張分鏡卡 */
+    frameCards().forEach(function (card, ai) {
+      var box = card.querySelector(".frame-preview");
+      clearSprites(box);
+      currentData[ai].sprites.forEach(function (rec) { spawnSprite(rec, box); });
+    });
+    $("board").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+
+  walkNext.addEventListener("click", function () {
+    if (walkIdx >= walkData.length - 1) { endWalk(); return; }
+    walkIdx++;
+    renderWalk(true);
+  });
+  walkPrev.addEventListener("click", function () {
+    if (walkIdx === 0) return;
+    walkIdx--;
+    renderWalk(true);
+  });
+  $("walkSkip").addEventListener("click", endWalk);
+  document.addEventListener("keydown", function (ev) {
+    if (!document.body.classList.contains("walk-on")) return;
+    if (ev.key === "ArrowRight") walkNext.click();
+    else if (ev.key === "ArrowLeft") walkPrev.click();
+    else if (ev.key === "Escape") endWalk();
+  });
+
+  /* ── 全螢幕創作模式 ── */
+  var fsBtn = $("fsBtn"), fsExit = $("fsExit"), fsStage = $("fsStage");
+  var gridHome = null;
+  function fsResize() {
+    if (!document.body.classList.contains("fs-on")) return;
+    var r = fsStage.getBoundingClientRect();
+    var cellW = (r.width - 16) / 2 - 32;
+    var cellH = (r.height - 16) / 2 - 64;
+    var w = Math.max(240, Math.min(cellW, cellH * 1.625));
+    document.documentElement.style.setProperty("--fsw", w.toFixed(0) + "px");
+  }
+  fsBtn.addEventListener("click", function () {
+    var grid = $("boardGrid");
+    gridHome = { parent: grid.parentNode, next: grid.nextSibling };
+    fsStage.appendChild(grid);
+    document.body.classList.add("fs-on");
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(function () { /* 環境不允許時仍以覆蓋層呈現 */ });
+    }
+    fsResize();
+    setTimeout(fsResize, 120);
+  });
+  function exitFs() {
+    if (!document.body.classList.contains("fs-on")) return;
+    document.body.classList.remove("fs-on");
+    if (gridHome) gridHome.parent.insertBefore($("boardGrid"), gridHome.next);
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(function () { /* 忽略 */ });
+    }
+  }
+  fsExit.addEventListener("click", exitFs);
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") exitFs();
+  });
+  window.addEventListener("resize", fsResize);
+
+  function attemptMatch(tile, actIdx, clientX, clientY) {
+    if (tile.done) return;
+    clearSelection();
+    if (tile.acts.indexOf(actIdx) !== -1) {
+      tile.done = true;
+      tile.dom.classList.add("done");
+      matchedCount++;
+      updateMatchCount();
+      var placed = "";
+      if (spriteable(tile.key)) {
+        var rx = 0.5, ry = 0.68;
+        var box = activeBoxFor(actIdx);
+        if (box && clientX != null) {
+          var r = box.getBoundingClientRect();
+          if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom + 40) {
+            rx = Math.min(0.94, Math.max(0.06, (clientX - r.left) / r.width));
+            ry = Math.min(0.92, Math.max(0.1, (clientY - r.top) / r.height));
+          }
+        } else {
+          rx = 0.3 + (currentData[actIdx].sprites.length % 3) * 0.22;
+        }
+        var made = addSprite(actIdx, tile.key, rx, ry);
+        placed = "點一下它可以放大、縮小、換色、翻轉;按住可以拖動位置。";
+        if (made) showTools(made.sp, made.rec, made.box);
+      }
+      var praise = PRAISES[matchedCount % PRAISES.length];
+      if (matchedCount === gameTiles.length) {
+        matchNote.textContent = "太棒了!" + gameTiles.length + " 件記憶都回到故事裡了。" + (placed ? "每一件都還能拖動、放大、換色。" : "") + "想再玩一次,就再按一次「生成分鏡」。";
+      } else {
+        matchNote.textContent = praise + "「" + tile.name + "」回到了第" + "一二三四"[actIdx] + "幕(" + STAGES[actIdx].glyph + ")。" + placed;
+      }
+    } else {
+      tile.tries++;
+      tile.dom.classList.remove("shake");
+      void tile.dom.offsetWidth;
+      tile.dom.classList.add("shake");
+      var inWalk = document.body.classList.contains("walk-on");
+      if (tile.tries >= 2) {
+        var hintIdx = tile.acts[0];
+        if (inWalk) {
+          matchNote.textContent = "放錯囉——「" + tile.name + "」屬於第" + "一二三四"[hintIdx] + "幕(" + STAGES[hintIdx].glyph + "),先用箭頭翻到那一幕再放。";
+        } else {
+          var card = frameCards()[hintIdx];
+          if (card) {
+            card.classList.remove("hint-glow");
+            void card.offsetWidth;
+            card.classList.add("hint-glow");
+          }
+          matchNote.textContent = "再想想看——亮起來的那一幕,就是「" + tile.name + "」的家。";
+        }
+      } else {
+        matchNote.textContent = inWalk
+          ? "放錯囉,「" + tile.name + "」不屬於這一幕,再想想看。"
+          : "再想想看,「" + tile.name + "」好像屬於別的一幕。";
+      }
+    }
+  }
+
+  function clearSelection() {
+    if (selectedTile) { selectedTile.dom.classList.remove("selected"); selectedTile = null; }
+  }
+
+  function wireTile(tile) {
+    var startX = 0, startY = 0, dragging = false, ghost = null;
+    tile.dom.addEventListener("pointerdown", function (ev) {
+      if (tile.done) return;
+      try { tile.dom.setPointerCapture(ev.pointerId); } catch (e) { /* 無作用中指標時略過 */ }
+      startX = ev.clientX; startY = ev.clientY; dragging = false;
+    });
+    tile.dom.addEventListener("pointermove", function (ev) {
+      if (tile.done || ev.buttons === 0) return;
+      if (!dragging && Math.hypot(ev.clientX - startX, ev.clientY - startY) > 8) {
+        dragging = true;
+        ghost = tile.dom.cloneNode(true);
+        ghost.className = "tile tile-ghost";
+        document.body.appendChild(ghost);
+        drawTile(ghost.querySelector("canvas"), tile.key);
+      }
+      if (dragging && ghost) {
+        ghost.style.left = ev.clientX + "px";
+        ghost.style.top = ev.clientY + "px";
+        if (document.body.classList.contains("walk-on")) {
+          var wp = walkPreviewFromPoint(ev.clientX, ev.clientY);
+          document.querySelector(".walk-preview").classList.toggle("drop-hint", !!wp);
+        } else {
+          if (ev.clientY < 110) window.scrollBy(0, -16);
+          else if (ev.clientY > window.innerHeight - 230 && ev.clientY < window.innerHeight - 160) window.scrollBy(0, 16);
+          var over = cardFromPoint(ev.clientX, ev.clientY);
+          frameCards().forEach(function (cd, i) { cd.classList.toggle("drop-hint", cd === over); });
+        }
+      }
+    });
+    tile.dom.addEventListener("pointerup", function (ev) {
+      if (tile.done) return;
+      if (dragging) {
+        var inWalk = document.body.classList.contains("walk-on");
+        var over = inWalk ? null : cardFromPoint(ev.clientX, ev.clientY);
+        var overWalk = inWalk ? walkPreviewFromPoint(ev.clientX, ev.clientY) : null;
+        frameCards().forEach(function (cd) { cd.classList.remove("drop-hint"); });
+        var wpEl = document.querySelector(".walk-preview");
+        if (wpEl) wpEl.classList.remove("drop-hint");
+        if (ghost) { ghost.remove(); ghost = null; }
+        dragging = false;
+        if (overWalk) attemptMatch(tile, walkIdx, ev.clientX, ev.clientY);
+        else if (over) attemptMatch(tile, frameCards().indexOf(over), ev.clientX, ev.clientY);
+      } else {
+        /* 點選模式:先選元件,再點分鏡卡 */
+        if (selectedTile === tile) { clearSelection(); return; }
+        clearSelection();
+        selectedTile = tile;
+        tile.dom.classList.add("selected");
+        matchNote.textContent = "已選「" + tile.name + "」——現在點一張分鏡卡,把它放回去。";
+      }
+    });
+    tile.dom.addEventListener("pointercancel", function () {
+      if (ghost) { ghost.remove(); ghost = null; }
+      dragging = false;
+      frameCards().forEach(function (cd) { cd.classList.remove("drop-hint"); });
+    });
+  }
+
+  function cardFromPoint(x, y) {
+    var el = document.elementFromPoint(x, y);
+    return el ? el.closest(".frame-card") : null;
+  }
+
+  function walkPreviewFromPoint(x, y) {
+    if (!document.body.classList.contains("walk-on")) return null;
+    var el = document.elementFromPoint(x, y);
+    return el ? el.closest(".walk-preview") : null;
+  }
+
+  $("boardGrid").addEventListener("click", function (ev) {
+    if (!selectedTile) return;
+    var card = ev.target.closest(".frame-card");
+    if (!card) return;
+    attemptMatch(selectedTile, frameCards().indexOf(card));
+  });
+  document.addEventListener("click", function (ev) {
+    if (!selectedTile) return;
+    if (!document.body.classList.contains("walk-on")) return;
+    if (ev.target.closest && ev.target.closest(".walk-preview")) {
+      attemptMatch(selectedTile, walkIdx, ev.clientX, ev.clientY);
+    }
+  });
+
+  window.__test = {
+    draw: function (canvas, text, act, pi) {
+      var spec = composeScene(text);
+      if (!spec.hit) spec = { base: "plain", els: ["tree"], hit: true };
+      var p2 = pi == null ? pickPalette(text, act) : pi;
+      spec.els.forEach(function (k) { if (ELS[k].night && p2 < 2) p2 = 4; });
+      var chosen = layoutScene(spec);
+      renderScene(canvas, spec, chosen, hashText(text) + act * 131, act, p2);
+      return { base: spec.base, els: spec.els, pi: p2 };
+    }
+  };
+
+  function typeInto(el, text, done) {
+    if (reduceMotion) { el.value = text; done(); return; }
+    el.value = "";
+    var i = 0;
+    var t = setInterval(function () {
+      el.value += text[i];
+      i++;
+      if (i >= text.length) { clearInterval(t); done(); }
+    }, 22);
+  }
+})();
+</script>
+
+</body>
+</html>
