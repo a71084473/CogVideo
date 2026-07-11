@@ -1232,14 +1232,15 @@
   ];
 
   /* 從段落文字判斷時空:0 晨 / 1 日 / 2 風雨 / 3 暮 / 4 夜;沒線索則依幕次推進 */
-  function pickPalette(text, actIndex) {
-    if (/颱風|風颱|暴雨|大雨|下雨|下起雨|風雨|大水|淹|梅雨/.test(text)) return 2;
-    if (/清晨|天還沒亮|天未亮|一早|早晨|黎明|天剛亮|早上/.test(text)) return 0;
-    if (/黃昏|夕陽|傍晚|日落|暮色|天黑前/.test(text)) return 3;
-    if (/半夜|深夜|夜裡|夜晚|晚上|月光|月亮|星空|星星|睡不著|夜市|守夜|不敢睡|煙火|螢火蟲/.test(text)) return 4;
-    if (/中午|正午|大太陽|白天|日頭/.test(text)) return 1;
-    return actIndex;
+  function pickPaletteEx(text, actIndex) {
+    if (/颱風|風颱|暴雨|大雨|下雨|下起雨|風雨|大水|淹|梅雨/.test(text)) return { pi: 2, explicit: true };
+    if (/清晨|天還沒亮|天未亮|一早|早晨|黎明|天剛亮|早上/.test(text)) return { pi: 0, explicit: true };
+    if (/黃昏|夕陽|傍晚|日落|暮色|天黑前/.test(text)) return { pi: 3, explicit: true };
+    if (/半夜|深夜|夜裡|夜晚|晚上|月光|月亮|星空|星星|睡不著|夜市|守夜|不敢睡|煙火|螢火蟲/.test(text)) return { pi: 4, explicit: true };
+    if (/中午|正午|大太陽|白天|日頭/.test(text)) return { pi: 1, explicit: true };
+    return { pi: actIndex, explicit: false };
   }
+  function pickPalette(text, actIndex) { return pickPaletteEx(text, actIndex).pi; }
 
   /* ── 畫家:精緻插圖引擎 ─────────────── */
   function Painter(canvas, seed, act, pi, w, h, res) {
@@ -2202,12 +2203,13 @@
     text = text.replace(/全家人|全家|大家|家人|人家/g, "\u25cb");
     var bases = scoreVocab(text, BASE_VOCAB);
     var base = bases.length ? bases[0].key : null;
+    var baseExplicit = !!base;
     var els = scoreVocab(text, EL_VOCAB).map(function (e) { return e.key; });
-    /* 元素對基底的修正 */
-    if (els.indexOf("lighthouse") !== -1) base = "sea";
-    else if (els.indexOf("bridge") !== -1 && base !== "sea" && base !== "river") base = "river";
-    else if (els.indexOf("boat") !== -1 && base !== "sea" && base !== "river") base = /海|港|漁/.test(text + (ctxText || "")) ? "sea" : "river";
-    if (els.indexOf("train") !== -1 && (base === "interior" || base === "sea")) base = "plain";
+    /* 元素對基底的修正(由故事元素推得,同樣視為明確) */
+    if (els.indexOf("lighthouse") !== -1) { base = "sea"; baseExplicit = true; }
+    else if (els.indexOf("bridge") !== -1 && base !== "sea" && base !== "river") { base = "river"; baseExplicit = true; }
+    else if (els.indexOf("boat") !== -1 && base !== "sea" && base !== "river") { base = /海|港|漁/.test(text + (ctxText || "")) ? "sea" : "river"; baseExplicit = true; }
+    if (els.indexOf("train") !== -1 && (base === "interior" || base === "sea")) { base = "plain"; baseExplicit = false; }
     if (base === "street") els = els.filter(function (k) { return k !== "skyline"; });
     if (base === "interior") {
       els = els.filter(function (k) { return ELS[k].indoor || ELS[k].z === 4; });
@@ -2215,8 +2217,8 @@
       els = els.filter(function (k) { return !ELS[k].indoor; });
     }
     var hit = !!base || els.length > 0;
-    if (!base) base = els.length ? "plain" : null;
-    return { base: base, els: els, hit: hit };
+    if (!base) { base = els.length ? "plain" : null; baseExplicit = false; }
+    return { base: base, els: els, hit: hit, baseExplicit: baseExplicit };
   }
 
   /* 挑選要畫的元素:結構最多 2、植栽 2、小物 2、天空 1 */
@@ -2331,8 +2333,9 @@
       var actText = group.join("");
       var spec = composeScene(actText, text);
       if (!spec.hit) spec = globalSpec;
-      var pi = pickPalette(actText, i);
-      spec.els.forEach(function (k) { if (ELS[k].night && pi < 2) pi = 4; });
+      var pe = pickPaletteEx(actText, i);
+      var pi = pe.pi, piExplicit = pe.explicit;
+      spec.els.forEach(function (k) { if (ELS[k].night && pi < 2) { pi = 4; piExplicit = true; } });
       var chosen = layoutScene(spec);
       return {
         stage: STAGES[i],
@@ -2343,6 +2346,7 @@
         extras: [],
         sprites: [],
         pi: pi,
+        piExplicit: piExplicit,
         seed: hashText(actText) + i * 131,
         desc: describeScene(spec, chosen, pi),
         mood: detectMood(actText, i)
@@ -2870,25 +2874,41 @@
       data.forEach(function (d, ai) { if (actFilter(d)) acts.push(ai); });
       if (acts.length > 0) gameTiles.push({ key: key, name: name, acts: acts, weather: true });
     }
-    /* 時刻元件:清晨/日午/風雨/黃昏/夜晚 */
+    /* 時刻元件:只在故事文字明確提到該時刻時出現 */
     [0, 1, 2, 3, 4].forEach(function (pi) {
-      addFiller("t" + pi, TIME_NAMES[pi], function (d) { return d.pi === pi; });
+      addFiller("t" + pi, TIME_NAMES[pi], function (d) { return d.pi === pi && d.piExplicit; });
     });
-    /* 基底元件:這個故事出現過的場景 */
+    /* 場景基底:故事明確描寫過的環境才出現 */
     Object.keys(BASE_NAMES).forEach(function (b) {
-      addFiller("b_" + b, BASE_NAMES[b], function (d) { return d.spec.base === b; });
+      addFiller("b_" + b, BASE_NAMES[b], function (d) { return d.spec.base === b && d.spec.baseExplicit; });
     });
-    /* 天空與自然小物 */
-    addFiller("w_sun", "太陽", function (d) { return d.pi === 0 || d.pi === 1 || d.pi === 3; });
-    addFiller("w_moon", "月亮", function (d) { return d.pi === 4; });
-    addFiller("w_stars", "星星", function (d) { return d.pi === 4; });
-    addFiller("w_birds", "飛鳥", function (d) { return d.pi === 1 || d.pi === 3; });
-    addFiller("w_cloud", "白雲", function () { return true; });
-    addFiller("n_grass", "小草", function (d) { return d.spec.base !== "interior"; });
-    addFiller("n_pebbles", "石子", function (d) { return d.spec.base !== "interior"; });
-    addFiller("n_bench", "長椅", function (d) { return d.spec.base !== "interior"; });
-    addFiller("n_pot", "盆栽", function () { return true; });
+    /* 自然小物:故事文字有提到才出現 */
+    [
+      ["w_sun", "太陽", ["太陽", "日頭", "陽光", "烈日"]],
+      ["w_moon", "月亮", ["月亮", "月光", "月娘", "彎月"]],
+      ["w_stars", "星星", ["星星", "星空", "星光", "滿天星"]],
+      ["w_cloud", "白雲", ["雲"]],
+      ["w_birds", "飛鳥", ["鳥", "海鷗", "白鷺", "麻雀"]],
+      ["n_grass", "小草", ["草"]],
+      ["n_pebbles", "石子", ["石頭", "石子", "礁石", "碎石"]],
+      ["n_bench", "長椅", ["長椅", "板凳", "凳子", "椅子"]],
+      ["n_pot", "盆栽", ["盆栽", "花盆"]]
+    ].forEach(function (nt) {
+      addFiller(nt[0], nt[1], function (d) {
+        for (var k = 0; k < nt[2].length; k++) {
+          if (d.text.indexOf(nt[2][k]) !== -1) return true;
+        }
+        return false;
+      });
+    });
     gameTiles = gameTiles.slice(0, 16);
+    /* 故事太抽象、找不到任何元件時,不顯示配對區 */
+    if (gameTiles.length === 0) {
+      $("matchSec").classList.remove("show");
+      $("tileDock").classList.remove("on");
+      document.body.classList.remove("dock-space");
+      return;
+    }
     var rnd = makeRng(data[0].seed + 17);
     for (var i = gameTiles.length - 1; i > 0; i--) {
       var j = Math.floor(rnd() * (i + 1));
