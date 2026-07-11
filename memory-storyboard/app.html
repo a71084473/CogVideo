@@ -2925,14 +2925,47 @@
     return Array.prototype.slice.call(document.querySelectorAll("#boardGrid .frame-card"));
   }
 
-  function spriteable(key) {
-    return !/^t\d$/.test(key) && key.indexOf("b_") !== 0;
+  /* 時刻/場景元件:蓋一枚朱紅印章,像替這一幕落款 */
+  function drawSealArt(off, name) {
+    var P = new Painter(off, hashText(name), 1, 1, 116, 84);
+    var W = P.W, H = P.H, c = P.ctx;
+    c.save();
+    c.translate(W / 2, H / 2);
+    c.rotate(0.06);
+    var s = 30;
+    c.fillStyle = "rgba(168, 70, 47, 0.14)";
+    c.fillRect(-s, -s, s * 2, s * 2);
+    c.strokeStyle = "#a8462f";
+    c.lineWidth = 3.4;
+    c.strokeRect(-s, -s, s * 2, s * 2);
+    c.fillStyle = "#a8462f";
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    var chars = (name || "印").split("");
+    if (chars.length <= 2) {
+      c.font = '600 25px "Noto Serif TC", "Songti TC", "PMingLiU", serif';
+      for (var i = 0; i < chars.length; i++) {
+        c.fillText(chars[i], 0, (i - (chars.length - 1) / 2) * 27);
+      }
+    } else {
+      c.font = '600 17px "Noto Serif TC", "Songti TC", "PMingLiU", serif';
+      c.fillText(name, 0, 0);
+    }
+    c.restore();
+    /* 印泥的斑駁質感 */
+    for (var g = 0; g < 46; g++) {
+      P.rect(W / 2 - s + P.rnd() * s * 2, H / 2 - s + P.rnd() * s * 2, 1.4, 1.4, "#f4efe6", 0.3);
+    }
+  }
+  function isSealKey(key) {
+    return /^t\d$/.test(key) || key.indexOf("b_") === 0;
   }
 
   /* 把元件圖裁切到不透明範圍,命中區域才會貼合圖形 */
-  function drawSpriteCanvas(canvas, key) {
+  function drawSpriteCanvas(canvas, key, name) {
     var off = document.createElement("canvas");
-    drawTile(off, key, true);
+    if (isSealKey(key)) drawSealArt(off, name);
+    else drawTile(off, key, true);
     var oc = off.getContext("2d");
     var W = off.width, H = off.height;
     var d = oc.getImageData(0, 0, W, H).data;
@@ -2962,7 +2995,7 @@
     sp.className = "scene-sprite";
     sp.innerHTML = "<canvas></canvas>";
     box.appendChild(sp);
-    var meta = drawSpriteCanvas(sp.querySelector("canvas"), rec.key);
+    var meta = drawSpriteCanvas(sp.querySelector("canvas"), rec.key, rec.name);
     rec.artFrac = meta.frac;
     sp._rec = rec;
     positionSprite(sp, rec);
@@ -2985,9 +3018,9 @@
     return card ? card.querySelector(".frame-preview") : null;
   }
 
-  function addSprite(actIdx, key, rx, ry) {
+  function addSprite(actIdx, key, rx, ry, name) {
     var d = currentData[actIdx];
-    var rec = { key: key, rx: rx, ry: ry, scale: 1, hue: 0, flip: false, actIdx: actIdx };
+    var rec = { key: key, rx: rx, ry: ry, scale: 1, hue: 0, flip: false, actIdx: actIdx, name: name };
     d.sprites.push(rec);
     var box = activeBoxFor(actIdx);
     if (!box) return null;
@@ -3300,7 +3333,7 @@
       fxToast(pt.x, pt.y, "+" + gain + (streak >= 3 ? " 連對!" : ""), true);
       flashBox(okBox, true);
       var placed = "";
-      if (spriteable(tile.key)) {
+      if (true) {
         var rx = 0.5, ry = 0.68;
         var box = activeBoxFor(actIdx);
         if (box && clientX != null) {
@@ -3312,8 +3345,10 @@
         } else {
           rx = 0.3 + (currentData[actIdx].sprites.length % 3) * 0.22;
         }
-        var made = addSprite(actIdx, tile.key, rx, ry);
-        placed = "點一下它可以放大、縮小、換色、翻轉;按住可以拖動位置。";
+        var made = addSprite(actIdx, tile.key, rx, ry, tile.name);
+        placed = isSealKey(tile.key)
+          ? "「" + tile.name + "」的印章蓋上了!點一下可以放大、換色,按住可以拖動。"
+          : "點一下它可以放大、縮小、換色、翻轉;按住可以拖動位置。";
         if (made) showTools(made.sp, made.rec, made.box);
       }
       var praise = PRAISES[matchedCount % PRAISES.length];
