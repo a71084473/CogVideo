@@ -1,0 +1,431 @@
+<!doctype html><html><head><meta charset=utf-8></head><body><title>故事分鏡背景生成 · Story Storyboard</title>
+<style>
+  :root{
+    --bg:#E9ECF1; --panel:#FFFFFF; --panel-2:#F1F3F7; --line:#D3D9E3;
+    --ink:#1B2029; --muted:#5C6472; --accent:#D9891F; --accent-ink:#3A2A08;
+    --frame-line:#C6CDD9;
+    --font-display:"Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+    --font-body:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#12151C; --panel:#1A1F29; --panel-2:#202634; --line:#2C3444;
+      --ink:#ECE7DD; --muted:#8A93A6; --accent:#F5B740; --accent-ink:#241A05;
+      --frame-line:#2C3444;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#E9ECF1; --panel:#FFFFFF; --panel-2:#F1F3F7; --line:#D3D9E3;
+    --ink:#1B2029; --muted:#5C6472; --accent:#D9891F; --accent-ink:#3A2A08;
+    --frame-line:#C6CDD9;
+  }
+  :root[data-theme="dark"]{
+    --bg:#12151C; --panel:#1A1F29; --panel-2:#202634; --line:#2C3444;
+    --ink:#ECE7DD; --muted:#8A93A6; --accent:#F5B740; --accent-ink:#241A05;
+    --frame-line:#2C3444;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1200px; margin:0 auto; padding:28px clamp(16px,4vw,40px) 64px}
+
+  /* header */
+  header{border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:26px}
+  .eyebrow{
+    font-family:var(--font-display); text-transform:uppercase;
+    letter-spacing:.28em; font-size:12px; font-weight:700; color:var(--accent);
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:""; width:26px; height:14px; border-radius:2px;
+    background:
+      repeating-linear-gradient(90deg,var(--accent) 0 4px,transparent 4px 8px);
+    opacity:.9;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:800;
+    font-size:clamp(30px,5.5vw,52px); line-height:1.02; margin:12px 0 6px;
+    letter-spacing:-.01em; text-wrap:balance;
+  }
+  h1 .en{color:var(--muted); font-weight:700}
+  .sub{color:var(--muted); max-width:60ch; font-size:15px; margin:0}
+
+  /* layout */
+  .grid{display:grid; grid-template-columns:340px 1fr; gap:28px; align-items:start}
+  @media (max-width:820px){ .grid{grid-template-columns:1fr} }
+
+  /* control rail */
+  .rail{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:20px; position:sticky; top:20px; display:flex; flex-direction:column; gap:16px;
+  }
+  @media (max-width:820px){ .rail{position:static} }
+  label.field{display:flex; flex-direction:column; gap:8px}
+  .lab{
+    font-family:var(--font-display); text-transform:uppercase; letter-spacing:.14em;
+    font-size:12px; font-weight:700; color:var(--muted);
+  }
+  textarea{
+    width:100%; min-height:190px; resize:vertical; padding:12px 13px;
+    background:var(--panel-2); color:var(--ink);
+    border:1px solid var(--line); border-radius:10px;
+    font-family:var(--font-body); font-size:15px; line-height:1.65;
+  }
+  textarea:focus, .num:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent}
+
+  .shots-row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  .stepper{display:flex; align-items:center; gap:0; border:1px solid var(--line); border-radius:9px; overflow:hidden}
+  .stepper button{
+    width:38px; height:38px; border:0; background:var(--panel-2); color:var(--ink);
+    font-size:20px; cursor:pointer; font-family:var(--font-mono);
+  }
+  .stepper button:hover{background:var(--accent); color:var(--accent-ink)}
+  .num{
+    width:52px; text-align:center; border:0; border-left:1px solid var(--line);
+    border-right:1px solid var(--line); background:var(--panel); color:var(--ink);
+    font-family:var(--font-mono); font-size:16px; height:38px;
+    font-variant-numeric:tabular-nums;
+  }
+  .btns{display:flex; gap:10px}
+  button.act{
+    flex:1; border:0; border-radius:10px; padding:13px 14px; cursor:pointer;
+    font-family:var(--font-display); text-transform:uppercase; letter-spacing:.1em;
+    font-weight:800; font-size:14px;
+  }
+  button.primary{background:var(--accent); color:var(--accent-ink)}
+  button.primary:hover{filter:brightness(1.07)}
+  button.ghost{
+    flex:0 0 auto; background:transparent; color:var(--ink);
+    border:1px solid var(--line); padding-inline:16px;
+  }
+  button.ghost:hover{border-color:var(--accent); color:var(--accent)}
+  .hint{font-size:12.5px; color:var(--muted); margin:0}
+  .hint code{font-family:var(--font-mono); background:var(--panel-2); padding:1px 5px; border-radius:4px}
+
+  /* contact sheet */
+  .sheet-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:14px; gap:12px; flex-wrap:wrap;
+  }
+  .sheet-title{font-family:var(--font-display); text-transform:uppercase; letter-spacing:.16em; font-size:13px; font-weight:700; color:var(--muted)}
+  .sheet-title b{color:var(--ink)}
+  .sheet{display:grid; grid-template-columns:repeat(2,1fr); gap:18px}
+  @media (max-width:560px){ .sheet{grid-template-columns:1fr} }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .frame{position:relative; background:#000; line-height:0}
+  .frame canvas{width:100%; height:auto; display:block}
+  .dl{
+    position:absolute; top:8px; right:8px; opacity:0; transition:opacity .15s;
+    background:rgba(10,12,18,.72); color:#fff; border:0; border-radius:7px;
+    font-family:var(--font-mono); font-size:11px; padding:6px 9px; cursor:pointer;
+    letter-spacing:.03em;
+  }
+  .frame:hover .dl, .dl:focus{opacity:1}
+  .dl:hover{background:var(--accent); color:var(--accent-ink)}
+  .meta{padding:12px 14px; border-top:1px solid var(--frame-line); display:flex; flex-direction:column; gap:8px}
+  .tags{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+  .tag{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.02em;
+    padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted);
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .tag.n{border-color:var(--accent); color:var(--accent); font-weight:600}
+  .cap{font-size:13.5px; color:var(--ink); margin:0}
+  footer{margin-top:40px; color:var(--muted); font-size:12.5px; border-top:1px solid var(--line); padding-top:16px}
+  footer code{font-family:var(--font-mono)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">CogVideo · 分鏡工具 / Storyboard</div>
+    <h1>故事分鏡背景生成 <span class="en">/ Story Storyboard</span></h1>
+    <p class="sub">自己寫下一段文字故事（中文或英文），即時生成背景分鏡圖。系統會把故事切成鏡頭，分析每一鏡的時間、場景與氛圍，繪出對應的背景畫面。</p>
+  </header>
+
+  <div class="grid">
+    <section class="rail">
+      <label class="field">
+        <span class="lab">✍️ 你的故事 / Your story</span>
+        <textarea id="story" spellcheck="false"></textarea>
+      </label>
+
+      <div class="shots-row">
+        <span class="lab">分鏡數量 / Shots</span>
+        <div class="stepper">
+          <button type="button" id="minus" aria-label="減少分鏡">−</button>
+          <input class="num" id="shots" value="4" inputmode="numeric" aria-label="分鏡數量">
+          <button type="button" id="plus" aria-label="增加分鏡">+</button>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="act primary" id="gen">生成分鏡 🎬</button>
+        <button class="act ghost" id="shuffle" title="換一組畫面">↻</button>
+      </div>
+      <p class="hint">切句依 <code>。！？.!?</code>，關鍵詞決定時間 / 場景 / 氛圍。滑過畫面可下載 PNG。</p>
+    </section>
+
+    <main>
+      <div class="sheet-head">
+        <div class="sheet-title">背景分鏡圖 · <b id="count">4</b> 格 / Storyboard frames</div>
+        <div class="sheet-title" id="tod"></div>
+      </div>
+      <div class="sheet" id="sheet"></div>
+    </main>
+  </div>
+
+  <footer>
+    純前端 · Canvas 繪製，無需 GPU。要接真 <code>CogVideo / CogView2</code> 模型產生關鍵幀，見 repo 內 <code>storyboard/</code>。
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- keyword tables (mirror storyboard/segment.py) ---------- */
+const TIME_KW = {
+  night:["夜","晚","月","星","深夜","黑夜","night","moon","star","midnight"],
+  dawn: ["黎明","清晨","日出","拂晓","拂曉","早晨","dawn","sunrise","morning"],
+  dusk: ["黄昏","黃昏","傍晚","日落","夕阳","夕陽","dusk","sunset","evening","twilight"],
+  day:  ["正午","中午","晌午","白天","日间","日間","noon","midday","daytime"],
+};
+const SETTING_KW = {
+  sea:     ["海","海洋","大海","海边","海邊","波浪","浪","sea","ocean","beach","wave","coast"],
+  forest:  ["森林","树林","樹林","丛林","叢林","树","樹","林间","林間","forest","woods","tree","jungle"],
+  mountain:["山","山峰","群山","高山","mountain","hill","peak","cliff"],
+  city:    ["城市","都市","街道","大厦","大廈","高楼","高樓","楼","樓","城","city","street","building","town","skyline"],
+  desert:  ["沙漠","荒漠","戈壁","desert","dune","sand"],
+  snow:    ["雪","冰","雪山","冰川","snow","ice","frozen","glacier"],
+  room:    ["房间","房間","屋","室内","室內","房","客厅","客廳","卧室","臥室","room","indoor","house","hall"],
+  field:   ["草原","田野","原野","草地","平原","field","grass","meadow","plain","prairie"],
+  river:   ["河","江","溪","湖","river","lake","stream"],
+  space:   ["宇宙","太空","星空","银河","銀河","space","galaxy","cosmos","universe"],
+};
+const MOOD_KW = {
+  fire: ["火","燃烧","燃燒","火焰","烈焰","fire","flame","burning","blaze"],
+  rain: ["雨","下雨","暴雨","rain","storm","rainy"],
+  fog:  ["雾","霧","薄雾","薄霧","迷雾","迷霧","fog","mist","haze"],
+  magic:["魔法","光芒","发光","發光","神秘","magic","glow","mystic","aurora"],
+};
+
+const isAscii = s => /^[\x00-\x7f]+$/.test(s);
+function contains(text, word){
+  if(isAscii(word)){
+    const esc = word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    return new RegExp("\\b"+esc+"\\b","i").test(text);
+  }
+  return text.includes(word);
+}
+function firstMatch(text, table, dflt){
+  for(const tag in table) if(table[tag].some(w=>contains(text,w))) return tag;
+  return dflt;
+}
+function allMatches(text, table){
+  const out=[]; for(const tag in table) if(table[tag].some(w=>contains(text,w))) out.push(tag);
+  return out;
+}
+
+/* ---------- segmentation (mirror segment_story) ---------- */
+function splitSentences(story){
+  return story.split(/(?<=[。！？!?．.\n；;])/).map(s=>s.trim()).filter(Boolean);
+}
+function distribute(sents, n){
+  if(sents.length===0) return Array(n).fill("");
+  if(sents.length<=n){ const c=[...sents]; while(c.length<n) c.push(sents[sents.length-1]); return c; }
+  const c=[], size=sents.length/n;
+  for(let i=0;i<n;i++){ const lo=Math.round(i*size), hi=Math.round((i+1)*size); c.push(sents.slice(lo,hi).join(" ").trim()); }
+  return c;
+}
+function makeCaption(t, limit=40){
+  t=t.replace(/\s+/g," ").trim();
+  if([...t].length<=limit) return t;
+  return [...t].slice(0,limit-1).join("").replace(/[，,。.、\s]+$/,"")+"…";
+}
+function segmentStory(story, n){
+  story=(story||"").trim();
+  const gTime=firstMatch(story,TIME_KW,"day"), gSet=firstMatch(story,SETTING_KW,"field");
+  return distribute(splitSentences(story),n).map((chunk,i)=>({
+    index:i+1,
+    caption:makeCaption(chunk)||("分鏡 "+(i+1)),
+    time:firstMatch(chunk,TIME_KW,gTime),
+    setting:firstMatch(chunk,SETTING_KW,gSet),
+    moods:allMatches(chunk,MOOD_KW),
+  }));
+}
+
+/* ---------- rendering (mirror storyboard/render.py) ---------- */
+const W=768, H=432;
+const SKY={ day:[[104,176,235],[204,232,248]], dawn:[[60,70,120],[245,190,150]],
+  dusk:[[44,40,84],[240,140,96]], night:[[8,12,40],[28,40,84]] };
+const GROUND={ sea:[36,92,130],forest:[34,78,46],mountain:[78,84,96],city:[54,58,74],
+  desert:[196,160,104],snow:[222,230,240],room:[70,58,52],field:[86,132,68],
+  river:[60,110,120],space:[10,8,24] };
+
+const rgb=c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+const lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+const shade=(c,f)=>[Math.max(0,Math.min(255,c[0]*f)),Math.max(0,Math.min(255,c[1]*f)),Math.max(0,Math.min(255,c[2]*f))];
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function mkRng(seed){const r=mulberry32(seed>>>0);return{f:r,i:(a,b)=>a+Math.floor(r()*(b-a+1)),c:a=>a[Math.floor(r()*a.length)],u:(a,b)=>a+r()*(b-a)};}
+
+function vgrad(ctx,top,bot,y0,y1){const span=Math.max(1,y1-y0);for(let y=y0;y<y1;y++){ctx.strokeStyle=rgb(lerp(top,bot,(y-y0)/span));ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);ctx.stroke();}}
+function stars(ctx,rng,count,ymax){for(let i=0;i<count;i++){const x=rng.i(0,W),y=rng.i(0,ymax),r=rng.c([0,0,1]),b=rng.i(160,255);ctx.fillStyle=`rgb(${b},${b},${Math.min(255,b+20)})`;ctx.fillRect(x-r,y-r,2*r+1,2*r+1);}}
+function celestial(ctx,sc,horizon,rng){
+  let cx=W*0.74, cy=horizon*0.42;
+  const circ=(x,y,r,col)=>{ctx.fillStyle=rgb(col);ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();};
+  if(sc.time==="night"){ circ(cx,cy,34,[238,240,220]); ctx.fillStyle=rgb(SKY.night[0]); ctx.beginPath(); ctx.arc(cx-4,cy-24,20,0,7); ctx.fill(); }
+  else if(sc.time==="day"){ [[60,[255,244,200]],[40,[255,236,150]],[26,[255,250,220]]].forEach(([r,c])=>circ(cx,cy,r,c)); }
+  else{ cy=horizon*0.85; [[70,[255,210,150]],[48,[255,176,110]],[30,[255,236,190]]].forEach(([r,c])=>circ(cx,cy,r,c)); }
+}
+function mountains(ctx,horizon,base,rng,layers){
+  for(let layer=0;layer<layers;layer++){
+    const f=0.55+0.25*layer, col=shade(base,f);
+    const topY=horizon-(layers-layer)*46-rng.i(0,24);
+    ctx.fillStyle=rgb(col); ctx.beginPath(); ctx.moveTo(0,horizon);
+    let x=0; ctx.lineTo(0,horizon);
+    while(x<=W){ const peak=topY+rng.i(-30,30); ctx.lineTo(x,Math.max(0,peak)); x+=rng.i(90,150); }
+    ctx.lineTo(W,horizon); ctx.closePath(); ctx.fill();
+  }
+}
+function sea(ctx,horizon,base,skyBot,rng){
+  for(let y=horizon;y<H;y++){const t=(y-horizon)/Math.max(1,H-horizon);ctx.strokeStyle=rgb(lerp(shade(skyBot,0.7),shade(base,1.05),t));ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);ctx.stroke();}
+  ctx.strokeStyle=rgb(shade(base,1.4));
+  for(let i=0;i<70;i++){const y=rng.i(horizon+6,H-4),x=rng.i(0,W-40),w=rng.i(10,46);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.stroke();}
+}
+function forest(ctx,horizon,base,rng){
+  ctx.fillStyle=rgb(shade(base,0.9)); ctx.fillRect(0,horizon,W,H-horizon);
+  for(let i=0;i<46;i++){const x=rng.i(-10,W),h=rng.i(50,150),top=horizon-h,col=shade(base,rng.u(0.7,1.15));
+    ctx.fillStyle=rgb(col); ctx.beginPath(); ctx.moveTo(x-22,horizon); ctx.lineTo(x+22,horizon); ctx.lineTo(x,top); ctx.closePath(); ctx.fill();
+    ctx.fillStyle=rgb(shade(base,0.5)); ctx.fillRect(x-3,horizon,6,8);}
+}
+function city(ctx,horizon,base,sc,rng){
+  ctx.fillStyle=rgb(shade(base,0.7)); ctx.fillRect(0,horizon,W,H-horizon);
+  const lit=(sc.time==="night"||sc.time==="dusk"); let x=0;
+  while(x<W){const w=rng.i(34,72),h=rng.i(60,190),top=horizon-h,col=shade(base,rng.u(0.8,1.2));
+    ctx.fillStyle=rgb(col); ctx.fillRect(x,top,w,horizon-top);
+    if(lit){for(let wy=top+8;wy<horizon-6;wy+=16)for(let wx=x+6;wx<x+w-6;wx+=14)if(rng.f()<0.5){ctx.fillStyle="rgb(255,214,128)";ctx.fillRect(wx,wy,6,8);}}
+    x+=w+rng.i(4,14);}
+}
+function desert(ctx,horizon,base,rng){
+  for(let y=horizon;y<H;y++){const t=(y-horizon)/Math.max(1,H-horizon);ctx.strokeStyle=rgb(lerp(base,shade(base,0.75),t));ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);ctx.stroke();}
+  for(let layer=0;layer<3;layer++){ctx.fillStyle=rgb(shade(base,0.85+0.1*layer));ctx.beginPath();ctx.moveTo(0,H);let x=0;const y0=horizon+20+layer*40;
+    for(x=0;x<=W;x+=24)ctx.lineTo(x,y0+20*Math.sin(x/90+layer)); ctx.lineTo(W,H); ctx.closePath(); ctx.fill();}
+}
+function plain(ctx,horizon,base){for(let y=horizon;y<H;y++){const t=(y-horizon)/Math.max(1,H-horizon);ctx.strokeStyle=rgb(lerp(shade(base,1.1),shade(base,0.7),t));ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);ctx.stroke();}}
+function space(ctx,rng){
+  stars(ctx,rng,260,H);
+  for(let i=0;i<3;i++){const cx=rng.i(0,W),cy=rng.i(0,H),r=rng.i(30,90),col=rng.c([[120,80,160],[70,90,170],[160,90,120]]);
+    for(let rr=r;rr>0;rr-=6){ctx.fillStyle=rgb(shade(col,0.5+rr/(2*r)));ctx.beginPath();ctx.arc(cx,cy,rr,0,7);ctx.fill();}}
+}
+/* mood overlays */
+function rain(ctx,rng){ctx.strokeStyle="rgb(180,195,215)";for(let i=0;i<220;i++){const x=rng.i(0,W),y=rng.i(0,H);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-4,y+14);ctx.stroke();}}
+function fog(ctx,rng){for(let i=0;i<6;i++){const y=rng.i(H*0.4,H);ctx.fillStyle="rgba(220,220,225,0.16)";ctx.fillRect(0,y,W,rng.i(20,60));}}
+function fireGlow(ctx,rng){for(let i=0;i<40;i++){const x=rng.i(0,W),y=rng.i(H*0.55,H),r=rng.i(4,16);ctx.fillStyle=`rgba(255,${rng.i(120,190)},40,0.47)`;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}}
+function magic(ctx,rng){const cols=["rgba(140,220,255,0.6)","rgba(200,160,255,0.6)","rgba(160,255,200,0.6)"];for(let i=0;i<90;i++){const x=rng.i(0,W),y=rng.i(0,H*0.75),r=rng.i(1,4);ctx.fillStyle=rng.c(cols);ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}}
+
+function wrapCJK(ctx,text,maxW){
+  const lines=[]; let cur="";
+  for(const ch of text){ if(ch==="\n"){lines.push(cur);cur="";continue;}
+    if(ctx.measureText(cur+ch).width<=maxW) cur+=ch; else {lines.push(cur);cur=ch;} }
+  if(cur) lines.push(cur); return lines.slice(0,3);
+}
+function caption(ctx,sc){
+  const band=96;
+  ctx.fillStyle="rgba(0,0,0,0.59)"; ctx.fillRect(0,H-band,W,band);
+  ctx.fillStyle="rgb(255,200,80)"; ctx.fillRect(16,H-band+14,58,40);
+  ctx.fillStyle="rgb(30,24,10)"; ctx.font="700 26px "+MONO; ctx.textBaseline="top";
+  ctx.fillText("#"+sc.index,26,H-band+20);
+  ctx.fillStyle="rgb(245,245,245)"; ctx.font="22px "+BODY;
+  const tx=92; wrapCJK(ctx,sc.caption,W-tx-24).forEach((ln,i)=>ctx.fillText(ln,tx,H-band+16+i*26));
+}
+const MONO='ui-monospace,Menlo,Consolas,monospace';
+const BODY='system-ui,"PingFang SC","Microsoft YaHei",sans-serif';
+
+function renderScene(ctx,sc,seedExtra){
+  const seed=(sc.index*7919 + sc.caption.length + seedExtra)>>>0;
+  const rng=mkRng(seed);
+  const [skyTop,skyBot]=SKY[sc.time]||SKY.day;
+  const base=GROUND[sc.setting]||GROUND.field;
+  const horizon=Math.round(H*((sc.setting==="sea"||sc.setting==="river")?0.60:0.66));
+  ctx.lineWidth=1; ctx.fillStyle=rgb(skyBot); ctx.fillRect(0,0,W,H);
+  if(sc.setting==="space"){ ctx.fillStyle=rgb(GROUND.space); ctx.fillRect(0,0,W,H); space(ctx,rng); }
+  else{
+    vgrad(ctx,skyTop,skyBot,0,horizon);
+    if(sc.time==="night") stars(ctx,rng,120,horizon);
+    celestial(ctx,sc,horizon,rng);
+    switch(sc.setting){
+      case "mountain": mountains(ctx,horizon,base,rng,3); plain(ctx,horizon,base); break;
+      case "sea": case "river": mountains(ctx,horizon,GROUND.mountain,rng,1); sea(ctx,horizon,base,skyBot,rng); break;
+      case "forest": mountains(ctx,horizon,GROUND.mountain,rng,1); forest(ctx,horizon,base,rng); break;
+      case "city": city(ctx,horizon,base,sc,rng); break;
+      case "desert": desert(ctx,horizon,base,rng); break;
+      case "snow": mountains(ctx,horizon,base,rng,3); plain(ctx,horizon,base); break;
+      default: mountains(ctx,horizon,GROUND.mountain,rng,1); plain(ctx,horizon,base);
+    }
+  }
+  if(sc.moods.includes("rain")) rain(ctx,rng);
+  if(sc.moods.includes("fog")) fog(ctx,rng);
+  if(sc.moods.includes("fire")) fireGlow(ctx,rng);
+  if(sc.moods.includes("magic")) magic(ctx,rng);
+  caption(ctx,sc);
+}
+
+/* ---------- UI wiring ---------- */
+const TIME_LABEL={day:"白天 day",dawn:"清晨 dawn",dusk:"黄昏 dusk",night:"夜晚 night"};
+const SET_LABEL={sea:"海 sea",forest:"森林 forest",mountain:"山 mountain",city:"城市 city",
+  desert:"沙漠 desert",snow:"雪 snow",room:"室内 room",field:"原野 field",river:"河 river",space:"太空 space"};
+const MOOD_LABEL={fire:"🔥火",rain:"🌧雨",fog:"🌫雾",magic:"✨魔法"};
+const TOD_ICON={day:"☀︎",dawn:"🌅",dusk:"🌇",night:"🌙"};
+
+const EXAMPLE="清晨，少年离开熟睡的村庄，独自走进茂密的森林。正午时分，他翻过陡峭的高山，远处出现了一片蔚蓝的大海。黄昏，他乘船横渡海洋，海面燃起金色的火光。深夜，他终于抵达灯火通明的城市，星空下高楼林立。";
+
+const $=id=>document.getElementById(id);
+let seedExtra=0;
+
+function render(){
+  const story=$("story").value;
+  let n=parseInt($("shots").value,10); if(isNaN(n)) n=4; n=Math.max(2,Math.min(8,n)); $("shots").value=n;
+  const scenes=segmentStory(story,n);
+  $("count").textContent=n;
+  const times=[...new Set(scenes.map(s=>s.time))];
+  $("tod").innerHTML = times.map(t=>TOD_ICON[t]+" "+t).join("  ·  ");
+  const sheet=$("sheet"); sheet.innerHTML="";
+  scenes.forEach(sc=>{
+    const card=document.createElement("div"); card.className="card";
+    const frame=document.createElement("div"); frame.className="frame";
+    const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+    renderScene(cv.getContext("2d"),sc,seedExtra);
+    const dl=document.createElement("button"); dl.className="dl"; dl.textContent="↓ PNG";
+    dl.onclick=()=>{const a=document.createElement("a");a.download=`shot_${String(sc.index).padStart(2,"0")}.png`;a.href=cv.toDataURL("image/png");a.click();};
+    frame.appendChild(cv); frame.appendChild(dl);
+    const meta=document.createElement("div"); meta.className="meta";
+    const tags=document.createElement("div"); tags.className="tags";
+    tags.innerHTML=`<span class="tag n">#${sc.index}</span>`
+      +`<span class="tag">⏱ ${TIME_LABEL[sc.time]}</span>`
+      +`<span class="tag">🎬 ${SET_LABEL[sc.setting]}</span>`
+      +sc.moods.map(m=>`<span class="tag">${MOOD_LABEL[m]}</span>`).join("");
+    const cap=document.createElement("p"); cap.className="cap"; cap.textContent=sc.caption;
+    meta.appendChild(tags); meta.appendChild(cap);
+    card.appendChild(frame); card.appendChild(meta); sheet.appendChild(card);
+  });
+}
+
+$("gen").onclick=render;
+$("shuffle").onclick=()=>{seedExtra=(seedExtra+101)>>>0;render();};
+$("plus").onclick=()=>{$("shots").value=Math.min(8,(parseInt($("shots").value,10)||4)+1);render();};
+$("minus").onclick=()=>{$("shots").value=Math.max(2,(parseInt($("shots").value,10)||4)-1);render();};
+$("shots").onchange=render;
+let deb; $("story").addEventListener("input",()=>{clearTimeout(deb);deb=setTimeout(render,320);});
+
+$("story").value=EXAMPLE;
+render();
+</script>
+</body></html>

@@ -17,6 +17,13 @@ pip install pillow gradio
 
 ## Web demo
 
+**Zero-install / online:** open [`storyboard/web.html`](web.html) directly in a
+browser — a self-contained, no-server page that segments and renders the whole
+storyboard client-side (Canvas). Type a story, get 4 background frames, download
+each as PNG.
+
+**Gradio (Python) demo:**
+
 ```bash
 python story_storyboard_demo.py
 ```
