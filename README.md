@@ -30,6 +30,21 @@ https://user-images.githubusercontent.com/48993524/170857367-2033c514-3c9f-4297-
 
 The demo for CogVideo is at [https://models.aminer.cn/cogvideo/](https://models.aminer.cn/cogvideo/), where you can get hands-on practice on text-to-video generation. *The original input is in Chinese.*
 
+## Story → Storyboard Backgrounds (故事分鏡背景生成)
+
+Write your own text story and instantly generate **4 background storyboard
+frames** for it. The tool (in [`storyboard/`](storyboard/)) splits the story
+into shots, analyzes each shot's time-of-day / setting / mood, and paints a
+matching background. It runs with **no GPU** by default, and can be wired to the
+real CogVideo/CogView2 model for keyframes. See
+[`storyboard/README.md`](storyboard/README.md).
+
+```bash
+pip install pillow gradio
+python story_storyboard_demo.py                       # web UI
+python -m storyboard.generator --story "清晨少年走进森林，深夜抵达城市。" --out out/   # CLI
+```
+
 
 ## Generated Samples
 
