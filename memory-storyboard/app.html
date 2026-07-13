@@ -2748,6 +2748,183 @@
         P.rect(W / 2 - 16, H - 38, 32, 5, shade("#a8674a", 0.15));
         P.foliage(W / 2, H - 36, 20, "#5c7a4f");
         break;
+      case "o_meal":
+        P.softShadow(W / 2, H - 16, 26, 0.2);
+        c.fillStyle = P.lgrad(H - 44, H - 18, tint("#8a6b4f", 0.15), "#8a6b4f");
+        c.beginPath(); c.arc(W / 2, H - 40, 22, 0, Math.PI); c.fill();
+        P.ellipse(W / 2, H - 40, 22, 5, tint("#8a6b4f", 0.3));
+        P.ellipse(W / 2, H - 42, 16, 6, "#f4efe2");
+        P.stroke([[W / 2 + 12, H - 62], [W / 2 + 24, H - 40]], "#5d4632", 2.2, 0.95);
+        P.stroke([[W / 2 + 18, H - 62], [W / 2 + 28, H - 42]], "#5d4632", 2.2, 0.95);
+        P.arcStroke(W / 2 - 6, H - 56, 5, Math.PI * 0.2, Math.PI * 1.2, "#ffffff", 2, 0.45);
+        P.arcStroke(W / 2 - 2, H - 66, 6, Math.PI * 1.1, Math.PI * 2.1, "#ffffff", 2, 0.3);
+        break;
+      case "o_tea":
+        P.softShadow(W / 2, H - 16, 24, 0.2);
+        P.shadeCircle(W / 2 - 4, H - 32, 15, "#9db4a6");
+        P.rect(W / 2 - 18, H - 32, 28, 14, "#9db4a6");
+        P.stroke([[W / 2 + 12, H - 36], [W / 2 + 22, H - 44]], "#9db4a6", 5, 1);
+        P.rect(W / 2 - 8, H - 50, 9, 5, "#9db4a6");
+        P.arcStroke(W / 2 - 22, H - 34, 8, Math.PI * 0.5, Math.PI * 1.5, shade("#9db4a6", 0.2), 2.4, 0.9);
+        P.arcStroke(W / 2 + 2, H - 60, 6, Math.PI * 0.2, Math.PI * 1.2, "#ffffff", 2, 0.4);
+        break;
+      case "o_net":
+        P.stroke([[W / 2 - 30, H - 14], [W / 2 - 18, H - 62]], "#5b4a38", 2.6, 0.95);
+        P.stroke([[W / 2 + 30, H - 14], [W / 2 + 18, H - 62]], "#5b4a38", 2.6, 0.95);
+        for (var nn = 0; nn < 4; nn++) {
+          P.arcStroke(W / 2, H - 56 + nn * 11, 22 - nn * 1.5, Math.PI * 0.15, Math.PI * 0.85, shade(p.dark, 0), 1.1, 0.7);
+        }
+        for (var nv = -2; nv <= 2; nv++) {
+          P.stroke([[W / 2 + nv * 9, H - 56], [W / 2 + nv * 11, H - 22]], shade(p.dark, 0), 1.1, 0.6);
+        }
+        P.circle(W / 2 - 20, H - 58, 3.4, "#c98f6e");
+        P.circle(W / 2 + 20, H - 58, 3.4, "#c98f6e");
+        break;
+      case "o_umbrella":
+        c.save(); c.fillStyle = mix("#b3604c", p.dark, 0);
+        c.beginPath(); c.arc(W / 2, H - 40, 26, Math.PI, Math.PI * 2); c.fill(); c.restore();
+        for (var uf = 0; uf < 4; uf++) {
+          c.save(); c.fillStyle = uf % 2 ? tint("#b3604c", 0.25) : "#b3604c";
+          c.beginPath(); c.arc(W / 2 - 19.5 + uf * 13, H - 40, 6.7, 0, Math.PI); c.fill(); c.restore();
+        }
+        P.stroke([[W / 2, H - 66], [W / 2, H - 18]], "#5b4a38", 2.4, 1);
+        P.arcStroke(W / 2 + 4, H - 16, 4, 0, Math.PI, "#5b4a38", 2.4, 1);
+        break;
+      case "o_book":
+        P.softShadow(W / 2, H - 14, 26, 0.18);
+        c.save(); c.fillStyle = "#f4efe2";
+        c.beginPath();
+        c.moveTo(W / 2, H - 22);
+        c.quadraticCurveTo(W / 2 - 14, H - 30, W / 2 - 28, H - 24);
+        c.lineTo(W / 2 - 28, H - 48);
+        c.quadraticCurveTo(W / 2 - 14, H - 54, W / 2, H - 46);
+        c.quadraticCurveTo(W / 2 + 14, H - 54, W / 2 + 28, H - 48);
+        c.lineTo(W / 2 + 28, H - 24);
+        c.quadraticCurveTo(W / 2 + 14, H - 30, W / 2, H - 22);
+        c.closePath(); c.fill();
+        c.strokeStyle = "#6b5136"; c.lineWidth = 1.6; c.stroke(); c.restore();
+        P.stroke([[W / 2, H - 46], [W / 2, H - 22]], "#6b5136", 1.4, 0.8);
+        for (var bl = 0; bl < 3; bl++) {
+          P.stroke([[W / 2 - 22, H - 42 + bl * 6], [W / 2 - 8, H - 40 + bl * 6]], "#6b5136", 1, 0.4);
+          P.stroke([[W / 2 + 8, H - 40 + bl * 6], [W / 2 + 22, H - 42 + bl * 6]], "#6b5136", 1, 0.4);
+        }
+        break;
+      case "o_ticket":
+        c.save(); c.translate(W / 2, H - 38); c.rotate(-0.12);
+        c.fillStyle = "#f0e8d6";
+        c.fillRect(-30, -16, 60, 32);
+        c.strokeStyle = "#5b4a38"; c.lineWidth = 1.4; c.strokeRect(-30, -16, 60, 32);
+        c.setLineDash([3, 3]);
+        c.beginPath(); c.moveTo(12, -16); c.lineTo(12, 16); c.stroke();
+        c.setLineDash([]);
+        c.fillStyle = "#5b4a38";
+        c.fillRect(-22, -6, 26, 3); c.globalAlpha = 0.6; c.fillRect(-22, 2, 20, 3); c.globalAlpha = 1;
+        c.fillStyle = "#a8462f"; c.globalAlpha = 0.85; c.fillRect(17, -7, 9, 9); c.globalAlpha = 1;
+        c.restore();
+        break;
+      case "o_luggage":
+        P.softShadow(W / 2, H - 14, 28, 0.2);
+        c.save(); c.fillStyle = P.lgrad(H - 58, H - 16, tint("#8a6b4f", 0.12), "#8a6b4f");
+        c.beginPath();
+        c.moveTo(W / 2 - 28, H - 16); c.lineTo(W / 2 - 28, H - 50);
+        c.quadraticCurveTo(W / 2 - 28, H - 56, W / 2 - 20, H - 56);
+        c.lineTo(W / 2 + 20, H - 56);
+        c.quadraticCurveTo(W / 2 + 28, H - 56, W / 2 + 28, H - 50);
+        c.lineTo(W / 2 + 28, H - 16);
+        c.closePath(); c.fill(); c.restore();
+        P.rect(W / 2 - 20, H - 56, 5, 40, shade("#8a6b4f", 0.25));
+        P.rect(W / 2 + 15, H - 56, 5, 40, shade("#8a6b4f", 0.25));
+        P.arcStroke(W / 2, H - 56, 9, Math.PI, Math.PI * 2, "#5d4632", 3, 1);
+        P.rect(W / 2 - 8, H - 44, 16, 11, "#f0e8d6", 0.95);
+        break;
+      case "o_dress":
+        P.arcStroke(W / 2, H - 70, 4, Math.PI, Math.PI * 2.6, "#5b4a38", 2, 1);
+        P.stroke([[W / 2 - 16, H - 60], [W / 2, H - 66], [W / 2 + 16, H - 60]], "#5b4a38", 2, 1);
+        c.save(); c.fillStyle = mix("#b56a9c", p.dark, 0.05);
+        c.beginPath();
+        c.moveTo(W / 2 - 14, H - 58);
+        c.quadraticCurveTo(W / 2 - 18, H - 44, W / 2 - 13, H - 16);
+        c.lineTo(W / 2 + 13, H - 16);
+        c.quadraticCurveTo(W / 2 + 18, H - 44, W / 2 + 14, H - 58);
+        c.quadraticCurveTo(W / 2, H - 64, W / 2 - 14, H - 58);
+        c.closePath(); c.fill(); c.restore();
+        P.stroke([[W / 2 - 12, H - 55], [W / 2 + 10, H - 48]], tint("#b56a9c", 0.4), 1.4, 0.8);
+        P.circle(W / 2 - 2, H - 54, 1.4, tint("#b56a9c", 0.5));
+        P.circle(W / 2 + 4, H - 51, 1.4, tint("#b56a9c", 0.5));
+        break;
+      case "o_hoe":
+        P.stroke([[W / 2 - 20, H - 14], [W / 2 + 18, H - 64]], "#8a6b4f", 3.4, 1);
+        c.save(); c.fillStyle = "#5f6a72";
+        c.beginPath();
+        c.moveTo(W / 2 + 12, H - 66); c.lineTo(W / 2 + 30, H - 58);
+        c.lineTo(W / 2 + 26, H - 48); c.lineTo(W / 2 + 12, H - 58);
+        c.closePath(); c.fill(); c.restore();
+        P.grassTufts(H - 24, 4, mix(p.mid, "#7f975f", 0.4));
+        break;
+      case "o_incense":
+        P.softShadow(W / 2, H - 14, 24, 0.2);
+        c.save(); c.fillStyle = P.lgrad(H - 40, H - 16, tint("#8a6b4f", 0.1), shade("#8a6b4f", 0.15));
+        c.beginPath();
+        c.moveTo(W / 2 - 20, H - 40); c.lineTo(W / 2 + 20, H - 40);
+        c.lineTo(W / 2 + 14, H - 16); c.lineTo(W / 2 - 14, H - 16);
+        c.closePath(); c.fill(); c.restore();
+        P.rect(W / 2 - 24, H - 44, 48, 5, shade("#8a6b4f", 0.25));
+        [[-8, 0.12], [0, 0], [8, -0.1]].forEach(function (st) {
+          c.save(); c.translate(W / 2 + st[0], H - 44); c.rotate(st[1]);
+          c.strokeStyle = "#a8462f"; c.lineWidth = 2; c.beginPath();
+          c.moveTo(0, 0); c.lineTo(0, -22); c.stroke();
+          c.fillStyle = "#e8b878"; c.beginPath(); c.arc(0, -23, 2, 0, Math.PI * 2); c.fill();
+          c.restore();
+        });
+        P.arcStroke(W / 2 + 2, H - 74, 6, Math.PI * 0.2, Math.PI * 1.2, "#ffffff", 2, 0.35);
+        break;
+      case "n_sand":
+        c.save(); c.fillStyle = P.lgrad(H - 40, H - 14, tint(p.sand, 0.15), p.sand);
+        c.beginPath();
+        c.moveTo(W / 2 - 36, H - 14);
+        c.quadraticCurveTo(W / 2, H - 48, W / 2 + 36, H - 14);
+        c.closePath(); c.fill(); c.restore();
+        P.stroke([[W / 2 - 20, H - 26], [W / 2 - 8, H - 30]], "#ffffff", 1.6, 0.5);
+        P.stroke([[W / 2 + 4, H - 32], [W / 2 + 16, H - 28]], "#ffffff", 1.6, 0.4);
+        P.circle(W / 2 - 12, H - 18, 2, "#f4efe2", 0.9);
+        P.arcStroke(W / 2 + 14, H - 18, 3, Math.PI, Math.PI * 2, "#c98f6e", 1.6, 0.9);
+        break;
+      case "n_wave":
+        for (var wr = 0; wr < 3; wr++) {
+          for (var wx4 = 22 + wr * 12; wx4 < W - 18; wx4 += 30) {
+            P.arcStroke(wx4, 34 + wr * 15, 10, Math.PI * 0.08, Math.PI * 0.92, mix(p.water, "#5a8a9a", 0.5), 2, 0.75 - wr * 0.15);
+          }
+        }
+        P.circle(36, 30, 1.8, "#ffffff", 0.8);
+        P.circle(74, 44, 1.6, "#ffffff", 0.7);
+        P.circle(56, 60, 1.5, "#ffffff", 0.6);
+        break;
+      case "n_hills":
+        P.poly([[8, 62], [34, 30], [62, 52], [86, 24], [110, 56], [110, 66], [8, 66]], mix(p.far, p.skyB, 0.25), 0.95);
+        P.poly([[8, 66], [42, 46], [76, 62], [110, 50], [110, 72], [8, 72]], p.mid, 0.95);
+        P.mist(40, 14, 0.3);
+        break;
+      case "n_bank":
+        c.save(); c.strokeStyle = tint(p.sand, 0.1); c.lineWidth = 3;
+        c.beginPath(); c.moveTo(14, 34);
+        c.quadraticCurveTo(50, 46, 100, 38); c.stroke(); c.restore();
+        c.save(); c.fillStyle = tint(p.water, 0.3); c.globalAlpha = 0.85;
+        c.beginPath(); c.moveTo(14, 36);
+        c.quadraticCurveTo(50, 48, 100, 40);
+        c.lineTo(100, 62); c.lineTo(14, 60); c.closePath(); c.fill(); c.restore();
+        P.grassTufts(46, 5, mix(p.mid, "#7f975f", 0.4));
+        P.shadeCircle(30, 56, 4, "#b9b2a2");
+        P.shadeCircle(44, 60, 3, "#a8a191");
+        break;
+      case "n_sign":
+        P.rect(W / 2 - 2, 14, 4, H - 28, "#5b4a38");
+        P.rect(W / 2 - 20, 20, 40, 44, "#f0e8d6");
+        c.save(); c.strokeStyle = "#6b5136"; c.lineWidth = 1.4;
+        c.strokeRect(W / 2 - 20, 20, 40, 44); c.restore();
+        P.rect(W / 2 - 12, 28, 24, 4, "#5b4a38", 0.75);
+        P.rect(W / 2 - 12, 37, 24, 4, "#5b4a38", 0.6);
+        P.rect(W / 2 - 8, 48, 16, 10, "#a8462f", 0.85);
+        break;
       case "n_grass":
         P.grassTufts(H * 0.3, 14, mix(p.mid, "#7f975f", 0.4));
         break;
@@ -2870,37 +3047,96 @@
     });
     function addFiller(key, name, actFilter) {
       if (gameTiles.length >= 16) return;
+      for (var gi = 0; gi < gameTiles.length; gi++) {
+        if (gameTiles[gi].key === key) return;
+      }
       var acts = [];
       data.forEach(function (d, ai) { if (actFilter(d)) acts.push(ai); });
       if (acts.length > 0) gameTiles.push({ key: key, name: name, acts: acts, weather: true });
     }
-    /* 時刻元件:只在故事文字明確提到該時刻時出現 */
-    [0, 1, 2, 3, 4].forEach(function (pi) {
-      addFiller("t" + pi, TIME_NAMES[pi], function (d) { return d.pi === pi && d.piExplicit; });
-    });
-    /* 場景基底:故事明確描寫過的環境才出現 */
-    Object.keys(BASE_NAMES).forEach(function (b) {
-      addFiller("b_" + b, BASE_NAMES[b], function (d) { return d.spec.base === b && d.spec.baseExplicit; });
-    });
-    /* 自然小物:故事文字有提到才出現 */
-    [
+    /* 畫面可見條件:這些元素會真實出現在該幕的插圖裡 */
+    var VISIBLE = {
+      w_sun: function (d) { return d.spec.base !== "interior" && (d.pi === 0 || d.pi === 1 || d.pi === 3); },
+      w_moon: function (d) { return d.spec.base !== "interior" && d.pi === 4; },
+      w_stars: function (d) { return d.spec.base !== "interior" && d.pi === 4; },
+      w_cloud: function (d) { return d.spec.base !== "interior"; },
+      w_birds: function (d) { return d.spec.base !== "interior" && (d.pi === 1 || d.pi === 3); },
+      n_grass: function (d) { return ["plain", "river", "field"].indexOf(d.spec.base) !== -1; },
+      n_sand: function (d) { return d.spec.base === "sea"; },
+      n_wave: function (d) { return d.spec.base === "sea" || d.spec.base === "river"; },
+      n_hills: function (d) { return d.spec.base !== "interior" && d.spec.base !== "street"; },
+      n_bank: function (d) { return d.spec.base === "river"; },
+      lanterns: function (d) { return d.spec.els.indexOf("temple") !== -1 || d.spec.els.indexOf("lanterns") !== -1; },
+      o_incense: function (d) { return d.spec.els.indexOf("temple") !== -1; },
+      n_sign: function (d) { return d.spec.els.indexOf("storefront") !== -1 || d.spec.els.indexOf("train") !== -1; }
+    };
+    function textActFilter(kws, key) {
+      return function (d) {
+        for (var k = 0; k < kws.length; k++) {
+          if (d.text.indexOf(kws[k]) !== -1) return true;
+        }
+        return !!(VISIBLE[key] && VISIBLE[key](d));
+      };
+    }
+    function textAppears(kws) {
+      return data.some(function (d) {
+        return kws.some(function (kw) { return d.text.indexOf(kw) !== -1; });
+      });
+    }
+    /* 第二層:故事文字提到的物件與自然元素 */
+    var TEXT_TILES = [
+      ["o_meal", "飯菜", ["吃飯", "便當", "滷蛋", "菜脯", "飯糰", "煮飯", "晚飯", "午飯"]],
+      ["o_tea", "茶壺", ["茶"]],
+      ["o_net", "漁網", ["漁網", "魚網", "撒網", "補網", "討海"]],
+      ["o_umbrella", "雨傘", ["傘"]],
+      ["o_book", "書本", ["書", "課本", "讀冊", "念書"]],
+      ["o_ticket", "車票", ["車票", "票根", "月台"]],
+      ["o_luggage", "行李", ["行李", "包袱", "皮箱", "行囊"]],
+      ["o_dress", "旗袍", ["旗袍"]],
+      ["o_hoe", "農具", ["犁", "鋤頭", "割稻", "插秧", "農具"]],
+      ["o_incense", "香爐", ["燒香", "上香", "香爐", "拜拜", "守在廟"]],
       ["w_sun", "太陽", ["太陽", "日頭", "陽光", "烈日"]],
       ["w_moon", "月亮", ["月亮", "月光", "月娘", "彎月"]],
       ["w_stars", "星星", ["星星", "星空", "星光", "滿天星"]],
       ["w_cloud", "白雲", ["雲"]],
       ["w_birds", "飛鳥", ["鳥", "海鷗", "白鷺", "麻雀"]],
       ["n_grass", "小草", ["草"]],
+      ["n_sand", "沙灘", ["沙灘", "沙子"]],
       ["n_pebbles", "石子", ["石頭", "石子", "礁石", "碎石"]],
+      ["n_wave", "浪花", ["浪"]],
+      ["n_bank", "河岸", ["河邊", "溪邊", "岸邊", "河岸", "溪畔"]],
       ["n_bench", "長椅", ["長椅", "板凳", "凳子", "椅子"]],
       ["n_pot", "盆栽", ["盆栽", "花盆"]]
-    ].forEach(function (nt) {
-      addFiller(nt[0], nt[1], function (d) {
-        for (var k = 0; k < nt[2].length; k++) {
-          if (d.text.indexOf(nt[2][k]) !== -1) return true;
-        }
-        return false;
-      });
+    ];
+    TEXT_TILES.forEach(function (nt) {
+      if (!textAppears(nt[2])) return;
+      addFiller(nt[0], nt[1], textActFilter(nt[2], nt[0]));
     });
+    /* 第三層:故事文字明確提到的時刻與場景 */
+    [0, 1, 2, 3, 4].forEach(function (pi) {
+      var explicit = data.some(function (d) { return d.pi === pi && d.piExplicit; });
+      if (explicit) addFiller("t" + pi, TIME_NAMES[pi], function (d) { return d.pi === pi; });
+    });
+    Object.keys(BASE_NAMES).forEach(function (b) {
+      var explicit = data.some(function (d) { return d.spec.base === b && d.spec.baseExplicit; });
+      if (explicit) addFiller("b_" + b, BASE_NAMES[b], function (d) { return d.spec.base === b; });
+    });
+    /* 第四層:不足 10 個時,以分鏡畫面上真實畫出的元素補足(仍不憑空捏造) */
+    var MIN_TILES = 10;
+    if (gameTiles.length < MIN_TILES) {
+      [0, 1, 2, 3, 4].forEach(function (pi) {
+        if (gameTiles.length >= MIN_TILES) return;
+        addFiller("t" + pi, TIME_NAMES[pi], function (d) { return d.pi === pi; });
+      });
+      Object.keys(BASE_NAMES).forEach(function (b) {
+        if (gameTiles.length >= MIN_TILES) return;
+        addFiller("b_" + b, BASE_NAMES[b], function (d) { return d.spec.base === b; });
+      });
+      [["w_sun", "太陽"], ["w_cloud", "白雲"], ["w_moon", "月亮"], ["w_stars", "星星"], ["w_birds", "飛鳥"], ["n_grass", "小草"], ["n_sand", "沙灘"], ["n_wave", "浪花"], ["n_hills", "遠山"], ["n_bank", "河岸"], ["lanterns", "燈籠"], ["o_incense", "香爐"], ["n_sign", "招牌"]].forEach(function (vt) {
+        if (gameTiles.length >= MIN_TILES) return;
+        addFiller(vt[0], vt[1], VISIBLE[vt[0]]);
+      });
+    }
     gameTiles = gameTiles.slice(0, 16);
     /* 故事太抽象、找不到任何元件時,不顯示配對區 */
     if (gameTiles.length === 0) {
