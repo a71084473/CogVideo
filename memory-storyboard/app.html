@@ -867,6 +867,86 @@
     40% { box-shadow: 0 0 0 4px var(--accent); }
   }
 
+  .dock-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--hair);
+    margin: 0 2px 9px;
+    overflow: hidden;
+  }
+  .dock-progress i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: width 0.5s var(--ease);
+  }
+  .match-score.pop { animation: scorePop 0.4s var(--ease); }
+  @keyframes scorePop {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+  }
+
+  #resultWrap {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    padding: 20px;
+  }
+  #resultWrap.on { display: flex; }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    border-radius: 26px;
+    box-shadow: var(--shadow-lg);
+    max-width: 420px;
+    width: 100%;
+    padding: 34px 30px 28px;
+    text-align: center;
+    animation: resultIn 0.45s var(--ease);
+  }
+  @keyframes resultIn {
+    0% { opacity: 0; transform: translateY(22px) scale(0.96); }
+    100% { opacity: 1; transform: none; }
+  }
+  .result-emoji { font-size: 44px; line-height: 1; }
+  .result-title { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 12px 0 6px; }
+  .result-stars { font-size: 30px; letter-spacing: 6px; color: #f5a623; min-height: 1.2em; }
+  .result-stars .dim { color: var(--hair-strong); }
+  .result-score { font-size: 54px; font-weight: 700; letter-spacing: -0.02em; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .result-score small { font-size: 17px; font-weight: 500; color: var(--ink-3); }
+  .result-rows { margin: 16px 0 6px; display: flex; flex-direction: column; gap: 6px; }
+  .result-rows div {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14.5px;
+    color: var(--ink-2);
+    padding: 7px 12px;
+    background: var(--bg);
+    border-radius: 10px;
+  }
+  .result-rows b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .result-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 12px 0 4px; min-height: 1em; }
+  .result-badges span {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-tint);
+    border-radius: 980px;
+    padding: 6px 14px;
+  }
+  .result-actions { display: flex; gap: 12px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+  @media (prefers-reduced-motion: reduce) {
+    .result-card { animation: none; }
+    .match-score.pop { animation: none; }
+  }
+
   footer.colophon {
     max-width: 720px;
     margin: 96px auto 0;
@@ -1027,7 +1107,23 @@
       <span class="match-score" id="scoreBox">得分 0</span>
       <span class="match-note" id="matchNote">拖曳插圖到分鏡卡上,放開的位置就是它的家;放好後還能自由拖動。</span>
     </div>
+    <div class="dock-progress" aria-hidden="true"><i id="dockBar"></i></div>
     <div class="tile-tray" id="tileTray"></div>
+  </div>
+
+  <div id="resultWrap" role="dialog" aria-label="配對成績單">
+    <div class="result-card">
+      <div class="result-emoji">🎉</div>
+      <h3 class="result-title">全部配對完成!</h3>
+      <div class="result-stars" id="resultStars"></div>
+      <div class="result-score"><span id="resultScore">0</span><small> 分</small></div>
+      <div class="result-rows" id="resultRows"></div>
+      <div class="result-badges" id="resultBadges"></div>
+      <div class="result-actions">
+        <button class="go-btn" id="playAgain">再玩一次配對</button>
+        <button class="ghost-btn" id="closeResult">繼續佈置畫面</button>
+      </div>
+    </div>
   </div>
 
   <footer class="colophon">
@@ -2875,9 +2971,31 @@
   var gameTiles = [], matchedCount = 0, selectedTile = null;
   var matchNote = $("matchNote"), matchCount = $("matchCount");
   var score = 0, streak = 0;
+  var stats = { firstTry: 0, wrong: 0, edits: 0, maxStreak: 0, watched: false };
+  var creativityEarned = 0, resultShown = false;
 
   function updateScore() {
-    $("scoreBox").textContent = "得分 " + score + (streak >= 2 ? "・連對 " + streak : "");
+    var box = $("scoreBox");
+    box.textContent = "得分 " + score + (streak >= 2 ? "・連對 " + streak : "");
+    box.classList.remove("pop");
+    void box.offsetWidth;
+    box.classList.add("pop");
+  }
+  function updateBar() {
+    var bar = $("dockBar");
+    if (bar) bar.style.width = (gameTiles.length ? matchedCount / gameTiles.length * 100 : 0) + "%";
+  }
+  /* 創作分:編輯或搬動貼紙,+2 分,上限 20 */
+  function awardCreate(sp) {
+    stats.edits++;
+    if (creativityEarned >= 20) return;
+    creativityEarned += 2;
+    score += 2;
+    updateScore();
+    if (sp) {
+      var r = sp.getBoundingClientRect();
+      fxToast(r.left + r.width / 2, r.top, "+2 創作", true);
+    }
   }
   function fxToast(x, y, text, good) {
     var t = document.createElement("div");
@@ -2962,7 +3080,11 @@
     var tray = $("tileTray");
     tray.innerHTML = "";
     gameTiles = []; matchedCount = 0; selectedTile = null;
-    score = 0; streak = 0; updateScore();
+    score = 0; streak = 0;
+    stats = { firstTry: 0, wrong: 0, edits: 0, maxStreak: 0, watched: false };
+    creativityEarned = 0; resultShown = false;
+    $("resultWrap").classList.remove("on");
+    updateScore();
     var seen = {};
     data.forEach(function (d, ai) {
       d.spec.els.forEach(function (k) {
@@ -3102,6 +3224,7 @@
 
   function updateMatchCount() {
     matchCount.textContent = "已配對 " + matchedCount + " / " + gameTiles.length;
+    updateBar();
   }
 
   function frameCards() {
@@ -3272,8 +3395,10 @@
       if (!cur) return;
       ev.stopPropagation();
       cur.classList.remove("lift");
-      if (moved) box._blockClick = Date.now(); /* 只有拖曳後才需要吃掉隨後的 click */
-      else toggleTools(cur, cur._rec, box);
+      if (moved) {
+        box._blockClick = Date.now(); /* 只有拖曳後才需要吃掉隨後的 click */
+        awardCreate(cur);
+      } else toggleTools(cur, cur._rec, box);
       cur = null;
     });
     box.addEventListener("pointercancel", function () {
@@ -3334,7 +3459,8 @@
     else if (act === "smaller") rec.scale = Math.max(0.45, (rec.scale || 1) / 1.18);
     else if (act === "hue") rec.hue = ((rec.hue || 0) + 1) % SPRITE_HUES.length;
     else if (act === "flip") rec.flip = !rec.flip;
-    else if (act === "remove") {
+    if (act !== "remove") awardCreate(toolsFor.sp);
+    if (act === "remove") {
       var d = currentData[rec.actIdx];
       d.sprites = d.sprites.filter(function (r) { return r !== rec; });
       sp.remove();
@@ -3445,7 +3571,16 @@
   }
 
   walkNext.addEventListener("click", function () {
-    if (walkIdx >= walkData.length - 1) { endWalk(); return; }
+    if (walkIdx >= walkData.length - 1) {
+      if (!stats.watched) {
+        stats.watched = true;
+        score += 20;
+        updateScore();
+        fxToast(window.innerWidth / 2, window.innerHeight * 0.3, "🎬 聽完整部放映 +20", true);
+      }
+      endWalk();
+      return;
+    }
     walkIdx++;
     renderWalk(true);
   });
@@ -3507,13 +3642,17 @@
       matchedCount++;
       updateMatchCount();
       streak++;
-      var gain = streak >= 3 ? 20 : 10;
+      if (streak > stats.maxStreak) stats.maxStreak = streak;
+      var firstTry = tile.tries === 0;
+      if (firstTry) stats.firstTry++;
+      var gain = 10 + (firstTry ? 5 : 0);
+      if (streak >= 3) gain *= 2;
       score += gain;
       updateScore();
       var okBox = activeBoxFor(actIdx);
       var pt = fxPoint(okBox, clientX, clientY);
       fxBurst(pt.x, pt.y, false);
-      fxToast(pt.x, pt.y, "+" + gain + (streak >= 3 ? " 連對!" : ""), true);
+      fxToast(pt.x, pt.y, "+" + gain + (streak >= 3 ? " 連對!" : (firstTry ? " 一次就對!" : "")), true);
       flashBox(okBox, true);
       var placed = "";
       if (true) {
@@ -3537,15 +3676,18 @@
       var praise = PRAISES[matchedCount % PRAISES.length];
       if (matchedCount === gameTiles.length) {
         score += 30;
+        if (stats.wrong === 0) score += 50;
         updateScore();
         fxBurst(window.innerWidth / 2, window.innerHeight * 0.4, true);
-        fxToast(window.innerWidth / 2, window.innerHeight * 0.4, "🎉 全部完成!+30", true);
-        matchNote.textContent = "🎉 太棒了!" + gameTiles.length + " 件記憶都回到故事裡,總得分 " + score + " 分。想再玩一次,就再按一次「生成分鏡」。";
+        fxToast(window.innerWidth / 2, window.innerHeight * 0.4, stats.wrong === 0 ? "💯 零失誤!+80" : "🎉 全部完成!+30", true);
+        matchNote.textContent = "🎉 太棒了!" + gameTiles.length + " 件記憶都回到故事裡,總得分 " + score + " 分。";
+        setTimeout(showResult, 1100);
       } else {
         matchNote.textContent = praise + "「" + tile.name + "」回到了第" + "一二三四"[actIdx] + "幕(" + STAGES[actIdx].glyph + ")。" + placed;
       }
     } else {
       tile.tries++;
+      stats.wrong++;
       streak = 0;
       updateScore();
       tile.dom.classList.remove("shake");
@@ -3677,6 +3819,61 @@
     if (ev.target.closest && ev.target.closest(".walk-preview")) {
       attemptMatch(selectedTile, walkIdx, ev.clientX, ev.clientY);
     }
+  });
+
+  /* ── 成績單與再玩一次 ── */
+  function showResult() {
+    if (resultShown) return;
+    resultShown = true;
+    var total = gameTiles.length;
+    var ratio = total ? stats.firstTry / total : 0;
+    var starN = ratio >= 0.9 ? 3 : (ratio >= 0.6 ? 2 : 1);
+    var starsHtml = "";
+    for (var i = 0; i < 3; i++) starsHtml += i < starN ? "★" : '<span class="dim">★</span>';
+    $("resultStars").innerHTML = starsHtml;
+    $("resultScore").textContent = score;
+    $("resultRows").innerHTML =
+      "<div><span>一次就答對</span><b>" + stats.firstTry + " / " + total + "</b></div>" +
+      "<div><span>最長連對</span><b>" + stats.maxStreak + "</b></div>" +
+      "<div><span>創作與佈置</span><b>" + stats.edits + " 次</b></div>";
+    var badges = [];
+    if (stats.wrong === 0) badges.push("💯 零失誤");
+    if (stats.firstTry === total) badges.push("🎯 神準記憶");
+    if (stats.maxStreak >= 5) badges.push("🔥 連對達人");
+    if (stats.watched) badges.push("🎬 聽完整部放映");
+    if (stats.edits >= 5) badges.push("🎨 小小藝術家");
+    $("resultBadges").innerHTML = badges.map(function (b) { return "<span>" + b + "</span>"; }).join("");
+    $("resultWrap").classList.add("on");
+  }
+
+  function resetGame() {
+    $("resultWrap").classList.remove("on");
+    if (!currentData) return;
+    currentData.forEach(function (d, ai) {
+      d.sprites = [];
+    });
+    document.querySelectorAll(".frame-preview, .walk-preview").forEach(function (box) {
+      clearSprites(box);
+    });
+    gameTiles.forEach(function (t) {
+      t.done = false;
+      t.tries = 0;
+      t.dom.classList.remove("done");
+    });
+    matchedCount = 0;
+    score = 0; streak = 0;
+    stats = { firstTry: 0, wrong: 0, edits: 0, maxStreak: 0, watched: stats.watched };
+    creativityEarned = 0; resultShown = false;
+    updateScore();
+    updateMatchCount();
+    matchNote.textContent = "重新開始!把插圖再放回它們的家。";
+  }
+  $("playAgain").addEventListener("click", resetGame);
+  $("closeResult").addEventListener("click", function () {
+    $("resultWrap").classList.remove("on");
+  });
+  $("resultWrap").addEventListener("click", function (ev) {
+    if (ev.target === this) this.classList.remove("on");
   });
 
   window.__test = {
