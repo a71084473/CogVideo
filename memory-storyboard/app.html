@@ -954,6 +954,23 @@
     .flash-good, .flash-bad { animation: none; }
     .fx-toast { animation: none; opacity: 0.95; }
   }
+  @media (max-width: 700px) {
+    .tile-tray {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .tile { flex: 0 0 64px; padding: 5px 5px 6px; touch-action: pan-x; }
+    .tile .tile-name { font-size: 10.5px; letter-spacing: 0.02em; margin-top: 3px; }
+    #tileDock { padding: 8px 10px; bottom: 8px; }
+    .dock-head { margin-bottom: 6px; gap: 10px; }
+    .match-note { font-size: 11px; }
+    body.dock-space { padding-bottom: 168px; }
+    #walkOverlay { padding: 10px 12px 160px; }
+    .fx-toast { font-size: 16px; padding: 6px 14px; }
+  }
 
   .frame-card.drop-hint { border-color: var(--indigo); box-shadow: 0 0 0 2px var(--indigo-soft), var(--shadow); }
   .frame-card.hint-glow { animation: hintGlow 1.6s ease; }
@@ -2471,10 +2488,14 @@
       setTimeout(function () {
         var text = SAMPLES[sampleIdx % SAMPLES.length];
         sampleIdx++;
+        var existing = storyEl.value.trim();
+        var base = existing ? existing + "\n" : "";
         typeInto(storyEl, text, function () {
           setRec("idle");
-          recStatus.textContent = "已把語音轉成文字(示範模式)。可以直接修改,再生成分鏡。";
-        });
+          recStatus.textContent = existing
+            ? "已把這段語音接在您的故事後面(示範模式),原文都還在。"
+            : "已把語音轉成文字(示範模式)。可以直接修改,再生成分鏡。";
+        }, base);
       }, reduceMotion ? 200 : 1600);
     }
   });
@@ -3764,13 +3785,15 @@
     }
   };
 
-  function typeInto(el, text, done) {
-    if (reduceMotion) { el.value = text; done(); return; }
-    el.value = "";
+  function typeInto(el, text, done, base) {
+    base = base || "";
+    if (reduceMotion) { el.value = base + text; done(); return; }
+    el.value = base;
     var i = 0;
     var t = setInterval(function () {
       el.value += text[i];
       i++;
+      el.scrollTop = el.scrollHeight;
       if (i >= text.length) { clearInterval(t); done(); }
     }, 22);
   }
