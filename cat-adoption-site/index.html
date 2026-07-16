@@ -209,18 +209,18 @@ const CATS = [
 
 /* 成長相簿(脫敏:只顯示貓名與月齡) */
 const ALBUM = [
-  { name: '橘子',   months: 14, homeMonth: 12, furFrom: '#E8964F', furTo: '#C05621', note: '第一次自己跳上冰箱成功' },
-  { name: '雪球',   months: 9,  homeMonth: 6,  furFrom: '#F5F0E8', furTo: '#DCD2C0', note: '學會開毛毯自己蓋' },
-  { name: '奶昔',   months: 20, homeMonth: 15, furFrom: '#EAD7BD', furTo: '#C98A4B', note: '體重達標,醫生說讚' },
-  { name: '煤球',   months: 30, homeMonth: 24, furFrom: '#4A4642', furTo: '#2F2C28', note: '兩週年,收到新跳台' },
-  { name: '拿鐵',   months: 11, homeMonth: 8,  furFrom: '#D9C3A5', furTo: '#8B6844', note: '跟家裡的狗和解了' },
-  { name: '花捲',   months: 16, homeMonth: 10, furFrom: '#E8B77D', furTo: '#B0764A', note: '首次剪指甲零流血事件' },
-  { name: '阿磅',   months: 26, homeMonth: 18, furFrom: '#8195A6', furTo: '#5B6B7A', note: '減肥成功 0.8 公斤' },
-  { name: '豆腐',   months: 8,  homeMonth: 5,  furFrom: '#F5F0E8', furTo: '#E8DCC8', note: '會在鬧鐘前叫人起床了' },
-  { name: '玳玳',   months: 40, homeMonth: 36, furFrom: '#6B5544', furTo: '#3E3A36', note: '三週年,依然是沙發之王' },
-  { name: '麻花',   months: 13, homeMonth: 9,  furFrom: '#C9A876', furTo: '#8B6844', note: '第一次看雪(在陽台)' },
-  { name: '嗶嗶',   months: 10, homeMonth: 7,  furFrom: '#3E3A36', furTo: '#F5F0E8', note: '學會擊掌換零食' },
-  { name: '湯圓',   months: 22, homeMonth: 16, furFrom: '#F3E9DA', furTo: '#E8B77D', note: '陪小主人讀完整套繪本' },
+  { name: '橘子',   months: 14, homeMonth: 12, furFrom: '#E8964F', furTo: '#C05621', note: '第一次自己跳上冰箱成功', similarTo: 'tiger' },
+  { name: '雪球',   months: 9,  homeMonth: 6,  furFrom: '#F5F0E8', furTo: '#DCD2C0', note: '學會開毛毯自己蓋', similarTo: 'mochi' },
+  { name: '奶昔',   months: 20, homeMonth: 15, furFrom: '#EAD7BD', furTo: '#C98A4B', note: '體重達標,醫生說讚', similarTo: 'pudding' },
+  { name: '煤球',   months: 30, homeMonth: 24, furFrom: '#4A4642', furTo: '#2F2C28', note: '兩週年,收到新跳台', similarTo: 'momo' },
+  { name: '拿鐵',   months: 11, homeMonth: 8,  furFrom: '#D9C3A5', furTo: '#8B6844', note: '跟家裡的狗和解了', similarTo: 'sesame' },
+  { name: '花捲',   months: 16, homeMonth: 10, furFrom: '#E8B77D', furTo: '#B0764A', note: '首次剪指甲零流血事件', similarTo: 'mochi' },
+  { name: '阿磅',   months: 26, homeMonth: 18, furFrom: '#8195A6', furTo: '#5B6B7A', note: '減肥成功 0.8 公斤', similarTo: 'agray' },
+  { name: '豆腐',   months: 8,  homeMonth: 5,  furFrom: '#F5F0E8', furTo: '#E8DCC8', note: '會在鬧鐘前叫人起床了', similarTo: 'mochi' },
+  { name: '玳玳',   months: 40, homeMonth: 36, furFrom: '#6B5544', furTo: '#3E3A36', note: '三週年,依然是沙發之王', similarTo: 'momo' },
+  { name: '麻花',   months: 13, homeMonth: 9,  furFrom: '#C9A876', furTo: '#8B6844', note: '第一次看雪(在陽台)', similarTo: 'pudding' },
+  { name: '嗶嗶',   months: 10, homeMonth: 7,  furFrom: '#3E3A36', furTo: '#F5F0E8', note: '學會擊掌換零食', similarTo: 'sesame' },
+  { name: '湯圓',   months: 22, homeMonth: 16, furFrom: '#F3E9DA', furTo: '#E8B77D', note: '陪小主人讀完整套繪本', similarTo: 'tiger' },
 ];
 
 /* 透明帳本(假資料) */
@@ -533,7 +533,7 @@ function Hero() {
 /* ============================================================
  * 2. 生活樣態配對測驗(對話式、一屏一題、皆可跳過)
  * ============================================================ */
-function Quiz({ openChat }) {
+function Quiz({ openChat, variant = 'a' }) {
   const [started, setStarted] = useState(false);
   const [answers, setAnswers] = useState({});
   const [step, setStep] = useState(0);
@@ -604,6 +604,9 @@ function Quiz({ openChat }) {
                 </p>
                 <div className="mt-4 flex flex-col gap-2">
                   <CtaButton onClick={() => openChat(cat, answers)}>跟中途聊聊{cat.name}</CtaButton>
+                  {variant === 'b' && (
+                    <p className="text-xs text-mist text-center">先見面、可試相處,不用一次決定。</p>
+                  )}
                   <GhostButton onClick={() => setSaved({ ...saved, [cat.id]: true })}>
                     {saved[cat.id] ? '已收藏,會通知你牠的近況 ✓' : '先收藏,看牠的近況'}
                   </GhostButton>
@@ -663,7 +666,7 @@ function Quiz({ openChat }) {
 }
 
 /* 「跟中途聊聊」:預填自我介紹草稿,認養人確認後才送出(B1-4) */
-function ChatModal({ cat, answers, onClose }) {
+function ChatModal({ cat, answers, onClose, variant = 'a' }) {
   const foster = FOSTERS[cat.fosterId];
   const [sent, setSent] = useState(false);
   const summary = useMemo(() => {
@@ -698,14 +701,29 @@ function ChatModal({ cat, answers, onClose }) {
         </div>
       ) : (
         <div>
+          {variant === 'b' && (
+            <p className="mb-3 bg-latte rounded-xl p-3 text-ink text-sm leading-relaxed">
+              💬 中途看的是你願不願意學,不是你懂多少。第一次養貓的問題,他們最擅長回答。
+            </p>
+          )}
           <p className="text-mist mb-3">這是幫你擬好的自我介紹草稿,改成你的語氣再送出就可以:</p>
           <label htmlFor="chat-draft" className="sr-only">給中途的訊息草稿</label>
           <textarea id="chat-draft" value={draft} onChange={(e) => setDraft(e.target.value)} rows={10}
             className="w-full rounded-2xl border border-misty bg-white p-4 leading-relaxed text-ink" />
+          {variant === 'b' && (
+            <p className="mt-2 text-xs text-mist">
+              🔒 這段摘要只寄給 {foster.name},不會公開、不進相簿、不留在任何名單上。
+            </p>
+          )}
           <div className="mt-4 flex flex-wrap gap-3 justify-end">
             <GhostButton onClick={onClose}>再想想</GhostButton>
             <CtaButton onClick={() => setSent(true)}>送出給{foster.name}</CtaButton>
           </div>
+          {variant === 'b' && (
+            <p className="mt-4 pt-3 border-t border-latte text-xs text-mist text-center">
+              之後任何原因養不了,牠永遠可以回家——我們不追問。
+            </p>
+          )}
         </div>
       )}
     </Modal>
@@ -826,7 +844,7 @@ function CatsSection({ openChat }) {
 /* ============================================================
  * 4. 認養旅程(儀式化四階段)
  * ============================================================ */
-function Journey() {
+function Journey({ variant = 'a' }) {
   const steps = [
     { name: '相識', you: '看檔案、做配對,跟中途聊聊這隻貓', foster: '分享貓咪日常,回答你所有的問題' },
     { name: '見面', you: '約時間去見牠本貓,感受彼此的頻率', foster: '安排見面,介紹牠的小習慣' },
@@ -857,6 +875,11 @@ function Journey() {
             最終的決定,由貓咪的中途做出。<br className="sm:hidden" />
             <strong className="font-round">每隻貓的中途最了解牠,他們的把關是給你和貓的保障。</strong>
           </p>
+          {variant === 'b' && (
+            <p className="mt-3 pt-3 border-t border-latte text-sm text-mist">
+              而承諾日之後,任何原因養不了,<a href="#support" className="underline underline-offset-4 text-mist hover:text-ink">牠永遠可以回家</a>——我們不追問。
+            </p>
+          )}
         </div>
       </div>
     </section>
@@ -960,8 +983,9 @@ function AdopterView() {
   );
 }
 
-function Album() {
+function Album({ openChat, variant = 'a' }) {
   const [showAdopter, setShowAdopter] = useState(false);
+  const [profileCat, setProfileCat] = useState(null);
   return (
     <section id="album" className="bg-cream">
       <div className="max-w-6xl mx-auto px-4 py-16 md:py-20">
@@ -977,6 +1001,15 @@ function Album() {
                 <p className="font-round font-bold text-ink">{a.name}<span className="text-mist font-normal text-sm">・{a.months} 個月大</span></p>
                 <p className="text-xs text-clay font-round font-bold mt-1">回家第 {a.homeMonth} 個月</p>
                 <p className="text-sm text-mist mt-1">{a.note}</p>
+                {variant === 'b' && a.similarTo && (() => {
+                  const sim = CATS.find((c) => c.id === a.similarTo);
+                  return sim ? (
+                    <button type="button" onClick={() => setProfileCat(sim)}
+                      className="mt-2 min-h-[44px] w-full rounded-xl bg-latte text-sm text-ink font-medium hover:bg-misty">
+                      和牠同型的{sim.name},現在可以認養 →
+                    </button>
+                  ) : null;
+                })()}
               </div>
             </li>
           ))}
@@ -988,6 +1021,7 @@ function Album() {
         </div>
         {showAdopter && <AdopterView />}
       </div>
+      {profileCat && <CatProfile cat={profileCat} onClose={() => setProfileCat(null)} openChat={openChat} />}
     </section>
   );
 }
@@ -1267,9 +1301,30 @@ function LedgerPage({ setPage }) {
 /* ============================================================
  * App
  * ============================================================ */
+/* AB 測試預覽切換(fixed 於視窗角落,不干擾正式版面) */
+function VariantToggle({ variant, setVariant }) {
+  return (
+    <div className="fixed bottom-4 left-4 z-50 bg-ink/90 text-cream rounded-full px-2 py-1.5 flex items-center gap-1 shadow-lg"
+      role="group" aria-label="AB 測試版本切換">
+      <span className="px-2 text-xs font-round font-bold">AB 測試預覽</span>
+      {['a', 'b'].map((v) => (
+        <button key={v} type="button" onClick={() => setVariant(v)} aria-pressed={variant === v}
+          className={`min-h-[44px] min-w-[44px] rounded-full font-round font-bold text-sm
+            ${variant === v ? 'bg-clay text-white' : 'text-cream/70 hover:text-cream'}`}>
+          {v === 'a' ? 'A 控制' : 'B 變異'}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function App() {
   const [page, setPage] = useState('site');           // site | admin | ledger
   const [chat, setChat] = useState(null);             // { cat, answers }
+  /* AB 變異組:?v=b 可直連,預設 A 控制組 */
+  const [variant, setVariant] = useState(
+    new URLSearchParams(window.location.search).get('v') === 'b' ? 'b' : 'a'
+  );
   const openChat = (cat, answers) => setChat({ cat, answers });
 
   useEffect(() => { window.scrollTo(0, 0); }, [page]);
@@ -1282,14 +1337,15 @@ function App() {
       <Nav setPage={setPage} />
       <main id="main">
         <Hero />
-        <Quiz openChat={openChat} />
+        <Quiz openChat={openChat} variant={variant} />
         <CatsSection openChat={openChat} />
-        <Journey />
-        <Album />
+        <Journey variant={variant} />
+        <Album openChat={openChat} variant={variant} />
         <Support setPage={setPage} />
       </main>
       <Footer setPage={setPage} />
-      {chat && <ChatModal cat={chat.cat} answers={chat.answers} onClose={() => setChat(null)} />}
+      {chat && <ChatModal cat={chat.cat} answers={chat.answers} onClose={() => setChat(null)} variant={variant} />}
+      <VariantToggle variant={variant} setVariant={setVariant} />
     </div>
   );
 }
