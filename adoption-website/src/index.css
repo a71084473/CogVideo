@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  /* 品牌色彩 */
+  --color-cream: #F7F2E8;
+  --color-cream-dark: #EFE7D6;
+  --color-brand: #D9824E;
+  --color-brand-dark: #B96A3B;
+  --color-brand-light: #F3D9C6;
+  --color-sage: #748C78;
+  --color-sage-dark: #5C7361;
+  --color-sage-light: #DCE5DD;
+  --color-ink: #2F3A35;
+  --color-ink-soft: #5A6660;
+  --color-info: #7B93A8;
+  --color-info-light: #E3EAF0;
+  --color-danger: #A8443C;
+  --color-danger-light: #F2E0DE;
+
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+
+  --radius-card: 1rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 鍵盤焦點狀態 */
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 跳至主要內容 */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--color-ink);
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 0.5rem 0;
+}
+.skip-link:focus {
+  left: 0;
+}
