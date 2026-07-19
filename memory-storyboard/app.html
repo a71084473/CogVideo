@@ -801,6 +801,51 @@
     transition: filter 0.2s var(--ease);
   }
   .scene-sprite canvas { display: block; width: 100%; height: auto; }
+  .scene-sprite.lift canvas { animation-play-state: paused !important; }
+  .anim-bob { animation: spBob 3.4s ease-in-out infinite; }
+  @keyframes spBob {
+    0%, 100% { transform: scaleX(var(--flip, 1)) translateY(0) rotate(-1.6deg); }
+    50% { transform: scaleX(var(--flip, 1)) translateY(-4px) rotate(1.6deg); }
+  }
+  .anim-drift { animation: spDrift 7s ease-in-out infinite; }
+  @keyframes spDrift {
+    0%, 100% { transform: scaleX(var(--flip, 1)) translateX(-5px); }
+    50% { transform: scaleX(var(--flip, 1)) translateX(5px); }
+  }
+  .anim-sway { transform-origin: 50% 100%; animation: spSway 3.6s ease-in-out infinite; }
+  .anim-sway-top { transform-origin: 50% 0%; animation: spSway 3.2s ease-in-out infinite; }
+  @keyframes spSway {
+    0%, 100% { transform: scaleX(var(--flip, 1)) rotate(-2.6deg); }
+    50% { transform: scaleX(var(--flip, 1)) rotate(2.6deg); }
+  }
+  .anim-twinkle { animation: spTwinkle 2.2s ease-in-out infinite; }
+  @keyframes spTwinkle {
+    0%, 100% { opacity: 1; transform: scaleX(var(--flip, 1)) scale(1); }
+    50% { opacity: 0.65; transform: scaleX(var(--flip, 1)) scale(0.96); }
+  }
+  .anim-pulse { animation: spPulse 3.6s ease-in-out infinite; }
+  @keyframes spPulse {
+    0%, 100% { transform: scaleX(var(--flip, 1)) scale(1); }
+    50% { transform: scaleX(var(--flip, 1)) scale(1.06); }
+  }
+  .anim-float { animation: spFloat 4.4s ease-in-out infinite; }
+  @keyframes spFloat {
+    0%, 100% { transform: scaleX(var(--flip, 1)) translateY(0); }
+    50% { transform: scaleX(var(--flip, 1)) translateY(-5px); }
+  }
+  .anim-flutter { transform-origin: 50% 0%; animation: spFlutter 2.8s ease-in-out infinite; }
+  @keyframes spFlutter {
+    0%, 100% { transform: scaleX(var(--flip, 1)) skewX(-2.4deg); }
+    50% { transform: scaleX(var(--flip, 1)) skewX(2.4deg); }
+  }
+  .anim-breathe { animation: spBreathe 5.2s ease-in-out infinite; }
+  @keyframes spBreathe {
+    0%, 100% { transform: scaleX(var(--flip, 1)) scale(1); }
+    50% { transform: scaleX(var(--flip, 1)) scale(1.015); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scene-sprite canvas { animation: none !important; }
+  }
   .scene-sprite.lift {
     cursor: grabbing;
     filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.36));
@@ -3296,14 +3341,35 @@
     return { frac: bw / W };
   }
 
+  /* 每種元件的環境動畫:船搖、雲飄、樹搖曳、星閃爍…… */
+  var SPRITE_ANIM = {
+    boat: "anim-bob", n_wave: "anim-bob",
+    w_cloud: "anim-drift", w_birds: "anim-drift",
+    kite: "anim-float", smoke: "anim-float", fireflies: "anim-twinkle",
+    w_sun: "anim-pulse", w_moon: "anim-pulse", fireworks: "anim-pulse",
+    w_stars: "anim-twinkle",
+    tree: "anim-sway", pines: "anim-sway", bamboo: "anim-sway",
+    flowers: "anim-sway", n_grass: "anim-sway", n_pot: "anim-sway",
+    lanterns: "anim-sway-top", o_dress: "anim-sway-top", n_sign: "anim-sway-top",
+    clothesline: "anim-flutter", o_net: "anim-flutter",
+    o_umbrella: "anim-bob", o_incense: "anim-float"
+  };
+  function animClassFor(key) {
+    if (SPRITE_ANIM[key]) return SPRITE_ANIM[key];
+    return "anim-breathe"; /* 建物、印章與器物:輕輕呼吸 */
+  }
+
   function spawnSprite(rec, box) {
     var sp = document.createElement("div");
     sp.className = "scene-sprite";
     sp.innerHTML = "<canvas></canvas>";
     box.appendChild(sp);
-    var meta = drawSpriteCanvas(sp.querySelector("canvas"), rec.key, rec.name);
+    var cv = sp.querySelector("canvas");
+    var meta = drawSpriteCanvas(cv, rec.key, rec.name);
     rec.artFrac = meta.frac;
     sp._rec = rec;
+    cv.classList.add(animClassFor(rec.key));
+    cv.style.animationDelay = "-" + ((hashText(rec.key) + Math.round(rec.rx * 97)) % 36) / 10 + "s";
     positionSprite(sp, rec);
     applySpriteFx(sp, rec);
     ensureBoxWiring(box);
@@ -3343,7 +3409,9 @@
   function applySpriteFx(sp, rec) {
     var cv = sp.querySelector("canvas");
     cv.style.filter = SPRITE_HUES[rec.hue || 0];
-    cv.style.transform = rec.flip ? "scaleX(-1)" : "";
+    cv.style.setProperty("--flip", rec.flip ? -1 : 1);
+    /* 無動畫類別時仍需翻轉 */
+    if (!cv.className) cv.style.transform = rec.flip ? "scaleX(-1)" : "";
   }
 
   /* 像素級命中:點在透明處會穿透到下層元件 */
