@@ -1,0 +1,387 @@
+<title>合拍 PawMatch 真實驗研究設計報告｜隨機控制實驗(N=20)</title>
+<style>
+  :root{
+    --bg:#FBF7F0;--surface:#FFFFFF;--surface2:#F4EEE3;--sunken:#F7F2E9;
+    --ink:#2B2823;--muted:#6E6659;--faint:#938A7B;
+    --accent:#B4501C;--accent-ink:#8F3D12;--accent-soft:#F3E0D2;
+    --line:#E6DECF;--line-strong:#D8CDB8;
+    --good:#4F6B47;--good-soft:#E4EADE;--warn:#9C6B12;--warn-soft:#F5E9CE;
+    --crit:#A23B2A;--crit-soft:#F3DAD3;
+    --sA:#2E6FA8;--sB:#C05621;
+    --shadow:0 1px 2px rgba(43,40,35,.05),0 8px 24px rgba(43,40,35,.06);--maxw:920px;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#201D19;--surface:#2A2621;--surface2:#322D27;--sunken:#252119;
+    --ink:#F1EBDF;--muted:#B5AA98;--faint:#8B8171;
+    --accent:#E2884A;--accent-ink:#EE9D63;--accent-soft:#3A2E23;
+    --line:#3B352C;--line-strong:#4A4237;
+    --good:#8FB07F;--good-soft:#2C3326;--warn:#D8A24E;--warn-soft:#352C1B;
+    --crit:#E08A76;--crit-soft:#3A2620;
+    --sA:#4585C4;--sB:#D4753A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);
+  }}
+  :root[data-theme="light"]{--bg:#FBF7F0;--surface:#FFFFFF;--surface2:#F4EEE3;--sunken:#F7F2E9;--ink:#2B2823;--muted:#6E6659;--faint:#938A7B;--accent:#B4501C;--accent-ink:#8F3D12;--accent-soft:#F3E0D2;--line:#E6DECF;--line-strong:#D8CDB8;--good:#4F6B47;--good-soft:#E4EADE;--warn:#9C6B12;--warn-soft:#F5E9CE;--crit:#A23B2A;--crit-soft:#F3DAD3;--sA:#2E6FA8;--sB:#C05621;}
+  :root[data-theme="dark"]{--bg:#201D19;--surface:#2A2621;--surface2:#322D27;--sunken:#252119;--ink:#F1EBDF;--muted:#B5AA98;--faint:#8B8171;--accent:#E2884A;--accent-ink:#EE9D63;--accent-soft:#3A2E23;--line:#3B352C;--line-strong:#4A4237;--good:#8FB07F;--good-soft:#2C3326;--warn:#D8A24E;--warn-soft:#352C1B;--crit:#E08A76;--crit-soft:#3A2620;--sA:#4585C4;--sB:#D4753A;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  h1,h2,h3,h4{line-height:1.3;text-wrap:balance;font-weight:800}
+  a{color:var(--accent-ink)}.tnum{font-variant-numeric:tabular-nums}
+  header.masthead{background:radial-gradient(120% 120% at 100% 0%,var(--accent-soft) 0%,transparent 55%),var(--surface);border-bottom:1px solid var(--line)}
+  .masthead .wrap{padding-top:56px;padding-bottom:44px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:6px 12px;border-radius:999px}
+  h1{font-size:clamp(27px,5vw,42px);margin:20px 0 10px;letter-spacing:-.01em}
+  .lede{font-size:clamp(16px,2.4vw,19px);color:var(--muted);max-width:64ch;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:22px;font-size:13.5px;color:var(--faint)}.meta b{color:var(--ink)}
+  section{padding:48px 0;border-bottom:1px solid var(--line)}
+  .kicker{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 6px}
+  h2{font-size:clamp(22px,3.4vw,29px);margin:0 0 8px}h2 .n{color:var(--faint);margin-right:12px;font-variant-numeric:tabular-nums}
+  .sub{color:var(--muted);max-width:68ch;margin:0 0 24px}
+  h3{font-size:18px;margin:30px 0 10px}h4{font-size:15px;margin:0 0 6px}p{margin:0 0 16px}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}@media(max-width:480px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow)}
+  .card.tint{background:var(--surface2);box-shadow:none}
+  .note{background:var(--sunken);border:1px dashed var(--line-strong);border-radius:12px;padding:15px 18px;font-size:14.5px;color:var(--muted)}.note b{color:var(--ink)}
+  .warnbox{background:var(--warn-soft);border:1px solid var(--warn);border-radius:12px;padding:14px 18px;font-size:14.5px;color:var(--ink)}
+  .critbox{background:var(--crit-soft);border:1px solid var(--crit);border-radius:12px;padding:14px 18px;font-size:14.5px;color:var(--ink)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:13.5px}
+  caption{text-align:left;padding:13px 16px;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:var(--surface2);font-size:12px;letter-spacing:.03em;color:var(--muted);font-weight:800}
+  tbody tr:last-child td{border-bottom:0}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.c,th.c{text-align:center}
+  ul.clean{margin:0 0 16px;padding-left:20px}ul.clean li{margin:6px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--surface2);color:var(--muted)}
+  .pill.good{background:var(--good-soft);color:var(--good)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.crit{background:var(--crit-soft);color:var(--crit)}
+  .pill.a{background:color-mix(in srgb,var(--sA) 18%,transparent);color:var(--sA)}
+  .pill.b{background:color-mix(in srgb,var(--sB) 18%,transparent);color:var(--sB)}
+  .foot{padding:34px 0 60px;color:var(--faint);font-size:13px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .toc a{font-size:13px;text-decoration:none;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+  .toc a:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .lab{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+  .stat .val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:4px}
+  .stat .sub2{font-size:12px;color:var(--faint);margin-top:2px}
+  .stat.pos .val{color:var(--good)}.stat.warn .val{color:var(--warn)}.stat.neutral .val{color:var(--ink)}
+  .designnote{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface2);border-radius:12px;padding:16px 18px;font-size:14px;line-height:2;color:var(--ink)}
+  .designnote b{color:var(--accent-ink)}
+  /* figures */
+  .fig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);margin:18px 0}
+  .fig .title{font-size:15px;font-weight:800;margin:0}.fig .desc{font-size:12.5px;color:var(--faint);margin:2px 0 16px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .legend .key{display:inline-flex;align-items:center;gap:6px}.swatch{width:12px;height:12px;border-radius:3px;display:inline-block}.sw-a{background:var(--sA)}.sw-b{background:var(--sB)}
+  /* strip plot */
+  .strip{position:relative;margin:6px 0 2px}
+  .strip .axis{position:relative;height:1px;background:var(--line-strong);margin:8px 0}
+  .strip .tick{position:absolute;top:6px;transform:translateX(-50%);font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+  .striprow{position:relative;height:34px;margin:4px 0}
+  .striprow .rl{position:absolute;left:0;top:8px;font-size:12.5px;font-weight:700;color:var(--ink)}
+  .striptrack{position:absolute;left:42px;right:8px;top:0;bottom:0}
+  .dot{position:absolute;top:9px;width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);transform:translateX(-50%)}
+  .dot.a{background:var(--sA)}.dot.b{background:var(--sB)}
+  .meanline{position:absolute;top:2px;bottom:2px;width:2.5px;background:var(--ink)}
+  .meanlab{position:absolute;top:-14px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* conversion bars */
+  .cbar{display:grid;grid-template-columns:60px 1fr;gap:6px 10px;align-items:center;margin:8px 0}
+  .cbar .cl{font-size:13px;font-weight:700;text-align:right}
+  .cbar .ctrack{height:26px;background:var(--surface2);border-radius:6px;position:relative;overflow:hidden}
+  .cbar .cfill{height:100%;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:12px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+  .cbar .cfill.a{background:var(--sA)}.cbar .cfill.b{background:var(--sB)}
+  /* forest */
+  .forest{display:grid;grid-template-columns:150px 1fr 96px;gap:10px;align-items:center;margin:9px 0}
+  @media(max-width:640px){.forest{grid-template-columns:120px 1fr;grid-template-rows:auto auto}.forest .fv{grid-column:2}}
+  .flab{font-size:12.5px;font-weight:600;text-align:right;color:var(--ink)}
+  .ftrack{position:relative;height:22px;background:var(--surface2);border-radius:6px}
+  .fzero{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--line-strong)}
+  .fband{position:absolute;top:9px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--sB) 40%,transparent)}
+  .fdot{position:absolute;top:5px;width:12px;height:12px;border-radius:50%;background:var(--sB);border:2px solid var(--surface)}
+  .fv{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.fv b{color:var(--ink)}
+  code{background:var(--surface2);border-radius:6px;padding:1px 7px;font-size:.88em}
+</style>
+
+<header class="masthead"><div class="wrap">
+  <span class="eyebrow">🔬 True-Experimental Research Design</span>
+  <h1>大效果，卻測不出來：一場 N=20 的隨機控制實驗</h1>
+  <p class="lede">以四場中途訪談推導的 20 位受試者，隨機分派到控制組(現行網站)與變異組(易用性改進版)，做一場真實驗設計的模擬研究——並誠實面對小樣本的檢定力真相。</p>
+  <div class="meta">
+    <span><b>設計</b> 後測式隨機控制組(Posttest-only RCT)</span>
+    <span><b>N</b> 20(A=10, B=10, 完全隨機分派)</span>
+    <span><b>主要 DV</b> 送出意向(二元)</span>
+    <span><b>次要 DV</b> SUS、被審查感、信心、耗時</span>
+  </div>
+  <nav class="toc" aria-label="章節">
+    <a href="#s1">① 摘要</a><a href="#s2">② 問題與假設</a><a href="#s3">③ 為何真實驗</a><a href="#s4">④ 變項</a>
+    <a href="#s5">⑤ 受試者</a><a href="#s6">⑥ 隨機分派</a><a href="#s7">⑦ 程序</a><a href="#s8">⑧ 分析計畫</a>
+    <a href="#s9">⑨ 結果</a><a href="#s10">⑩ 效度威脅</a><a href="#s11">⑪ 討論結論</a>
+  </nav>
+</div></header>
+
+<!-- 1 摘要 -->
+<section id="s1"><div class="wrap">
+  <p class="kicker">Part 1 · Abstract</p>
+  <h2><span class="n">01</span>摘要:一個「對的方向、錯的樣本量」的教學案例</h2>
+  <div class="warnbox" style="margin-bottom:20px"><b>研究性質:</b>本研究為<b>模擬的真實驗</b>——20 位「受試者」由四場中途訪談推導的行為模型生成(三種 persona),隨機分派、依模型抽樣產生每人的反應資料。它示範一個真實驗<b>該怎麼設計、資料長怎樣、以及 N=20 能得到什麼結論</b>;真實效果須以真人受試複製。所有參數在 §4、§8 揭露,固定種子可重現(<code>sim_true_exp.py</code>)。</div>
+  <div class="grid g4">
+    <div class="stat warn"><div class="lab">主要 DV｜送出意向</div><div class="val">p = .17</div><div class="sub2">40% → 80%,OR=6.0<br>但 Fisher 不顯著</div></div>
+    <div class="stat pos"><div class="lab">效果大小｜風險差</div><div class="val">+40pp</div><div class="sub2">95% CI [+1, +79]<br>效果大但區間極寬</div></div>
+    <div class="stat pos"><div class="lab">次要 DV｜送出耗時</div><div class="val">−14s</div><div class="sub2">g=−0.98,p=.028<br>唯一達顯著</div></div>
+    <div class="stat warn"><div class="lab">事後檢定力</div><div class="val">44%</div><div class="sub2">需每組 n≈23<br>才有 power .8</div></div>
+  </div>
+  <p style="margin-top:20px"><b>一句話結論:</b>變異組把核心轉換(送出意向)從 40% 拉到 80%、SUS 與信心都往好的方向大幅移動(Hedges g = 0.84、0.65,屬大／中效果),但在 <b>N=20 的二元主要依變項上,Fisher 精確檢定 p=.17——測不到顯著</b>。這不是「B 無效」的證據,而是<b>樣本量不足</b>的證據(事後檢定力僅 44%)。本報告的最大產出,是把這個「absence of evidence ≠ evidence of absence」用真實驗的語言講清楚,並給出真人研究的樣本量處方(每組 ≥ 23–25)。</p>
+</div></section>
+
+<!-- 2 問題與假設 -->
+<section id="s2"><div class="wrap">
+  <p class="kicker">Part 2 · Question & Hypotheses</p>
+  <h2><span class="n">02</span>研究問題與假設</h2>
+  <p class="sub">自變項只有一個:網站版本(A 控制組 = 現行 MVP;B 變異組 = 易用性報告改進清單 C1–C5)。研究問題:改進版是否<b>因果性地</b>提升認養轉換與體驗?</p>
+  <div class="tablewrap"><table>
+    <caption>表 1．虛無假設與對立假設</caption>
+    <thead><tr><th>依變項</th><th>H₀(虛無)</th><th>H₁(對立,單向預期)</th></tr></thead>
+    <tbody>
+      <tr><td class="who">送出意向率(主)</td><td>P(B)=P(A)</td><td>P(B) &gt; P(A)</td></tr>
+      <tr><td class="who">SUS 易用性分數</td><td>μ(B)=μ(A)</td><td>μ(B) &gt; μ(A)</td></tr>
+      <tr><td class="who">被審查感(1–7)</td><td>μ(B)=μ(A)</td><td>μ(B) &lt; μ(A)</td></tr>
+      <tr><td class="who">認養信心(1–7)</td><td>μ(B)=μ(A)</td><td>μ(B) &gt; μ(A)</td></tr>
+      <tr><td class="who">送出耗時(秒)</td><td>μ(B)=μ(A)</td><td>μ(B) &lt; μ(A)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:16px">分析採雙尾檢定(較保守),但假設方向來自易用性走查的先驗預期。α = .05。</p>
+</div></section>
+
+<!-- 3 為何真實驗 -->
+<section id="s3"><div class="wrap">
+  <p class="kicker">Part 3 · Why True-Experimental</p>
+  <h2><span class="n">03</span>這為什麼是「真實驗」而非準實驗</h2>
+  <p class="sub">真實驗(true-experimental)的三個必要條件:<b>操弄自變項、有控制組、受試者隨機分派</b>。三者齊備才可做因果推論。本研究全部滿足。</p>
+  <div class="grid g3">
+    <div class="card"><h4>① 操弄自變項</h4><p style="margin:0;font-size:14px">研究者主動指派版本(A/B),而非觀察既有差異。</p></div>
+    <div class="card"><h4>② 控制組</h4><p style="margin:0;font-size:14px">A 為現行網站,提供反事實基準,分離「改動效果」與「時間/情境效果」。</p></div>
+    <div class="card"><h4>③ 隨機分派 ★</h4><p style="margin:0;font-size:14px">每位受試者以亂數指派到 A 或 B,讓已知與未知的干擾在兩組間機率均等——這是真實驗與準實驗的分水嶺。</p></div>
+  </div>
+  <h3>設計標記(Campbell &amp; Stanley)</h3>
+  <div class="designnote">
+    R　X_B　O　　<span style="color:var(--muted)">(變異組:隨機分派 → 接受改進版 → 後測)</span><br>
+    R　X_A　O　　<span style="color:var(--muted)">(控制組:隨機分派 → 接受現行版 → 後測)</span><br>
+    <span style="font-size:12.5px;color:var(--faint)">R = 隨機分派　X = 處置(版本)　O = 觀測(依變項)。屬<b>後測式僅控制組設計(Posttest-Only Control Group Design)</b>。</span>
+  </div>
+  <p style="margin-top:14px">選<b>後測式</b>而非前後測:認養轉換是一次性行為,前測會污染(問過「你想養貓嗎」會改變後續行為 → 測試–處置交互作用)。隨機分派已能保證兩組事前等值,毋須前測。</p>
+</div></section>
+
+<!-- 4 變項 -->
+<section id="s4"><div class="wrap">
+  <p class="kicker">Part 4 · Variables</p>
+  <h2><span class="n">04</span>變項與操作型定義</h2>
+  <div class="grid g2">
+    <div class="card tint"><h4>自變項(IV)</h4><p style="margin:0;font-size:14.5px"><b>網站版本</b>,二水準:<span class="pill a">A 控制組</span> 現行 MVP;<span class="pill b">B 變異組</span> 改進清單 C1–C5(草稿除罪化、隱私說明、試相處前移、退回入口、相簿導流)。組間操弄。</p></div>
+    <div class="card tint"><h4>控制變項(held constant)</h4><ul class="clean" style="margin:0;font-size:14px"><li>相同貓咪資料集、相同任務腳本與順序</li><li>相同裝置模擬環境與時間限制</li><li>測驗流程本身兩版一致(改動只加文案/入口)</li><li>主持人腳本標準化(消除主持人效應)</li></ul></div>
+  </div>
+  <div class="tablewrap" style="margin-top:16px"><table>
+    <caption>表 2．依變項的操作型定義與測量</caption>
+    <thead><tr><th>依變項</th><th>型態</th><th>操作型定義</th><th>方向</th></tr></thead>
+    <tbody>
+      <tr><td class="who">送出意向(主)</td><td>二元</td><td>是否完成「送出跟中途聊聊的訊息」</td><td>1 = 成功</td></tr>
+      <tr><td class="who">SUS</td><td>連續 0–100</td><td>System Usability Scale 十題標準量表</td><td>越高越好</td></tr>
+      <tr><td class="who">被審查感</td><td>Likert 1–7</td><td>「這個過程讓我覺得像在被審查」同意度</td><td>越低越好</td></tr>
+      <tr><td class="who">認養信心</td><td>Likert 1–7</td><td>「我有信心自己能養好這隻貓」</td><td>越高越好</td></tr>
+      <tr><td class="who">送出耗時</td><td>連續(秒)</td><td>進入草稿頁到成功送出的秒數</td><td>越短越好</td></tr>
+      <tr><td class="who">任務成功數</td><td>0–5</td><td>五項任務(落地/測驗/檔案/送出/理解售後)完成數</td><td>越高越好</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<!-- 5 受試者 -->
+<section id="s5"><div class="wrap">
+  <p class="kicker">Part 5 · Participants</p>
+  <h2><span class="n">05</span>受試者(N=20,訪談推導)</h2>
+  <p class="sub">依訪談的認養人組成生成 20 位模擬受試者:新手 9、共感 6、隱私敏感 5(≈45/30/25%)。每位帶一組由 persona 基準 + 個體雜訊決定的潛在反應傾向。</p>
+  <div class="tablewrap"><table>
+    <caption>表 3．受試者名冊與後測資料(依 ID 排序;耗時僅計送出任務)</caption>
+    <thead><tr><th>ID</th><th>Persona</th><th class="c">組別</th><th class="num">SUS</th><th class="num">被審查感</th><th class="num">信心</th><th class="c">送出</th><th class="num">耗時s</th><th class="num">任務/5</th></tr></thead>
+    <tbody id="roster"></tbody>
+  </table></div>
+</div></section>
+
+<!-- 6 隨機分派 -->
+<section id="s6"><div class="wrap">
+  <p class="kicker">Part 6 · Randomization</p>
+  <h2><span class="n">06</span>隨機分派與隨機化檢查</h2>
+  <p class="sub">以固定種子的亂數把 20 人分派成 A=10、B=10。真實驗要求分派本身是隨機的——但隨機不等於「平衡」,尤其在小樣本。這裡就出了一個真實的問題。</p>
+  <div class="critbox" style="margin-bottom:18px"><b>⚠ 隨機化檢查發現不平衡:</b>完全隨機分派的結果,persona 在兩組並不均等——控制組 A 拿到 5 位共感型、僅 1 位隱私型;變異組 B 拿到 4 位隱私型、僅 1 位共感型。這是<b>小樣本隨機分派的已知風險</b>,構成潛在混淆(persona 與版本部分共變)。</div>
+  <div class="tablewrap"><table>
+    <caption>表 4．隨機化檢查:persona × 組別</caption>
+    <thead><tr><th>組別</th><th class="num">新手</th><th class="num">共感</th><th class="num">隱私</th><th class="num">合計</th></tr></thead>
+    <tbody>
+      <tr><td class="who"><span class="pill a">A 控制</span></td><td class="num">4</td><td class="num">5</td><td class="num">1</td><td class="num">10</td></tr>
+      <tr><td class="who"><span class="pill b">B 變異</span></td><td class="num">5</td><td class="num">1</td><td class="num">4</td><td class="num">10</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:16px"><b>補救(真人研究應採用):</b>改用<b>分層區組隨機化(stratified block randomization)</b>——先依 persona 分層,層內再區組隨機分派,確保每組的 persona 組成一致。本模擬刻意保留這個不平衡,以示範小樣本完全隨機化的內部效度風險(見 §10)。</p>
+</div></section>
+
+<!-- 7 程序 -->
+<section id="s7"><div class="wrap">
+  <p class="kicker">Part 7 · Procedure</p>
+  <h2><span class="n">07</span>實驗程序</h2>
+  <ol class="clean" style="font-size:14.5px">
+    <li><b>指派與遮盲:</b>受試者經亂數指派版本;採單盲(受試者不知自己屬控制或變異組);分析者對組別遮盲至統計完成。</li>
+    <li><b>標準化情境:</b>統一指導語——「你正在考慮認養一隻貓,請照平常習慣使用這個網站。」不提示任何功能。</li>
+    <li><b>任務腳本(五項,固定順序):</b>T1 判斷網站能否幫到你 → T2 完成配對測驗 → T3 深入一隻貓的檔案 → T4 聯繫中途/送出意向 → T5 理解認養之後會發生什麼。</li>
+    <li><b>測量:</b>過程記錄任務成功與送出耗時;任務後填 SUS、被審查感、信心量表(後測)。</li>
+    <li><b>去偏:</b>任務順序固定以控制學習效應對「組間比較」的影響(兩組同序,順序效應在組間相抵)。</li>
+  </ol>
+</div></section>
+
+<!-- 8 分析計畫 -->
+<section id="s8"><div class="wrap">
+  <p class="kicker">Part 8 · Analysis Plan</p>
+  <h2><span class="n">08</span>資料分析計畫(依變項型態選檢定)</h2>
+  <div class="tablewrap"><table>
+    <caption>表 5．統計方法對照(小樣本並行參數與無母數檢定)</caption>
+    <thead><tr><th>依變項</th><th>主檢定</th><th>穩健並行</th><th>效果量</th></tr></thead>
+    <tbody>
+      <tr><td class="who">送出意向(二元)</td><td>Fisher 精確檢定</td><td>風險差 + 95% CI</td><td>勝算比 OR</td></tr>
+      <tr><td class="who">SUS／信心／被審查感／耗時</td><td>Welch 獨立 t 檢定</td><td>Mann-Whitney U</td><td>Hedges g(小樣本校正)、rank-biserial</td></tr>
+    </tbody>
+  </table></div>
+  <ul class="clean" style="margin-top:14px;font-size:14.5px">
+    <li><b>為何用 Fisher 而非卡方:</b>N=20 且細格期望次數 &lt;5,卡方近似失準,Fisher 精確檢定較正確。</li>
+    <li><b>為何並行無母數:</b>N=10/組無法可靠檢驗常態性,Mann-Whitney U 對非常態穩健,與 t 檢定並陳。</li>
+    <li><b>為何重效果量與 CI:</b>小樣本 p 值不穩定,Hedges g 與信賴區間比「顯著與否」更能傳達真相。</li>
+    <li><b>事後檢定力與樣本量:</b>報告觀測檢定力,並反推達 power .8 所需樣本(供真人研究規劃)。</li>
+  </ul>
+</div></section>
+
+<!-- 9 結果 -->
+<section id="s9"><div class="wrap">
+  <p class="kicker">Part 9 · Results</p>
+  <h2><span class="n">09</span>結果</h2>
+
+  <div class="fig">
+    <p class="title">圖 1．主要依變項——送出意向轉換率</p>
+    <p class="desc">變異組達控制組兩倍,但 95% CI 極寬、Fisher p=.17。效果大,精確度低——這是 N=20 的代價。</p>
+    <div class="cbar"><div class="cl">A 控制</div><div class="ctrack"><div class="cfill a" style="width:40%">40%</div></div></div>
+    <div class="cbar"><div class="cl">B 變異</div><div class="ctrack"><div class="cfill b" style="width:80%">80%</div></div></div>
+    <div class="note" style="margin-top:12px;font-size:13.5px">風險差 <b>+40pp</b>,95% CI <b>[+1pp, +79pp]</b>(幾乎觸及 0);勝算比 <b>OR=6.0</b>;Fisher 精確檢定 <b>p=.170</b>(未達 α=.05)。事後檢定力 ≈ <b>44%</b>。</div>
+  </div>
+
+  <div class="fig">
+    <p class="title">圖 2．SUS 易用性——每位受試者的個別分數</p>
+    <p class="desc">每一點是一位受試者;粗線為組平均。B 整體右移,但兩組分布重疊。刻度 60–95。</p>
+    <div class="legend"><span class="key"><span class="swatch sw-a"></span>A 控制(n=10)</span><span class="key"><span class="swatch sw-b"></span>B 變異(n=10)</span></div>
+    <div class="strip">
+      <div class="striprow"><div class="rl">A</div><div class="striptrack" id="stripA"></div></div>
+      <div class="striprow"><div class="rl">B</div><div class="striptrack" id="stripB"></div></div>
+      <div class="axis" style="margin-left:42px"><span class="tick" style="left:0%">60</span><span class="tick" style="left:28.6%">70</span><span class="tick" style="left:57.1%">80</span><span class="tick" style="left:85.7%">90</span></div>
+    </div>
+    <div class="note" style="margin-top:14px;font-size:13.5px">A = 73.5 ± 4.9,B = 79.0 ± 7.3,Δ=<b>+5.4</b> [−0.4, +11.3];t=1.96 <b>p=.068</b>;U=74 p=.070;Hedges <b>g=+0.84(大效果)</b>。方向強、剛好未達顯著。</div>
+  </div>
+
+  <div class="fig">
+    <p class="title">圖 3．效果量森林圖(Hedges g,橫桿為方向;★=達 p&lt;.05)</p>
+    <p class="desc">五個連續依變項全部朝假設方向,效果量中到大;但只有「送出耗時」在此樣本量達統計顯著。</p>
+    <!-- g range -1.4..+1.4 → left% = (g+1.4)/2.8*100 ; zero at 50% -->
+    <div class="forest"><div class="flab">送出耗時(↓好)★</div>
+      <div class="ftrack"><span class="fzero" style="left:50%"></span><span class="fband" style="left:15%;width:35%"></span><span class="fdot" style="left:calc(15% - 6px)"></span></div>
+      <div class="fv"><b>g=−0.98</b> p=.028</div></div>
+    <div class="forest"><div class="flab">SUS(↑好)</div>
+      <div class="ftrack"><span class="fzero" style="left:50%"></span><span class="fband" style="left:50%;width:30%"></span><span class="fdot" style="left:calc(80% - 6px)"></span></div>
+      <div class="fv"><b>g=+0.84</b> p=.068</div></div>
+    <div class="forest"><div class="flab">認養信心(↑好)</div>
+      <div class="ftrack"><span class="fzero" style="left:50%"></span><span class="fband" style="left:50%;width:23%"></span><span class="fdot" style="left:calc(73% - 6px)"></span></div>
+      <div class="fv"><b>g=+0.65</b> p=.149</div></div>
+    <div class="forest"><div class="flab">被審查感(↓好)</div>
+      <div class="ftrack"><span class="fzero" style="left:50%"></span><span class="fband" style="left:29%;width:21%"></span><span class="fdot" style="left:calc(29% - 6px)"></span></div>
+      <div class="fv"><b>g=−0.59</b> p=.188</div></div>
+    <div class="forest"><div class="flab">任務成功數(↑好)</div>
+      <div class="ftrack"><span class="fzero" style="left:50%"></span><span class="fband" style="left:50%;width:6.4%"></span><span class="fdot" style="left:calc(56.4% - 6px)"></span></div>
+      <div class="fv"><b>g=+0.18</b> p=.673</div></div>
+    <p class="note" style="margin-top:12px;font-size:13px">任務成功數效果小屬天花板效應——T1–T3、T5 兩組都近乎全數通過,差異只落在 T4(送出),已由主要 DV 捕捉。</p>
+  </div>
+
+  <div class="tablewrap"><table>
+    <caption>表 6．推論統計總表(B − A)</caption>
+    <thead><tr><th>依變項</th><th class="num">A(M±SD)</th><th class="num">B(M±SD)</th><th class="num">Δ [95% CI]</th><th class="num">p(主)</th><th class="num">效果量</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td class="who">送出意向</td><td class="num">40%</td><td class="num">80%</td><td class="num">+40pp [+1,+79]</td><td class="num">.170</td><td class="num">OR=6.0</td><td><span class="pill warn">大效果·未顯著</span></td></tr>
+      <tr><td class="who">送出耗時(s)</td><td class="num">85.0±12.1</td><td class="num">70.7±15.7</td><td class="num">−14.4 [−27.6,−1.1]</td><td class="num">.028</td><td class="num">g=−0.98</td><td><span class="pill good">顯著</span></td></tr>
+      <tr><td class="who">SUS</td><td class="num">73.5±4.9</td><td class="num">79.0±7.3</td><td class="num">+5.4 [−0.4,+11.3]</td><td class="num">.068</td><td class="num">g=+0.84</td><td><span class="pill warn">邊緣</span></td></tr>
+      <tr><td class="who">認養信心</td><td class="num">4.78±0.71</td><td class="num">5.21±0.56</td><td class="num">+0.43 [−0.17,+1.03]</td><td class="num">.149</td><td class="num">g=+0.65</td><td><span class="pill">中效果·未顯著</span></td></tr>
+      <tr><td class="who">被審查感</td><td class="num">3.60±0.92</td><td class="num">3.14±0.52</td><td class="num">−0.46 [−1.17,+0.25]</td><td class="num">.188</td><td class="num">g=−0.59</td><td><span class="pill">中效果·未顯著</span></td></tr>
+      <tr><td class="who">任務成功/5</td><td class="num">4.40±0.52</td><td class="num">4.50±0.53</td><td class="num">+0.10 [−0.39,+0.59]</td><td class="num">.673</td><td class="num">g=+0.18</td><td><span class="pill">天花板</span></td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<!-- 10 效度威脅 -->
+<section id="s10"><div class="wrap">
+  <p class="kicker">Part 10 · Validity Threats</p>
+  <h2><span class="n">10</span>效度威脅分析(四大效度)</h2>
+  <div class="grid g2">
+    <div class="card"><h4>內部效度 Internal</h4><ul class="clean" style="margin:0;font-size:14px">
+      <li><b>隨機化不平衡(實際發生):</b>persona 在兩組不均,版本與 persona 部分共變 → 分層區組隨機化。</li>
+      <li>隨機分派已控制成熟、歷史、選擇偏誤。</li>
+      <li>單盲+分析遮盲控制期望效應。</li></ul></div>
+    <div class="card"><h4>統計結論效度 Statistical</h4><ul class="clean" style="margin:0;font-size:14px">
+      <li><b>檢定力不足(核心問題):</b>N=20 對二元 DV 檢定力僅 44%,第二型錯誤風險高。</li>
+      <li>以效果量+CI 佐證,不單看 p。</li>
+      <li>多重比較未校正(次要 DV 屬探索性,不作確認結論)。</li></ul></div>
+    <div class="card"><h4>建構效度 Construct</h4><ul class="clean" style="margin:0;font-size:14px">
+      <li>SUS 為標準化工具,建構效度佳。</li>
+      <li>「被審查感」為自編單題,信度未知 → 應發展多題量表。</li>
+      <li>模擬反應為假設映射,非真人自陳(最大建構限制)。</li></ul></div>
+    <div class="card"><h4>外部效度 External</h4><ul class="clean" style="margin:0;font-size:14px">
+      <li>persona 源自單一地區中途訪談,推論範圍受限。</li>
+      <li>實驗室任務情境≠真實認養決策(生態效度)。</li>
+      <li>單次接觸,無法反映長期留任/退養。</li></ul></div>
+  </div>
+</div></section>
+
+<!-- 11 討論結論 -->
+<section id="s11"><div class="wrap">
+  <p class="kicker">Part 11 · Discussion</p>
+  <h2><span class="n">11</span>討論與結論</h2>
+  <p><b>方向一致、力道不足。</b>五個連續依變項全部朝假設方向移動,效果量中到大(g = 0.59–0.98),主要 DV 的轉換率翻倍(40%→80%,OR=6)。從效果量看,變異組幾乎確定是更好的設計。但在 N=20 下,只有「送出耗時」跨過統計顯著線;主要 DV 的 Fisher p=.17。</p>
+  <p><b>這正是真實驗方法學最重要的一課:</b>不顯著 ≠ 沒效果。當事後檢定力只有 44%,即使真有 +40pp 的效果,也有超過一半的機率測不到。把 p=.17 誤讀成「B 沒用」而下架改進,會是嚴重的第二型錯誤。</p>
+  <div class="note" style="margin:18px 0"><b>樣本量處方(真人研究):</b>以本模擬的觀測效果反推,要在 power .8、α=.05 下穩定偵測——主要 DV(送出意向)需<b>每組 n≈23</b>(合計 ≈46);SUS 亦需<b>每組 n≈23</b>。建議真人 RCT 規劃<b>每組 25–30 人</b>(計 50–60),並採分層區組隨機化。</div>
+  <h3>結論</h3>
+  <ul class="clean">
+    <li><b>設計層面:</b>本研究示範了一個方法學完整的後測式隨機控制實驗——操弄、控制組、隨機分派、遮盲、依型態選檢定、效果量與檢定力並陳。</li>
+    <li><b>證據層面:</b>效果量與轉換翻倍一致支持變異組更優,與前一份大樣本模擬(+7.4pp、p&lt;.0001)方向吻合;差別在<b>小樣本無法達到統計顯著</b>。</li>
+    <li><b>行動層面:</b>不可據此 N=20 結果下架 B。下一步是依樣本量處方執行真人 RCT;在此之前,變異組的低風險改動(純文案)可先上線,由真實流量累積證據。</li>
+  </ul>
+  <div class="critbox" style="margin-top:18px"><b>誠實聲明:</b>本報告數據為模擬,用途是<b>示範真實驗的研究設計與資料分析、並凸顯小樣本的檢定力陷阱</b>。「效果存在」的最終證據,必須來自依此設計招募的真人受試者。</div>
+</div></section>
+
+<div class="wrap foot">
+  合拍 PawMatch 真實驗研究設計報告　·　後測式隨機控制組設計(R X O)　·　N=20(A=10, B=10)　·　模擬資料,固定種子可重現 <code>sim_true_exp.py</code>　·　圖表色通過色覺辨識驗證
+</div>
+
+<script>
+  const PARTS = [{"pid": "S01", "persona": "共感", "arm": "A", "sus": 74.0, "fric": 5.2, "conf": 4.7, "sent": 1, "t_send": 74.4, "task_success": 5}, {"pid": "S02", "persona": "新手", "arm": "B", "sus": 78.2, "fric": 2.8, "conf": 6.4, "sent": 0, "t_send": 51.4, "task_success": 4}, {"pid": "S03", "persona": "新手", "arm": "A", "sus": 73.1, "fric": 4.7, "conf": 4.0, "sent": 1, "t_send": 104.0, "task_success": 5}, {"pid": "S04", "persona": "新手", "arm": "A", "sus": 81.2, "fric": 2.5, "conf": 5.7, "sent": 0, "t_send": 74.2, "task_success": 4}, {"pid": "S05", "persona": "新手", "arm": "B", "sus": 92.6, "fric": 3.2, "conf": 5.1, "sent": 1, "t_send": 68.6, "task_success": 5}, {"pid": "S06", "persona": "共感", "arm": "A", "sus": 69.1, "fric": 3.1, "conf": 4.3, "sent": 1, "t_send": 86.9, "task_success": 5}, {"pid": "S07", "persona": "新手", "arm": "A", "sus": 70.6, "fric": 4.1, "conf": 5.5, "sent": 1, "t_send": 79.5, "task_success": 5}, {"pid": "S08", "persona": "新手", "arm": "B", "sus": 81.6, "fric": 3.8, "conf": 4.3, "sent": 1, "t_send": 65.6, "task_success": 5}, {"pid": "S09", "persona": "新手", "arm": "B", "sus": 69.9, "fric": 2.6, "conf": 5.0, "sent": 1, "t_send": 74.2, "task_success": 5}, {"pid": "S10", "persona": "隱私", "arm": "B", "sus": 77.0, "fric": 3.9, "conf": 5.2, "sent": 1, "t_send": 67.6, "task_success": 4}, {"pid": "S11", "persona": "新手", "arm": "B", "sus": 89.9, "fric": 3.6, "conf": 5.5, "sent": 1, "t_send": 48.1, "task_success": 4}, {"pid": "S12", "persona": "隱私", "arm": "B", "sus": 71.9, "fric": 3.1, "conf": 5.0, "sent": 0, "t_send": 64.0, "task_success": 4}, {"pid": "S13", "persona": "隱私", "arm": "B", "sus": 74.9, "fric": 2.7, "conf": 4.7, "sent": 1, "t_send": 77.4, "task_success": 5}, {"pid": "S14", "persona": "共感", "arm": "B", "sus": 75.6, "fric": 3.3, "conf": 5.4, "sent": 1, "t_send": 98.2, "task_success": 4}, {"pid": "S15", "persona": "共感", "arm": "A", "sus": 75.7, "fric": 2.7, "conf": 5.8, "sent": 0, "t_send": 86.0, "task_success": 4}, {"pid": "S16", "persona": "新手", "arm": "A", "sus": 66.7, "fric": 4.3, "conf": 4.6, "sent": 0, "t_send": 81.0, "task_success": 4}, {"pid": "S17", "persona": "共感", "arm": "A", "sus": 81.4, "fric": 3.4, "conf": 3.7, "sent": 0, "t_send": 95.0, "task_success": 4}, {"pid": "S18", "persona": "共感", "arm": "A", "sus": 73.6, "fric": 2.9, "conf": 4.9, "sent": 0, "t_send": 67.7, "task_success": 4}, {"pid": "S19", "persona": "隱私", "arm": "B", "sus": 78.1, "fric": 2.4, "conf": 5.5, "sent": 1, "t_send": 91.7, "task_success": 5}, {"pid": "S20", "persona": "隱私", "arm": "A", "sus": 69.9, "fric": 3.1, "conf": 4.6, "sent": 0, "t_send": 101.6, "task_success": 4}];
+  const rb = document.getElementById('roster');
+  PARTS.forEach(p=>{
+    const tr=document.createElement('tr');
+    const armPill = p.arm==='A' ? '<span class="pill a">A</span>' : '<span class="pill b">B</span>';
+    tr.innerHTML = `<td class="who">${p.pid}</td><td>${p.persona}</td><td class="c">${armPill}</td>`+
+      `<td class="num">${p.sus}</td><td class="num">${p.fric}</td><td class="num">${p.conf}</td>`+
+      `<td class="c">${p.sent? '✓':'—'}</td><td class="num">${p.t_send}</td><td class="num">${p.task_success}</td>`;
+    rb.appendChild(tr);
+  });
+  // strip plot: SUS 60..95 → left%
+  const x = s => Math.max(0,Math.min(100,(s-60)/(95-60)*100));
+  const place = (arm, id, mean) => {
+    const el=document.getElementById(id);
+    PARTS.filter(p=>p.arm===arm).forEach(p=>{
+      const d=document.createElement('span'); d.className='dot '+arm.toLowerCase();
+      d.style.left=x(p.sus)+'%'; d.title=`${p.pid} ${p.persona}: SUS ${p.sus}`; el.appendChild(d);
+    });
+    const m=document.createElement('span'); m.className='meanline'; m.style.left=x(mean)+'%'; el.appendChild(m);
+    const ml=document.createElement('span'); ml.className='meanlab'; ml.style.left=x(mean)+'%'; ml.textContent='M='+mean.toFixed(1); el.appendChild(ml);
+  };
+  place('A','stripA',73.53); place('B','stripB',78.97);
+</script>
