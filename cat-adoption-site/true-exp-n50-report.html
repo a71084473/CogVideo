@@ -1,0 +1,304 @@
+<title>合拍 PawMatch 真實驗研究設計報告(處方樣本量版)｜N=50 RCT</title>
+<style>
+  :root{
+    --bg:#FBF7F0;--surface:#FFFFFF;--surface2:#F4EEE3;--sunken:#F7F2E9;
+    --ink:#2B2823;--muted:#6E6659;--faint:#938A7B;
+    --accent:#B4501C;--accent-ink:#8F3D12;--accent-soft:#F3E0D2;
+    --line:#E6DECF;--line-strong:#D8CDB8;
+    --good:#4F6B47;--good-soft:#E4EADE;--warn:#9C6B12;--warn-soft:#F5E9CE;
+    --crit:#A23B2A;--crit-soft:#F3DAD3;
+    --sA:#2E6FA8;--sB:#C05621;
+    --shadow:0 1px 2px rgba(43,40,35,.05),0 8px 24px rgba(43,40,35,.06);--maxw:920px;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#201D19;--surface:#2A2621;--surface2:#322D27;--sunken:#252119;
+    --ink:#F1EBDF;--muted:#B5AA98;--faint:#8B8171;
+    --accent:#E2884A;--accent-ink:#EE9D63;--accent-soft:#3A2E23;
+    --line:#3B352C;--line-strong:#4A4237;
+    --good:#8FB07F;--good-soft:#2C3326;--warn:#D8A24E;--warn-soft:#352C1B;
+    --crit:#E08A76;--crit-soft:#3A2620;
+    --sA:#4585C4;--sB:#D4753A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);
+  }}
+  :root[data-theme="light"]{--bg:#FBF7F0;--surface:#FFFFFF;--surface2:#F4EEE3;--sunken:#F7F2E9;--ink:#2B2823;--muted:#6E6659;--faint:#938A7B;--accent:#B4501C;--accent-ink:#8F3D12;--accent-soft:#F3E0D2;--line:#E6DECF;--line-strong:#D8CDB8;--good:#4F6B47;--good-soft:#E4EADE;--warn:#9C6B12;--warn-soft:#F5E9CE;--crit:#A23B2A;--crit-soft:#F3DAD3;--sA:#2E6FA8;--sB:#C05621;}
+  :root[data-theme="dark"]{--bg:#201D19;--surface:#2A2621;--surface2:#322D27;--sunken:#252119;--ink:#F1EBDF;--muted:#B5AA98;--faint:#8B8171;--accent:#E2884A;--accent-ink:#EE9D63;--accent-soft:#3A2E23;--line:#3B352C;--line-strong:#4A4237;--good:#8FB07F;--good-soft:#2C3326;--warn:#D8A24E;--warn-soft:#352C1B;--crit:#E08A76;--crit-soft:#3A2620;--sA:#4585C4;--sB:#D4753A;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  h1,h2,h3,h4{line-height:1.3;text-wrap:balance;font-weight:800}
+  a{color:var(--accent-ink)}.tnum{font-variant-numeric:tabular-nums}
+  header.masthead{background:radial-gradient(120% 120% at 100% 0%,var(--accent-soft) 0%,transparent 55%),var(--surface);border-bottom:1px solid var(--line)}
+  .masthead .wrap{padding-top:56px;padding-bottom:44px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:6px 12px;border-radius:999px}
+  h1{font-size:clamp(27px,5vw,42px);margin:20px 0 10px;letter-spacing:-.01em}
+  .lede{font-size:clamp(16px,2.4vw,19px);color:var(--muted);max-width:64ch;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:22px;font-size:13.5px;color:var(--faint)}.meta b{color:var(--ink)}
+  section{padding:48px 0;border-bottom:1px solid var(--line)}
+  .kicker{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 6px}
+  h2{font-size:clamp(22px,3.4vw,29px);margin:0 0 8px}h2 .n{color:var(--faint);margin-right:12px;font-variant-numeric:tabular-nums}
+  .sub{color:var(--muted);max-width:68ch;margin:0 0 24px}
+  h3{font-size:18px;margin:30px 0 10px}h4{font-size:15px;margin:0 0 6px}p{margin:0 0 16px}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}@media(max-width:480px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow)}
+  .card.tint{background:var(--surface2);box-shadow:none}
+  .note{background:var(--sunken);border:1px dashed var(--line-strong);border-radius:12px;padding:15px 18px;font-size:14.5px;color:var(--muted)}.note b{color:var(--ink)}
+  .warnbox{background:var(--warn-soft);border:1px solid var(--warn);border-radius:12px;padding:14px 18px;font-size:14.5px;color:var(--ink)}
+  .critbox{background:var(--crit-soft);border:1px solid var(--crit);border-radius:12px;padding:14px 18px;font-size:14.5px;color:var(--ink)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:13.5px}
+  caption{text-align:left;padding:13px 16px;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:var(--surface2);font-size:12px;letter-spacing:.03em;color:var(--muted);font-weight:800}
+  tbody tr:last-child td{border-bottom:0}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.c,th.c{text-align:center}
+  ul.clean{margin:0 0 16px;padding-left:20px}ul.clean li{margin:6px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--surface2);color:var(--muted)}
+  .pill.good{background:var(--good-soft);color:var(--good)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.crit{background:var(--crit-soft);color:var(--crit)}
+  .pill.a{background:color-mix(in srgb,var(--sA) 18%,transparent);color:var(--sA)}
+  .pill.b{background:color-mix(in srgb,var(--sB) 18%,transparent);color:var(--sB)}
+  .foot{padding:34px 0 60px;color:var(--faint);font-size:13px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .toc a{font-size:13px;text-decoration:none;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+  .toc a:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .lab{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+  .stat .val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:4px}
+  .stat .sub2{font-size:12px;color:var(--faint);margin-top:2px}
+  .stat.pos .val{color:var(--good)}.stat.warn .val{color:var(--warn)}.stat.neutral .val{color:var(--ink)}
+  .designnote{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface2);border-radius:12px;padding:16px 18px;font-size:14px;line-height:2;color:var(--ink)}
+  .designnote b{color:var(--accent-ink)}
+  /* figures */
+  .fig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);margin:18px 0}
+  .fig .title{font-size:15px;font-weight:800;margin:0}.fig .desc{font-size:12.5px;color:var(--faint);margin:2px 0 16px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .legend .key{display:inline-flex;align-items:center;gap:6px}.swatch{width:12px;height:12px;border-radius:3px;display:inline-block}.sw-a{background:var(--sA)}.sw-b{background:var(--sB)}
+  /* strip plot */
+  .strip{position:relative;margin:6px 0 2px}
+  .strip .axis{position:relative;height:1px;background:var(--line-strong);margin:8px 0}
+  .strip .tick{position:absolute;top:6px;transform:translateX(-50%);font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+  .striprow{position:relative;height:34px;margin:4px 0}
+  .striprow .rl{position:absolute;left:0;top:8px;font-size:12.5px;font-weight:700;color:var(--ink)}
+  .striptrack{position:absolute;left:42px;right:8px;top:0;bottom:0}
+  .dot{position:absolute;top:9px;width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);transform:translateX(-50%)}
+  .dot.a{background:var(--sA)}.dot.b{background:var(--sB)}
+  .meanline{position:absolute;top:2px;bottom:2px;width:2.5px;background:var(--ink)}
+  .meanlab{position:absolute;top:-14px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* conversion bars */
+  .cbar{display:grid;grid-template-columns:60px 1fr;gap:6px 10px;align-items:center;margin:8px 0}
+  .cbar .cl{font-size:13px;font-weight:700;text-align:right}
+  .cbar .ctrack{height:26px;background:var(--surface2);border-radius:6px;position:relative;overflow:hidden}
+  .cbar .cfill{height:100%;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:12px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+  .cbar .cfill.a{background:var(--sA)}.cbar .cfill.b{background:var(--sB)}
+  /* forest */
+  .forest{display:grid;grid-template-columns:150px 1fr 96px;gap:10px;align-items:center;margin:9px 0}
+  @media(max-width:640px){.forest{grid-template-columns:120px 1fr;grid-template-rows:auto auto}.forest .fv{grid-column:2}}
+  .flab{font-size:12.5px;font-weight:600;text-align:right;color:var(--ink)}
+  .ftrack{position:relative;height:22px;background:var(--surface2);border-radius:6px}
+  .fzero{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--line-strong)}
+  .fband{position:absolute;top:9px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--sB) 40%,transparent)}
+  .fdot{position:absolute;top:5px;width:12px;height:12px;border-radius:50%;background:var(--sB);border:2px solid var(--surface)}
+  .fv{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.fv b{color:var(--ink)}
+  code{background:var(--surface2);border-radius:6px;padding:1px 7px;font-size:.88em}
+</style>
+<header class="masthead"><div class="wrap">
+  <span class="eyebrow">🔬 True-Experimental · 處方樣本量重跑</span>
+  <h1>把樣本量補足之後,真相分成了兩半</h1>
+  <p class="lede">依前一版 N=20 報告開出的處方,把每組樣本提高到 25(N=50)、並改用分層區組隨機化重跑。結果:體驗類指標全部決定性顯著——但二元轉換指標,即使在處方樣本量下,仍然力有未逮。</p>
+  <div class="meta">
+    <span><b>設計</b> 後測式隨機控制組(Posttest-only RCT)</span>
+    <span><b>N</b> 50(A=25, B=25)· 分層區組隨機化</span>
+    <span><b>重複</b> R=2,000(求期望值與經驗檢定力)</span>
+    <span><b>對照</b> 前版 N=20</span>
+  </div>
+  <nav class="toc" aria-label="章節">
+    <a href="#s1">① 摘要</a><a href="#s2">② 改動</a><a href="#s3">③ 隨機化修正</a><a href="#s4">④ 受試者</a>
+    <a href="#s5">⑤ 檢定力(重複)</a><a href="#s6">⑥ 代表單場</a><a href="#s7">⑦ 二元陷阱</a><a href="#s8">⑧ 結論</a>
+  </nav>
+</div></header>
+
+<section id="s1"><div class="wrap">
+  <p class="kicker">Part 1 · Abstract</p>
+  <h2><span class="n">01</span>摘要:同樣的效果,兩種命運</h2>
+  <div class="warnbox" style="margin-bottom:20px"><b>與前版的關係:</b>效果量假設完全沿用 N=20 版(未動),只改兩件事——<b>樣本量 20→50(每組 25)</b>、<b>完全隨機化→分層區組隨機化</b>。因此本報告是「同一套假設、把樣本補到處方值」的直接重跑,可與前版逐點對照。資料為模擬,固定種子可重現(<code>sim_true_exp_n50.py</code>)。</div>
+  <div class="grid g4">
+    <div class="stat pos"><div class="lab">SUS 易用性</div><div class="val">g=1.4</div><div class="sub2">+11.1 分,p&lt;.001<br>經驗檢定力 100%</div></div>
+    <div class="stat pos"><div class="lab">被審查感(↓好)</div><div class="val">g=1.9</div><div class="sub2">−1.36,p&lt;.001<br>經驗檢定力 100%</div></div>
+    <div class="stat warn"><div class="lab">送出意向(二元)</div><div class="val">p=.088</div><div class="sub2">40%→68%,OR=3.2<br>經驗檢定力僅 45%</div></div>
+    <div class="stat warn"><div class="lab">二元 DV 達 .8 需</div><div class="val">n≈50</div><div class="sub2">每組(非前版<br>估計的 ~23)</div></div>
+  </div>
+  <p style="margin-top:20px"><b>一句話結論:</b>把樣本補到處方值後,<b>四個連續依變項(SUS、被審查感、信心、送出耗時)全部從「測不到」翻身為決定性顯著</b>(p&lt;.001、效果量 g=1.1–1.9、經驗檢定力 98–100%)——B 更好,已無懸念。但<b>二元的送出意向,即使在 n=25/組,Fisher 精確檢定的經驗檢定力仍只有 45%</b>。前版用常態近似公式開的「n≈23」處方,對二元 × 精確檢定過度樂觀了。這帶出真正的教訓:二元轉換是昂貴的主要指標,要嘛把樣本加到<b>每組 ~50</b>,要嘛把主要指標改成連續量表。</p>
+</div></section>
+
+<section id="s2"><div class="wrap">
+  <p class="kicker">Part 2 · What Changed</p>
+  <h2><span class="n">02</span>相對前版,只動兩個旋鈕</h2>
+  <div class="tablewrap"><table>
+    <caption>表 1．前版 N=20 vs 本版 N=50</caption>
+    <thead><tr><th>面向</th><th>前版</th><th>本版(處方重跑)</th></tr></thead>
+    <tbody>
+      <tr><td class="who">每組樣本</td><td>10</td><td><b>25</b>(合計 50)</td></tr>
+      <tr><td class="who">隨機分派</td><td>完全隨機(結果不平衡)</td><td><b>分層區組隨機化</b>(persona 平衡)</td></tr>
+      <tr><td class="who">效果量假設</td><td colspan="2">兩版完全相同(新手 C1 +/隱私 C2 +/共感 C3 + 等,見前版 §4)</td></tr>
+      <tr><td class="who">分析方法</td><td colspan="2">兩版相同:Fisher(二元)、Welch t + Mann-Whitney U(連續)、Hedges g、經驗檢定力</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:16px">變異組 B 的內容不變,仍是易用性報告改進清單 C1–C5(草稿除罪化、隱私說明、試相處前移、退回入口、相簿導流)。這確保兩版差異只來自「樣本量與隨機化」,而非處置本身。</p>
+</div></section>
+
+<section id="s3"><div class="wrap">
+  <p class="kicker">Part 3 · Randomization Fixed</p>
+  <h2><span class="n">03</span>隨機化修正:分層區組隨機化</h2>
+  <p class="sub">前版完全隨機化在 N=20 造成 persona 不平衡(A 拿 5 共感、B 拿 4 隱私),構成混淆。本版採前版建議的修正:先依 persona 分層,層內再區組分派。</p>
+  <div class="tablewrap"><table>
+    <caption>表 2．隨機化檢查:persona × 組別(本版已平衡)</caption>
+    <thead><tr><th>組別</th><th class="num">新手</th><th class="num">共感</th><th class="num">隱私</th><th class="num">合計</th></tr></thead>
+    <tbody>
+      <tr><td class="who"><span class="pill a">A 控制</span></td><td class="num">12</td><td class="num">7</td><td class="num">6</td><td class="num">25</td></tr>
+      <tr><td class="who"><span class="pill b">B 變異</span></td><td class="num">11</td><td class="num">8</td><td class="num">6</td><td class="num">25</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:16px"><b>內部效度提升:</b>兩組 persona 組成幾乎相同(僅新手/共感各差 1 人,屬奇數分層的必然餘數),版本與 persona 不再共變。前版最大的內部效度威脅已解除。</p>
+</div></section>
+
+<section id="s4"><div class="wrap">
+  <p class="kicker">Part 4 · Participants</p>
+  <h2><span class="n">04</span>受試者(N=50)</h2>
+  <p class="sub">依訪談組成:新手 23、共感 15、隱私 12(≈45/30/25%)。下表為代表性單場實驗的完整名冊(耗時僅計送出任務)。</p>
+  <div class="tablewrap" style="max-height:440px;overflow-y:auto"><table>
+    <caption>表 3．受試者名冊與後測資料(代表性單場,N=50)</caption>
+    <thead><tr><th>ID</th><th>Persona</th><th class="c">組別</th><th class="num">SUS</th><th class="num">被審查感</th><th class="num">信心</th><th class="c">送出</th><th class="num">耗時s</th><th class="num">任務/5</th></tr></thead>
+    <tbody id="roster"></tbody>
+  </table></div>
+</div></section>
+
+<section id="s5"><div class="wrap">
+  <p class="kicker">Part 5 · Power (Replicated)</p>
+  <h2><span class="n">05</span>重複模擬 R=2,000:誰被補足、誰還沒</h2>
+  <p class="sub">單場的二元結果抽樣雜訊大,故以 2,000 次重複求期望值與<b>經驗檢定力</b>(該指標在多少比例的實驗中達 p&lt;.05)。這是本次重跑最關鍵的一張表。</p>
+  <div class="fig">
+    <p class="title">圖 1．各依變項的經驗檢定力(n=25/組)</p>
+    <p class="desc">連續依變項全部逼近 100%;唯獨二元的送出意向落在 45%(Fisher)/57%(χ²)。虛線 = 慣例門檻 .80。</p>
+    <div id="powerbars"></div>
+  </div>
+  <div class="tablewrap"><table>
+    <caption>表 4．重複模擬的期望效果與經驗檢定力</caption>
+    <thead><tr><th>依變項</th><th class="num">平均 Δ(B−A)</th><th class="num">經驗檢定力</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td class="who">SUS</td><td class="num">+11.6</td><td class="num">100%</td><td><span class="pill good">充分</span></td></tr>
+      <tr><td class="who">被審查感</td><td class="num">−1.38</td><td class="num">100%</td><td><span class="pill good">充分</span></td></tr>
+      <tr><td class="who">認養信心</td><td class="num">+1.01</td><td class="num">99%</td><td><span class="pill good">充分</span></td></tr>
+      <tr><td class="who">送出耗時(s)</td><td class="num">−21.7</td><td class="num">98%</td><td><span class="pill good">充分</span></td></tr>
+      <tr><td class="who">送出意向(二元,Fisher)</td><td class="num">+28.3pp</td><td class="num">45%</td><td><span class="pill warn">不足</span></td></tr>
+      <tr><td class="who">送出意向(二元,χ²)</td><td class="num">+28.3pp</td><td class="num">57%</td><td><span class="pill warn">不足</span></td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="s6"><div class="wrap">
+  <p class="kicker">Part 6 · Representative Experiment</p>
+  <h2><span class="n">06</span>代表性單場實驗(數值接近整體平均)</h2>
+  <p class="sub">從重複模擬中挑一場數值最接近平均的實驗(<b>不做顯著性篩選</b>,誠實呈現典型結果),用來看逐受試者資料與統計。</p>
+  <div class="fig">
+    <p class="title">圖 2．四個連續依變項:每位受試者(點)與組平均(線)</p>
+    <p class="desc">四張條帶圖的 B 群整體明顯右移(或左移,依方向),與 A 群分離清楚——這是「充分檢定力」的視覺樣貌。</p>
+    <div class="legend"><span class="key"><span class="swatch sw-a"></span>A 控制(n=25)</span><span class="key"><span class="swatch sw-b"></span>B 變異(n=25)</span></div>
+    <div id="strips"></div>
+  </div>
+  <div class="tablewrap"><table>
+    <caption>表 5．代表性單場的推論統計(B − A)</caption>
+    <thead><tr><th>依變項</th><th class="num">A(M±SD)</th><th class="num">B(M±SD)</th><th class="num">Δ [95% CI]</th><th class="num">p</th><th class="num">g</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td class="who">SUS</td><td class="num">68.5±8.4</td><td class="num">79.6±7.2</td><td class="num">+11.1 [+6.6,+15.6]</td><td class="num">&lt;.001</td><td class="num">+1.39</td><td><span class="pill good">顯著·大</span></td></tr>
+      <tr><td class="who">被審查感</td><td class="num">4.29±0.75</td><td class="num">2.92±0.70</td><td class="num">−1.36 [−1.78,−0.95]</td><td class="num">&lt;.001</td><td class="num">−1.86</td><td><span class="pill good">顯著·大</span></td></tr>
+      <tr><td class="who">認養信心</td><td class="num">4.42±0.73</td><td class="num">5.43±1.01</td><td class="num">+1.01 [+0.51,+1.51]</td><td class="num">&lt;.001</td><td class="num">+1.13</td><td><span class="pill good">顯著·大</span></td></tr>
+      <tr><td class="who">送出耗時(s)</td><td class="num">88.6±14.4</td><td class="num">65.9±16.1</td><td class="num">−22.8 [−31.4,−14.1]</td><td class="num">&lt;.001</td><td class="num">−1.47</td><td><span class="pill good">顯著·大</span></td></tr>
+      <tr><td class="who">任務成功/5</td><td class="num">4.28±0.61</td><td class="num">4.64±0.49</td><td class="num">+0.36 [+0.04,+0.68]</td><td class="num">.027</td><td class="num">+0.64</td><td><span class="pill good">顯著·中</span></td></tr>
+      <tr><td class="who">送出意向(二元)</td><td class="num">40%</td><td class="num">68%</td><td class="num">+28pp [+1,+55]</td><td class="num">.088</td><td class="num">OR=3.2</td><td><span class="pill warn">大效果·未顯著</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:14px">注意最後一列:同一場實驗裡,轉換率相差 28pp(40%→68%),但 Fisher p=.088——這就是 45% 檢定力的具體長相。連續指標全數 p&lt;.001,二元指標卻擦身而過。</p>
+</div></section>
+
+<section id="s7"><div class="wrap">
+  <p class="kicker">Part 7 · The Binary Trap</p>
+  <h2><span class="n">07</span>二元指標的檢定力陷阱與處方修正</h2>
+  <p class="sub">為什麼補到處方樣本量,二元指標還是不夠力?因為前版的「n≈23」來自<b>常態近似</b>的兩比例公式,而我們實際用的是<b>Fisher 精確檢定</b>——它對小樣本離散資料偏保守,真實檢定力低於近似公式的預測。</p>
+  <div class="fig">
+    <p class="title">圖 3．二元送出意向:Fisher 經驗檢定力 vs 每組樣本量</p>
+    <p class="desc">實測(每點 ≥800 次重複)。要跨過 .80,每組需 n≈50——是連續指標(n=25 即滿)的兩倍。</p>
+    <div id="curve"></div>
+  </div>
+  <div class="grid g3">
+    <div class="card"><h4>修正後處方 A</h4><p style="margin:0;font-size:14px">若主要指標必須是二元轉換:每組 <b>n≈50</b>(合計 100),Fisher 才有 .80 檢定力。</p></div>
+    <div class="card"><h4>修正後處方 B(建議)</h4><p style="margin:0;font-size:14px">把主要指標改為<b>連續量表</b>(SUS 或被審查感):n=25/組即達 100% 檢定力,更省、更靈敏。</p></div>
+    <div class="card"><h4>為何不是前版錯</h4><p style="margin:0;font-size:14px">前版誠實標示了「近似公式」;本次用實測經驗檢定力校正,正是模擬研究該做的自我修正。</p></div>
+  </div>
+</div></section>
+
+<section id="s8"><div class="wrap">
+  <p class="kicker">Part 8 · Conclusion</p>
+  <h2><span class="n">08</span>結論</h2>
+  <ul class="clean">
+    <li><b>證據已足以下結論(體驗面):</b>補到處方樣本量後,SUS、被審查感、信心、耗時四項全部決定性顯著(p&lt;.001、g=1.1–1.9、經驗檢定力 ≥98%)。變異組 B 改善使用體驗,已無統計懸念,與大樣本 A/B 模擬(+7.4pp、p&lt;.0001)方向一致。</li>
+    <li><b>二元轉換仍需更大樣本:</b>送出意向的期望提升有 +28pp,但 Fisher 在 n=25/組僅 45% 檢定力;要確認轉換,需每組 ~50,或改用連續主指標。</li>
+    <li><b>隨機化修正生效:</b>分層區組隨機化讓 persona 在兩組平衡,解除前版最大的內部效度威脅。</li>
+    <li><b>行動建議:</b>真人研究以<b>「SUS/被審查感」為主要指標(每組 25)+ 送出意向為次要指標</b>的雙軌設計最務實;若組織堅持以轉換為主指標,則每組招募 ~50。低風險純文案改動可先上線,由真實流量並行累積轉換證據。</li>
+  </ul>
+  <div class="critbox" style="margin-top:18px"><b>誠實聲明:</b>資料為模擬,用途是示範真實驗設計、並演示「補足樣本量」如何改變結論——尤其揭露二元指標 × 精確檢定的檢定力陷阱。最終證據須來自依此設計招募的真人受試者。</div>
+</div></section>
+
+<div class="wrap foot">
+  合拍 PawMatch 真實驗研究設計報告(處方樣本量版)　·　後測式 RCT · N=50(每組 25)· 分層區組隨機化　·　R=2,000 重複求經驗檢定力　·　模擬資料,固定種子可重現 <code>sim_true_exp_n50.py</code>
+</div>
+
+<script>
+  const PARTS = [{"pid": "S01", "persona": "新手", "arm": "A", "sus": 68.7, "fric": 5.2, "conf": 4.6, "sent": 0, "t_send": 83.9, "task_success": 3}, {"pid": "S02", "persona": "新手", "arm": "B", "sus": 62.6, "fric": 2.9, "conf": 4.8, "sent": 1, "t_send": 54.9, "task_success": 5}, {"pid": "S03", "persona": "新手", "arm": "A", "sus": 69.4, "fric": 3.6, "conf": 3.0, "sent": 0, "t_send": 63.4, "task_success": 4}, {"pid": "S04", "persona": "新手", "arm": "B", "sus": 87.7, "fric": 2.7, "conf": 5.4, "sent": 1, "t_send": 62.0, "task_success": 4}, {"pid": "S05", "persona": "新手", "arm": "B", "sus": 79.0, "fric": 2.2, "conf": 5.8, "sent": 1, "t_send": 36.5, "task_success": 5}, {"pid": "S06", "persona": "新手", "arm": "A", "sus": 67.7, "fric": 5.3, "conf": 4.8, "sent": 1, "t_send": 96.5, "task_success": 5}, {"pid": "S07", "persona": "新手", "arm": "B", "sus": 86.6, "fric": 1.9, "conf": 5.3, "sent": 1, "t_send": 83.7, "task_success": 5}, {"pid": "S08", "persona": "新手", "arm": "B", "sus": 82.0, "fric": 3.1, "conf": 4.8, "sent": 1, "t_send": 71.3, "task_success": 5}, {"pid": "S09", "persona": "新手", "arm": "B", "sus": 83.0, "fric": 2.2, "conf": 6.1, "sent": 1, "t_send": 52.9, "task_success": 5}, {"pid": "S10", "persona": "新手", "arm": "B", "sus": 82.4, "fric": 3.1, "conf": 5.2, "sent": 1, "t_send": 72.4, "task_success": 5}, {"pid": "S11", "persona": "新手", "arm": "A", "sus": 59.9, "fric": 4.7, "conf": 3.6, "sent": 0, "t_send": 102.6, "task_success": 4}, {"pid": "S12", "persona": "新手", "arm": "B", "sus": 82.0, "fric": 2.6, "conf": 4.5, "sent": 0, "t_send": 37.8, "task_success": 4}, {"pid": "S13", "persona": "新手", "arm": "B", "sus": 93.7, "fric": 3.9, "conf": 4.4, "sent": 0, "t_send": 70.6, "task_success": 4}, {"pid": "S14", "persona": "新手", "arm": "A", "sus": 55.2, "fric": 4.8, "conf": 4.3, "sent": 1, "t_send": 77.1, "task_success": 5}, {"pid": "S15", "persona": "新手", "arm": "A", "sus": 85.4, "fric": 4.2, "conf": 4.6, "sent": 1, "t_send": 110.0, "task_success": 5}, {"pid": "S16", "persona": "新手", "arm": "A", "sus": 65.8, "fric": 4.0, "conf": 5.9, "sent": 0, "t_send": 90.8, "task_success": 4}, {"pid": "S17", "persona": "新手", "arm": "B", "sus": 74.9, "fric": 3.1, "conf": 5.8, "sent": 1, "t_send": 64.7, "task_success": 5}, {"pid": "S18", "persona": "新手", "arm": "A", "sus": 82.8, "fric": 5.4, "conf": 4.8, "sent": 0, "t_send": 89.1, "task_success": 4}, {"pid": "S19", "persona": "新手", "arm": "A", "sus": 61.4, "fric": 3.5, "conf": 5.3, "sent": 1, "t_send": 72.3, "task_success": 5}, {"pid": "S20", "persona": "新手", "arm": "A", "sus": 65.9, "fric": 4.3, "conf": 3.8, "sent": 1, "t_send": 99.6, "task_success": 5}, {"pid": "S21", "persona": "新手", "arm": "B", "sus": 78.3, "fric": 3.9, "conf": 5.2, "sent": 1, "t_send": 63.5, "task_success": 5}, {"pid": "S22", "persona": "新手", "arm": "A", "sus": 53.7, "fric": 4.3, "conf": 3.3, "sent": 0, "t_send": 89.5, "task_success": 4}, {"pid": "S23", "persona": "新手", "arm": "A", "sus": 80.5, "fric": 5.1, "conf": 3.6, "sent": 0, "t_send": 93.4, "task_success": 4}, {"pid": "S24", "persona": "共感", "arm": "B", "sus": 75.4, "fric": 4.4, "conf": 6.5, "sent": 0, "t_send": 95.7, "task_success": 4}, {"pid": "S25", "persona": "共感", "arm": "A", "sus": 78.8, "fric": 4.8, "conf": 5.3, "sent": 0, "t_send": 59.9, "task_success": 4}, {"pid": "S26", "persona": "共感", "arm": "A", "sus": 71.2, "fric": 3.8, "conf": 4.3, "sent": 1, "t_send": 57.4, "task_success": 4}, {"pid": "S27", "persona": "共感", "arm": "B", "sus": 81.3, "fric": 2.8, "conf": 5.5, "sent": 1, "t_send": 55.7, "task_success": 5}, {"pid": "S28", "persona": "共感", "arm": "A", "sus": 80.0, "fric": 3.8, "conf": 4.4, "sent": 1, "t_send": 82.7, "task_success": 5}, {"pid": "S29", "persona": "共感", "arm": "B", "sus": 86.0, "fric": 3.0, "conf": 5.0, "sent": 0, "t_send": 82.5, "task_success": 4}, {"pid": "S30", "persona": "共感", "arm": "B", "sus": 79.8, "fric": 3.0, "conf": 7.0, "sent": 1, "t_send": 54.5, "task_success": 5}, {"pid": "S31", "persona": "共感", "arm": "A", "sus": 66.9, "fric": 4.1, "conf": 5.4, "sent": 0, "t_send": 82.6, "task_success": 4}, {"pid": "S32", "persona": "共感", "arm": "B", "sus": 65.9, "fric": 2.4, "conf": 6.8, "sent": 1, "t_send": 91.2, "task_success": 5}, {"pid": "S33", "persona": "共感", "arm": "A", "sus": 72.9, "fric": 3.2, "conf": 4.7, "sent": 1, "t_send": 97.1, "task_success": 5}, {"pid": "S34", "persona": "共感", "arm": "A", "sus": 62.9, "fric": 2.7, "conf": 5.5, "sent": 1, "t_send": 96.8, "task_success": 5}, {"pid": "S35", "persona": "共感", "arm": "B", "sus": 86.6, "fric": 3.0, "conf": 6.8, "sent": 0, "t_send": 81.0, "task_success": 4}, {"pid": "S36", "persona": "共感", "arm": "B", "sus": 78.7, "fric": 2.1, "conf": 3.7, "sent": 1, "t_send": 80.7, "task_success": 5}, {"pid": "S37", "persona": "共感", "arm": "A", "sus": 71.4, "fric": 2.8, "conf": 4.3, "sent": 0, "t_send": 92.1, "task_success": 4}, {"pid": "S38", "persona": "共感", "arm": "B", "sus": 87.7, "fric": 3.8, "conf": 6.9, "sent": 1, "t_send": 74.2, "task_success": 5}, {"pid": "S39", "persona": "隱私", "arm": "B", "sus": 85.8, "fric": 3.5, "conf": 5.2, "sent": 0, "t_send": 68.7, "task_success": 4}, {"pid": "S40", "persona": "隱私", "arm": "B", "sus": 68.6, "fric": 4.1, "conf": 4.2, "sent": 0, "t_send": 84.0, "task_success": 4}, {"pid": "S41", "persona": "隱私", "arm": "A", "sus": 64.5, "fric": 4.7, "conf": 4.3, "sent": 1, "t_send": 83.7, "task_success": 5}, {"pid": "S42", "persona": "隱私", "arm": "A", "sus": 74.4, "fric": 5.1, "conf": 3.3, "sent": 0, "t_send": 90.7, "task_success": 4}, {"pid": "S43", "persona": "隱私", "arm": "B", "sus": 75.2, "fric": 2.1, "conf": 3.1, "sent": 0, "t_send": 61.9, "task_success": 4}, {"pid": "S44", "persona": "隱私", "arm": "B", "sus": 73.8, "fric": 2.4, "conf": 5.5, "sent": 1, "t_send": 48.7, "task_success": 5}, {"pid": "S45", "persona": "隱私", "arm": "A", "sus": 64.0, "fric": 4.2, "conf": 4.6, "sent": 0, "t_send": 107.7, "task_success": 4}, {"pid": "S46", "persona": "隱私", "arm": "B", "sus": 76.9, "fric": 2.0, "conf": 6.3, "sent": 1, "t_send": 43.9, "task_success": 5}, {"pid": "S47", "persona": "隱私", "arm": "A", "sus": 57.0, "fric": 4.4, "conf": 4.2, "sent": 0, "t_send": 110.6, "task_success": 3}, {"pid": "S48", "persona": "隱私", "arm": "B", "sus": 76.7, "fric": 2.9, "conf": 6.0, "sent": 1, "t_send": 53.6, "task_success": 5}, {"pid": "S49", "persona": "隱私", "arm": "A", "sus": 68.6, "fric": 5.0, "conf": 4.2, "sent": 0, "t_send": 99.8, "task_success": 4}, {"pid": "S50", "persona": "隱私", "arm": "A", "sus": 64.4, "fric": 4.2, "conf": 4.4, "sent": 0, "t_send": 86.5, "task_success": 4}];
+  const POWER = {SUS:1.00, '被審查感':1.00, '認養信心':0.99, '送出耗時':0.98, '送出意向 (Fisher)':0.45, '送出意向 (χ²)':0.57};
+  const CURVE = [[25,0.43],[40,0.67],[55,0.82],[70,0.91],[85,0.96],[100,0.98]];
+
+  // roster
+  const rb=document.getElementById('roster');
+  PARTS.forEach(p=>{const tr=document.createElement('tr');
+    const pill=p.arm==='A'?'<span class="pill a">A</span>':'<span class="pill b">B</span>';
+    tr.innerHTML=`<td class="who">${p.pid}</td><td>${p.persona}</td><td class="c">${pill}</td><td class="num">${p.sus}</td><td class="num">${p.fric}</td><td class="num">${p.conf}</td><td class="c">${p.sent?'✓':'—'}</td><td class="num">${p.t_send}</td><td class="num">${p.task_success}</td>`;
+    rb.appendChild(tr);});
+
+  // power bars (0-100%)
+  const pw=document.getElementById('powerbars');
+  Object.entries(POWER).forEach(([k,v])=>{
+    const row=document.createElement('div'); row.className='cbar';
+    const ok=v>=0.8; const col=ok?'var(--good)':'var(--warn)';
+    row.innerHTML=`<div class="cl" style="min-width:120px">${k}</div><div class="ctrack" style="position:relative"><div class="cfill" style="width:${(v*100).toFixed(0)}%;background:${col}">${(v*100).toFixed(0)}%</div><div style="position:absolute;top:-2px;bottom:-2px;left:80%;width:2px;background:var(--ink);opacity:.5"></div></div>`;
+    row.style.gridTemplateColumns='130px 1fr';
+    pw.appendChild(row);});
+
+  // strips for 4 continuous DVs
+  const strips=document.getElementById('strips');
+  const DVS=[['sus','SUS',[50,95]],['fric','被審查感 (↓好)',[1,7]],['conf','認養信心',[1,7]],['t_send','送出耗時 s (↓好)',[25,140]]];
+  const mean=(arr)=>arr.reduce((a,b)=>a+b,0)/arr.length;
+  DVS.forEach(([key,label,[lo,hi]])=>{
+    const wrap=document.createElement('div'); wrap.style.margin='14px 0 6px';
+    wrap.innerHTML=`<div style="font-size:13px;font-weight:700;margin-bottom:2px">${label}</div>`;
+    const x=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100));
+    ['A','B'].forEach(arm=>{
+      const vals=PARTS.filter(p=>p.arm===arm).map(p=>p[key]);
+      const row=document.createElement('div'); row.className='striprow'; row.style.height='30px';
+      let inner=`<div class="rl">${arm}</div><div class="striptrack">`;
+      vals.forEach(v=>{inner+=`<span class="dot ${arm.toLowerCase()}" style="left:${x(v)}%;opacity:.75" title="${v}"></span>`;});
+      const m=mean(vals);
+      inner+=`<span class="meanline" style="left:${x(m)}%"></span><span class="meanlab" style="left:${x(m)}%">M=${m.toFixed(1)}</span></div>`;
+      row.innerHTML=inner; wrap.appendChild(row);
+    });
+    strips.appendChild(wrap);
+  });
+
+  // power curve
+  const cv=document.getElementById('curve');
+  CURVE.forEach(([n,p])=>{
+    const row=document.createElement('div'); row.className='cbar'; row.style.gridTemplateColumns='90px 1fr';
+    const ok=p>=0.8; const col=ok?'var(--good)':'var(--sB)';
+    row.innerHTML=`<div class="cl">n=${n}/組</div><div class="ctrack" style="position:relative"><div class="cfill" style="width:${(p*100).toFixed(0)}%;background:${col}">${(p*100).toFixed(0)}%</div><div style="position:absolute;top:-2px;bottom:-2px;left:80%;width:2px;background:var(--ink);opacity:.5"></div></div>`;
+    cv.appendChild(row);});
+</script>
