@@ -1,0 +1,430 @@
+<title>合拍 PawMatch 每位模擬領養者的使用心得與改善建議</title>
+<style>
+  :root{
+    --bg:#FBF7F0;--surface:#FFFFFF;--surface2:#F4EEE3;--sunken:#F7F2E9;
+    --ink:#2B2823;--muted:#6E6659;--faint:#938A7B;
+    --accent:#B4501C;--accent-ink:#8F3D12;--accent-soft:#F3E0D2;
+    --line:#E6DECF;--line-strong:#D8CDB8;
+    --good:#4F6B47;--good-soft:#E4EADE;--warn:#9C6B12;--warn-soft:#F5E9CE;
+    --crit:#A23B2A;--crit-soft:#F3DAD3;
+    --sA:#2E6FA8;--sB:#C05621;
+    --shadow:0 1px 2px rgba(43,40,35,.05),0 8px 24px rgba(43,40,35,.06);--maxw:920px;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#201D19;--surface:#2A2621;--surface2:#322D27;--sunken:#252119;
+    --ink:#F1EBDF;--muted:#B5AA98;--faint:#8B8171;
+    --accent:#E2884A;--accent-ink:#EE9D63;--accent-soft:#3A2E23;
+    --line:#3B352C;--line-strong:#4A4237;
+    --good:#8FB07F;--good-soft:#2C3326;--warn:#D8A24E;--warn-soft:#352C1B;
+    --crit:#E08A76;--crit-soft:#3A2620;
+    --sA:#4585C4;--sB:#D4753A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);
+  }}
+  :root[data-theme="light"]{--bg:#FBF7F0;--surface:#FFFFFF;--surface2:#F4EEE3;--sunken:#F7F2E9;--ink:#2B2823;--muted:#6E6659;--faint:#938A7B;--accent:#B4501C;--accent-ink:#8F3D12;--accent-soft:#F3E0D2;--line:#E6DECF;--line-strong:#D8CDB8;--good:#4F6B47;--good-soft:#E4EADE;--warn:#9C6B12;--warn-soft:#F5E9CE;--crit:#A23B2A;--crit-soft:#F3DAD3;--sA:#2E6FA8;--sB:#C05621;}
+  :root[data-theme="dark"]{--bg:#201D19;--surface:#2A2621;--surface2:#322D27;--sunken:#252119;--ink:#F1EBDF;--muted:#B5AA98;--faint:#8B8171;--accent:#E2884A;--accent-ink:#EE9D63;--accent-soft:#3A2E23;--line:#3B352C;--line-strong:#4A4237;--good:#8FB07F;--good-soft:#2C3326;--warn:#D8A24E;--warn-soft:#352C1B;--crit:#E08A76;--crit-soft:#3A2620;--sA:#4585C4;--sB:#D4753A;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.75;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  h1,h2,h3,h4{line-height:1.3;text-wrap:balance;font-weight:800}
+  a{color:var(--accent-ink)}.tnum{font-variant-numeric:tabular-nums}
+  header.masthead{background:radial-gradient(120% 120% at 100% 0%,var(--accent-soft) 0%,transparent 55%),var(--surface);border-bottom:1px solid var(--line)}
+  .masthead .wrap{padding-top:56px;padding-bottom:44px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:6px 12px;border-radius:999px}
+  h1{font-size:clamp(27px,5vw,42px);margin:20px 0 10px;letter-spacing:-.01em}
+  .lede{font-size:clamp(16px,2.4vw,19px);color:var(--muted);max-width:64ch;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:22px;font-size:13.5px;color:var(--faint)}.meta b{color:var(--ink)}
+  section{padding:48px 0;border-bottom:1px solid var(--line)}
+  .kicker{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 6px}
+  h2{font-size:clamp(22px,3.4vw,29px);margin:0 0 8px}h2 .n{color:var(--faint);margin-right:12px;font-variant-numeric:tabular-nums}
+  .sub{color:var(--muted);max-width:68ch;margin:0 0 24px}
+  h3{font-size:18px;margin:30px 0 10px}h4{font-size:15px;margin:0 0 6px}p{margin:0 0 16px}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}@media(max-width:480px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow)}
+  .card.tint{background:var(--surface2);box-shadow:none}
+  .note{background:var(--sunken);border:1px dashed var(--line-strong);border-radius:12px;padding:15px 18px;font-size:14.5px;color:var(--muted)}.note b{color:var(--ink)}
+  .warnbox{background:var(--warn-soft);border:1px solid var(--warn);border-radius:12px;padding:14px 18px;font-size:14.5px;color:var(--ink)}
+  .critbox{background:var(--crit-soft);border:1px solid var(--crit);border-radius:12px;padding:14px 18px;font-size:14.5px;color:var(--ink)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:13.5px}
+  caption{text-align:left;padding:13px 16px;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line)}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:var(--surface2);font-size:12px;letter-spacing:.03em;color:var(--muted);font-weight:800}
+  tbody tr:last-child td{border-bottom:0}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.c,th.c{text-align:center}
+  ul.clean{margin:0 0 16px;padding-left:20px}ul.clean li{margin:6px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--surface2);color:var(--muted)}
+  .pill.good{background:var(--good-soft);color:var(--good)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.crit{background:var(--crit-soft);color:var(--crit)}
+  .pill.a{background:color-mix(in srgb,var(--sA) 18%,transparent);color:var(--sA)}
+  .pill.b{background:color-mix(in srgb,var(--sB) 18%,transparent);color:var(--sB)}
+  .foot{padding:34px 0 60px;color:var(--faint);font-size:13px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .toc a{font-size:13px;text-decoration:none;color:var(--muted);border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+  .toc a:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .lab{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+  .stat .val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:4px}
+  .stat .sub2{font-size:12px;color:var(--faint);margin-top:2px}
+  .stat.pos .val{color:var(--good)}.stat.warn .val{color:var(--warn)}.stat.neutral .val{color:var(--ink)}
+  .designnote{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface2);border-radius:12px;padding:16px 18px;font-size:14px;line-height:2;color:var(--ink)}
+  .designnote b{color:var(--accent-ink)}
+  /* figures */
+  .fig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);margin:18px 0}
+  .fig .title{font-size:15px;font-weight:800;margin:0}.fig .desc{font-size:12.5px;color:var(--faint);margin:2px 0 16px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .legend .key{display:inline-flex;align-items:center;gap:6px}.swatch{width:12px;height:12px;border-radius:3px;display:inline-block}.sw-a{background:var(--sA)}.sw-b{background:var(--sB)}
+  /* strip plot */
+  .strip{position:relative;margin:6px 0 2px}
+  .strip .axis{position:relative;height:1px;background:var(--line-strong);margin:8px 0}
+  .strip .tick{position:absolute;top:6px;transform:translateX(-50%);font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+  .striprow{position:relative;height:34px;margin:4px 0}
+  .striprow .rl{position:absolute;left:0;top:8px;font-size:12.5px;font-weight:700;color:var(--ink)}
+  .striptrack{position:absolute;left:42px;right:8px;top:0;bottom:0}
+  .dot{position:absolute;top:9px;width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);transform:translateX(-50%)}
+  .dot.a{background:var(--sA)}.dot.b{background:var(--sB)}
+  .meanline{position:absolute;top:2px;bottom:2px;width:2.5px;background:var(--ink)}
+  .meanlab{position:absolute;top:-14px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* conversion bars */
+  .cbar{display:grid;grid-template-columns:60px 1fr;gap:6px 10px;align-items:center;margin:8px 0}
+  .cbar .cl{font-size:13px;font-weight:700;text-align:right}
+  .cbar .ctrack{height:26px;background:var(--surface2);border-radius:6px;position:relative;overflow:hidden}
+  .cbar .cfill{height:100%;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:12px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+  .cbar .cfill.a{background:var(--sA)}.cbar .cfill.b{background:var(--sB)}
+  /* forest */
+  .forest{display:grid;grid-template-columns:150px 1fr 96px;gap:10px;align-items:center;margin:9px 0}
+  @media(max-width:640px){.forest{grid-template-columns:120px 1fr;grid-template-rows:auto auto}.forest .fv{grid-column:2}}
+  .flab{font-size:12.5px;font-weight:600;text-align:right;color:var(--ink)}
+  .ftrack{position:relative;height:22px;background:var(--surface2);border-radius:6px}
+  .fzero{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--line-strong)}
+  .fband{position:absolute;top:9px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--sB) 40%,transparent)}
+  .fdot{position:absolute;top:5px;width:12px;height:12px;border-radius:50%;background:var(--sB);border:2px solid var(--surface)}
+  .fv{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}.fv b{color:var(--ink)}
+  code{background:var(--surface2);border-radius:6px;padding:1px 7px;font-size:.88em}
+</style>
+<style>
+.mrow{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px}
+.chip{font-size:11.5px;background:var(--surface2);color:var(--muted);border-radius:7px;padding:3px 9px;font-variant-numeric:tabular-nums}
+.chip b{color:var(--ink)}
+.chip.good{background:var(--good-soft);color:var(--good)}.chip.good b{color:var(--good)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.warn b{color:var(--warn)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.fgrid{grid-template-columns:1fr}}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);break-inside:avoid;page-break-inside:avoid}
+.fhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pid{font-weight:800;font-size:15px;color:var(--ink)}
+.quoteblock{background:var(--sunken);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:14px;color:var(--ink);line-height:1.7;position:relative}
+.qmark{color:var(--accent);font-weight:800;font-size:16px;opacity:.6}
+.suglab{font-size:12px;font-weight:800;letter-spacing:.05em;color:var(--accent-ink);margin:14px 0 6px}
+.suglist{margin:0;padding-left:18px;font-size:13.5px;line-height:1.65}
+.suglist li{margin:6px 0}
+.tagchip{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 7px;margin-left:6px;vertical-align:1px}
+.tagchip.cc{background:var(--accent-soft);color:var(--accent-ink)}
+.tagchip.new{background:var(--good-soft);color:var(--good)}
+.pgroup{padding:40px 0;border-bottom:1px solid var(--line)}
+.pgh{display:flex;align-items:center;gap:12px;font-size:20px;margin:0 0 20px}
+.pgn{font-size:13px;color:var(--faint);font-weight:700}
+.pchip{font-size:14px;font-weight:800;padding:4px 12px;border-radius:999px}
+.pchip.新手{background:var(--accent-soft);color:var(--accent-ink)}
+.pchip.共感{background:#E7EDF3;color:var(--sA)}
+.pchip.隱私{background:var(--good-soft);color:var(--good)}
+@media(prefers-color-scheme:dark){.pchip.共感{background:#25313c}}
+:root[data-theme="dark"] .pchip.共感{background:#25313c}
+.afrow{display:grid;grid-template-columns:1fr 240px 46px;gap:10px;align-items:center;margin:7px 0}
+@media(max-width:680px){.afrow{grid-template-columns:1fr 60px}.afrow .aflab{grid-row:2;grid-column:1/3}}
+.afbar{height:12px;background:var(--surface2);border-radius:6px;overflow:hidden;order:2}
+.afbar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-ink));border-radius:6px}
+.aflab{font-size:13px;color:var(--ink);order:1}
+.afn{font-size:12px;color:var(--muted);font-weight:700;text-align:right;font-variant-numeric:tabular-nums;order:3}
+.afppl{font-size:12px;color:var(--faint)}
+</style>
+<header class="masthead"><div class="wrap">
+  <span class="eyebrow">🗣️ 質性回饋 · 20 位模擬領養者</span>
+  <h1>每一位受試者,測完想說的話</h1>
+  <p class="lede">承真實驗研究(N=20),為每位模擬領養者輸出「使用心得」與「改善建議」。每則回饋都扣合該受試者的實際量化資料(SUS、被審查感、信心、是否送出、耗時)與所屬組別——A 組體驗現行網站、B 組體驗改進版。</p>
+  <div class="meta">
+    <span><b>受試者</b> 20 位(新手9 / 共感6 / 隱私5)</span>
+    <span><b>回饋型態</b> 第一人稱心得 + 可執行建議</span>
+    <span><b>建議標記</b> 對應改進清單 C1–C5,或清單外新點子</span>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <p class="kicker">怎麼讀</p>
+  <h2 style="margin-bottom:8px">回饋如何對應數據</h2>
+  <p class="sub">心得語氣與是否送出、被審查感高低一致;A 組非送出者的抱怨,幾乎都指向 B 組已修正的痛點——這正是質性資料對量化結果的三角驗證。</p>
+  <div class="grid g3">
+    <div class="card tint"><h4>被審查感 ≥ 4.0</h4><p style="margin:0;font-size:14px">標為警示色,對應「像在被審查/填申請」的心得。</p></div>
+    <div class="card tint"><h4>未送出 ✗</h4><p style="margin:0;font-size:14px">代表在核心轉換那步流失;看其心得就知道被什麼卡住。</p></div>
+    <div class="card tint"><h4>建議標籤</h4><p style="margin:0;font-size:14px"><span class="tagchip cc">C·項目</span> = 驗證既有改進;<span class="tagchip new">＋新點子</span> = 清單外新發現。</p></div>
+  </div>
+  <div class="warnbox" style="margin-top:18px"><b>關鍵觀察:</b>8 位未送出者中,<b>控制組 A 佔 6 位</b>(S04、S15、S16、S17、S18、S20),變異組 B 僅 2 位(S02、S12)。A 組流失者的心得高度集中在「被審查感、怕被打槍、資料去向、無中間地帶」——全部是 B 組改進清單針對的痛點。</div>
+</div></section>
+
+<section class="pgroup"><div class="wrap">
+      <h2 class="pgh"><span class="pchip 新手">P1 新手（怕被審）</span><span class="pgn">9 位</span></h2>
+      <div class="fgrid"><div class="fcard">
+      <div class="fhead"><span class="pid">S02</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>78.2</b></span>
+      <span class="chip good">被審查感 <b>2.8</b></span>
+      <span class="chip good">信心 <b>6.4</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>51.4s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>改進版讓我對自己養得起來這件事很有信心,幾乎沒有壓力。但這是我第一次來,我其實只是想先逛逛,還沒準備好這次就聯繫中途,所以就先離開了。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>給我一個『先追蹤這隻貓、之後再聯繫』的低承諾選項。<span class="tagchip cc">C5·相簿/收藏導流</span></li><li>信心足夠的人也需要時間,別讓聯繫像是唯一的下一步。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S03</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>73.1</b></span>
+      <span class="chip warn">被審查感 <b>4.7</b></span>
+      <span class="chip warn">信心 <b>4.0</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>104.0s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>我第一次養貓,整個過程都在擔心自己會不會被打槍。草稿頁我卡了好久,不知道要寫什麼才顯得『夠格』,最後硬著頭皮送出。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>明確告訴新手『不懂沒關係、中途最會教』,我會放鬆很多。<span class="tagchip cc">C1·除罪化文案</span></li><li>附一份『第一次養貓要準備什麼』的清單,減少我的無措。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S04</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>81.2</b></span>
+      <span class="chip good">被審查感 <b>2.5</b></span>
+      <span class="chip good">信心 <b>5.7</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>74.2s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>網站很友善,我其實蠻有信心的。可是第一次來就要我聯繫中途,感覺太正式了,我還沒準備好承諾,結果就默默關掉了。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>給我一個低承諾選項,像『先追蹤這隻貓』,不用一來就聯繫。<span class="tagchip cc">C5·相簿/收藏導流</span></li><li>多放一些相似貓咪『回家後』的近況,幫我把想像變具體。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S05</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>92.6</b></span>
+      <span class="chip ">被審查感 <b>3.2</b></span>
+      <span class="chip good">信心 <b>5.1</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>68.6s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>『中途看的是你願不願意學,不是你懂多少』這句話直接把我的緊張消掉了,送出訊息毫無壓力。整體體驗是我用過最不像在被審核的。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>如果能附一個『每月養貓花費估算』,對新手決策更有幫助。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S07</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>70.6</b></span>
+      <span class="chip warn">被審查感 <b>4.1</b></span>
+      <span class="chip good">信心 <b>5.5</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>79.5s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>配對測驗很輕鬆,推薦的貓也對。到聯繫那步稍微猶豫了一下該寫多正式,但整體還算順。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>草稿可以給幾個語氣範例(輕鬆/正式),我照著改就好。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S08</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>81.6</b></span>
+      <span class="chip ">被審查感 <b>3.8</b></span>
+      <span class="chip ">信心 <b>4.3</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>65.6s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>改進版的引導讓我這個新手比較敢開口。除罪化那句話有幫到我,雖然我還是希望有人能即時回答我的笨問題。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>放一個常見新手問題的即時問答或客服入口。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S09</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>69.9</b></span>
+      <span class="chip good">被審查感 <b>2.6</b></span>
+      <span class="chip good">信心 <b>5.0</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>74.2s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>流程乾淨、沒有壓迫感,送出很自然。隱私那句說明我雖然不是特別在意的人,但看到也覺得被尊重。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>維持這種簡潔就好,不要再加額外欄位。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S11</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>89.9</b></span>
+      <span class="chip ">被審查感 <b>3.6</b></span>
+      <span class="chip good">信心 <b>5.5</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>48.1s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>是我填最快的一次,整個配對到送出一氣呵成。改進版的提示都在對的時機出現,幾乎沒有卡住的地方。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>可以在最後加一個『下一步會發生什麼』的小預告,讓我更有掌握感。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S16</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>66.7</b></span>
+      <span class="chip warn">被審查感 <b>4.3</b></span>
+      <span class="chip ">信心 <b>4.6</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>81.0s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>整個感覺像在填申請、被篩選,我這種新手壓力很大,到要聯繫時就放棄了。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>把聯繫步驟的措辭整個改成邀請式、去掉審查感。<span class="tagchip cc">C1·除罪化文案</span></li><li>首屏就讓我知道新手是被歡迎的。<span class="tagchip cc">C1·除罪化文案</span></li></ul>
+    </div></div>
+    </div></section><section class="pgroup"><div class="wrap">
+      <h2 class="pgh"><span class="pchip 共感">P2 共感（找契合）</span><span class="pgn">6 位</span></h2>
+      <div class="fgrid"><div class="fcard">
+      <div class="fhead"><span class="pid">S01</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>74.0</b></span>
+      <span class="chip warn">被審查感 <b>5.2</b></span>
+      <span class="chip ">信心 <b>4.7</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>74.4s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>個性檔案讓我像在讀一個人,不是在看規格表——這點打中我。但到了要聯繫中途那步,又變回像在寫求職信,被審視的感覺一下子回來了。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>送出前給我一句話,說明中途看的是契合度不是資格。<span class="tagchip cc">C1·除罪化文案</span></li><li>讓我先預覽中途端會看到我的什麼,再決定送不送。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S06</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>69.1</b></span>
+      <span class="chip ">被審查感 <b>3.1</b></span>
+      <span class="chip ">信心 <b>4.3</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>86.9s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>貓咪的故事寫得很好,我是因為個性描述才想認識牠的。聯繫也算順利,只是我很想多看牠平常的樣子。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>每隻貓加一段短影片或更多生活照,故事會更有說服力。<span class="tagchip new">＋新點子</span></li><li>讓我知道認養後還能看到牠的成長,我會更安心。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S14</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>75.6</b></span>
+      <span class="chip ">被審查感 <b>3.3</b></span>
+      <span class="chip good">信心 <b>5.4</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>98.2s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>我之前退養過一次,一直有陰影。看到『先見面、可試相處,不用一次決定』這句,我才敢往下走,雖然我花了點時間才確定。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>把試相處的實際流程與天數講清楚,我會更快下決定。<span class="tagchip cc">C3·試相處前移</span></li><li>提供退養過的人一些額外的心理支持說明。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S15</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>75.7</b></span>
+      <span class="chip good">被審查感 <b>2.7</b></span>
+      <span class="chip good">信心 <b>5.8</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>86.0s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>我很喜歡其中一隻貓的故事,信心也夠。但當下沒有一個『我有興趣、但還不想正式聯繫』的溫和選項,直接聯繫感覺太一翻兩瞪眼,就作罷了。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>在結果頁就說明可以先見面、先試相處,不用一次決定。<span class="tagchip cc">C3·試相處前移</span></li><li>加一個收藏/追蹤鍵,讓我把興趣先留下來。<span class="tagchip cc">C5·相簿/收藏導流</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S17</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>81.4</b></span>
+      <span class="chip ">被審查感 <b>3.4</b></span>
+      <span class="chip warn">信心 <b>3.7</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>95.0s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>貓的故事我很愛,但我一直懷疑自己夠不夠好、能不能養一輩子,越想越怕,最後沒有送出。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>把認養後的持續支援與『無責退回』講在前面,降低我對長期承諾的恐懼。<span class="tagchip cc">C4·無責退回</span></li><li>用真實認養人的話告訴我『你會被接住』。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S18</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>73.6</b></span>
+      <span class="chip good">被審查感 <b>2.9</b></span>
+      <span class="chip ">信心 <b>4.9</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>67.7s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>體驗不差,但聯繫這步對我來說像一道門檻。我想再多了解一下就好,結果沒有一個中間地帶,就沒繼續。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>提供『先問問題』而不是『正式申請』的輕量入口。<span class="tagchip new">＋新點子</span></li></ul>
+    </div></div>
+    </div></section><section class="pgroup"><div class="wrap">
+      <h2 class="pgh"><span class="pchip 隱私">P3 隱私（怕被盯）</span><span class="pgn">5 位</span></h2>
+      <div class="fgrid"><div class="fcard">
+      <div class="fhead"><span class="pid">S10</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>77.0</b></span>
+      <span class="chip ">被審查感 <b>3.9</b></span>
+      <span class="chip good">信心 <b>5.2</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>67.6s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>我對隱私很敏感,『摘要只寄給這位中途、不會公開』這句話正好回答了我最擔心的事,我才願意送出。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>讓我能匿名瀏覽整站、不被記錄,體驗會更完整。<span class="tagchip new">＋新點子</span></li><li>清楚寫出我的資料會保存多久。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S12</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>71.9</b></span>
+      <span class="chip ">被審查感 <b>3.1</b></span>
+      <span class="chip good">信心 <b>5.0</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>64.0s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>隱私說明讓我安心不少,但要把自己的生活樣態摘要寄給一個陌生中途,我還是猶豫了,最後沒送出。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>讓我能先不附生活摘要、用一句話開場,熟了再補資料。<span class="tagchip new">＋新點子</span></li><li>第一次接觸提供匿名或暱稱模式。<span class="tagchip cc">C2·隱私說明</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S13</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>74.9</b></span>
+      <span class="chip good">被審查感 <b>2.7</b></span>
+      <span class="chip ">信心 <b>4.7</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>77.4s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>回報預設只給中途看、提醒是系統發的,這些設計讓我這種怕被盯的人很放鬆。送出前那句退回說明也讓我更敢承諾。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>把『無責退回』的說明也放在更前面一點,我更早看到會更早安心。<span class="tagchip cc">C4·無責退回</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S19</span><span class="pill b">B 變異組（改進版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>78.1</b></span>
+      <span class="chip good">被審查感 <b>2.4</b></span>
+      <span class="chip good">信心 <b>5.5</b></span>
+      <span class="chip good">✓ 有送出</span>
+      <span class="chip">耗時 <b>91.7s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>這是我用過最沒有『被監視感』的認養網站。照片預設私密加上那句隱私說明,直接贏得我的信任,送出很乾脆。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>把這種隱私透明延伸到整個流程,每一步都告訴我資料去哪。<span class="tagchip new">＋新點子</span></li></ul>
+    </div><div class="fcard">
+      <div class="fhead"><span class="pid">S20</span><span class="pill a">A 控制組（現行版）</span></div>
+      <div class="mrow">
+      <span class="chip">SUS <b>69.9</b></span>
+      <span class="chip ">被審查感 <b>3.1</b></span>
+      <span class="chip ">信心 <b>4.6</b></span>
+      <span class="chip warn">✗ 未送出</span>
+      <span class="chip">耗時 <b>101.6s</b></span>
+    </div>
+      <div class="quoteblock"><span class="qmark">“</span>到送出那步我開始擔心我的資料會被丟到哪、會不會被加進什麼群組,想著想著就退出了。<span class="qmark">”</span></div>
+      <div class="suglab">改善建議</div>
+      <ul class="suglist"><li>明確告訴我這則訊息只有這位中途看得到、我不會被加進任何群。<span class="tagchip cc">C2·隱私說明</span></li><li>整個流程都標示資料流向。<span class="tagchip new">＋新點子</span></li></ul>
+    </div></div>
+    </div></section>
+
+<section><div class="wrap">
+  <p class="kicker">綜合 · 親和圖</p>
+  <h2>建議歸納:驗證了什麼、又發現了什麼</h2>
+  <p class="sub">把 20 位的建議做親和圖分群。左半驗證改進清單(受試者自發提出、與 C1–C5 不謀而合的次數);右半是清單外、值得納入下一輪的新點子。</p>
+  <h3>A. 驗證既有改進清單(自發提及次數)</h3>
+  <div style="margin:10px 0 6px"><div class="afrow"><div class="afbar"><span style="width:100%"></span></div><div class="aflab">① 送出前除罪化(對新手說「不懂沒關係」)</div><div class="afn">4 次</div></div><div class="afrow"><div class="afbar"><span style="width:50%"></span></div><div class="aflab">② 隱私說明(講清楚誰看得到、不入群)</div><div class="afn">2 次</div></div><div class="afrow"><div class="afbar"><span style="width:50%"></span></div><div class="aflab">③ 試相處前移(先見面、不用一次決定)</div><div class="afn">2 次</div></div><div class="afrow"><div class="afbar"><span style="width:50%"></span></div><div class="aflab">④ 無責退回前置(有退路才敢承諾)</div><div class="afn">2 次</div></div><div class="afrow"><div class="afbar"><span style="width:75%"></span></div><div class="aflab">⑤ 收藏/導流(低承諾選項)</div><div class="afn">3 次</div></div></div>
+  <p class="note" style="font-size:13px">受試者在不知道改進清單存在的情況下,自己講出了同樣的需求——這是改進清單方向正確的獨立佐證。</p>
+  <h3 style="margin-top:26px">B. 清單外的新點子(下一輪候選)</h3>
+  <ul class="clean" style="font-size:14.5px"><li><b>中間地帶/輕量入口</b> <span class="afppl">S02、S04、S15、S18</span></li><li><b>新手支援(清單/花費/即時問答)</b> <span class="afppl">S03、S05、S08、S16</span></li><li><b>更豐富的貓咪內容(影片/生活照/後續)</b> <span class="afppl">S06、S07</span></li><li><b>資料透明(去向/保存期/匿名瀏覽)</b> <span class="afppl">S10、S12、S19、S20</span></li><li><b>退養者/長期承諾的心理支持</b> <span class="afppl">S14、S17</span></li></ul>
+  <div class="critbox" style="margin-top:18px"><b>最高優先的新發現:</b>「中間地帶/輕量入口」被 4 位(含 3 位高信心卻未送出者 S02·S04·S15)獨立提出——他們不是被嚇跑,而是<b>還沒準備好正式聯繫、卻沒有溫和的表達興趣方式</b>。S02 尤其關鍵:改進版已把他的信心拉到全場最高(6.4),卻仍未送出——證明光有信心不夠,還需要一個低承諾的下一步。這是改進清單尚未完全覆蓋的轉換缺口。</div>
+  <div class="note" style="margin-top:16px;font-size:13px"><b>誠實聲明:</b>回饋為依受試者量化資料與 persona 生成的模擬心得,非真人自陳,用途是示範如何將質性回饋與量化結果整合、並產出可執行的改善清單。最終應以真人受訪者的逐字回饋取代。</div>
+</div></section>
+
+<div class="wrap foot">
+  合拍 PawMatch · 20 位模擬領養者使用心得與改善建議　·　承真實驗研究 N=20　·　模擬資料,回饋扣合各受試者量化數據與組別
+</div>
