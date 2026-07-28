@@ -151,6 +151,48 @@ export default function AnimalDetail() {
               </ul>
             </section>
 
+            {flags().longWaitSupport && animal.waitingDays >= 120 && (
+            <section aria-labelledby="lwsupport" className="rounded-card border border-sage/40 bg-sage-light/50 p-6">
+              <h2 id="lwsupport" className="text-xl font-bold">
+                {animal.name}已經等了 {animal.waitingDays} 天,所以我們多做了這些
+              </h2>
+              <p className="mt-1 text-sm text-ink-soft">
+                等待久的動物多半年紀較長或有病史,照顧成本讓人卻步。
+                這些支持是為了讓「想給牠家」和「負擔得起」不必二選一。
+              </p>
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                <li className="rounded-lg bg-white p-4">
+                  <p className="font-medium">前 6 個月醫療補助</p>
+                  <p className="mt-1 text-sm text-ink-soft">
+                    與牠既有病史相關的回診與用藥,由中途分擔;超出部分可申請醫療基金。
+                  </p>
+                </li>
+                <li className="rounded-lg bg-white p-4">
+                  <p className="font-medium">兩週試養期</p>
+                  <p className="mt-1 text-sm text-ink-soft">
+                    先住兩週再決定。這兩週牠仍屬中途,用品我們準備,沒有任何費用。
+                  </p>
+                </li>
+                <li className="rounded-lg bg-white p-4">
+                  <p className="font-medium">接送到府</p>
+                  <p className="mt-1 text-sm text-ink-soft">
+                    沒有車或住得遠都沒關係,首次見面與接家我們安排車輛。
+                  </p>
+                </li>
+                <li className="rounded-lg bg-white p-4">
+                  <p className="font-medium">行為與照護諮詢</p>
+                  <p className="mt-1 text-sm text-ink-soft">
+                    熟齡與慢熟動物的適應期較長,前三個月可隨時預約一對一諮詢。
+                  </p>
+                </li>
+              </ul>
+              <p className="mt-3 text-sm text-ink-soft">
+                試養期不是「先試試看不行再退」——是讓你在真實生活裡確認合不合適,
+                我們會全程陪你判斷。若最後不適合,牠回到中途、你不必有罪惡感。
+              </p>
+            </section>
+            )}
+
             <section aria-labelledby="health" className="rounded-card border border-cream-dark bg-white p-6">
               <h2 id="health" className="text-xl font-bold">健康與醫療</h2>
               <dl className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">

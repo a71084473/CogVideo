@@ -3,6 +3,8 @@ import type { Animal } from '../types'
 import { AnimalPhoto } from './AnimalPhoto'
 import { Tag, CareLevelBadge } from './Badges'
 import { flags } from '../lib/canary'
+import { useEffect } from 'react'
+import { track } from '../lib/funnel'
 
 export function AnimalCard({
   animal,
@@ -15,6 +17,11 @@ export function AnimalCard({
   onToggleFavorite?: (id: string) => void
   layout?: 'card' | 'list'
 }) {
+  // 曝光埋點:用來區分「久候動物看不到」與「看到但不敢認養」
+  useEffect(() => {
+    track('animal_impression', { animalId: animal.id, longWait: animal.waitingDays >= 120 })
+  }, [animal.id, animal.waitingDays])
+
   return (
     <article
       className={`overflow-hidden rounded-card border border-cream-dark bg-white shadow-sm ${

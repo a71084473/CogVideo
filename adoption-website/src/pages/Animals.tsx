@@ -4,6 +4,7 @@ import { AnimalCard } from '../components/AnimalCard'
 import { EmptyState, Section } from '../components/shared'
 import { getFavorites, toggleFavorite } from '../lib/storage'
 import { flags } from '../lib/canary'
+import { track } from '../lib/funnel'
 
 interface Filters {
   species: string
@@ -36,6 +37,13 @@ const initialFilters: Filters = {
 }
 
 const locations = [...new Set(animals.map((a) => a.location))]
+
+// 等待越久給越多加權,但上限封頂,避免完全壓過適配。
+// 120 天以下不加權——那些動物本來就送得出去。
+function waitWeight(a: (typeof animals)[number]): number {
+  if (a.waitingDays < 120) return 0
+  return Math.min(a.waitingDays - 120, 150)
+}
 
 function Select({
   id,
@@ -81,6 +89,7 @@ function Check({ id, label, checked, onChange }: { id: string; label: string; ch
 export default function Animals() {
   const [filters, setFilters] = useState<Filters>(initialFilters)
   const [sort, setSort] = useState<'default' | 'waiting'>('default')
+  const f = flags()
   const [layout, setLayout] = useState<'card' | 'list'>('card')
   const [favs, setFavs] = useState<string[]>(getFavorites)
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => setFilters((f) => ({ ...f, [k]: v }))
@@ -103,8 +112,14 @@ export default function Animals() {
       if (filters.pair === 'pair' && !a.mustAdoptInPair) return false
       return true
     })
-    return sort === 'waiting' ? [...matched].sort((x, y) => y.waitingDays - x.waitingDays) : matched
-  }, [filters, sort])
+    if (sort === 'waiting') return [...matched].sort((x, y) => y.waitingDays - x.waitingDays)
+    // 第三階:預設排序就把久候動物往前帶,而不是等使用者自己去改排序。
+    // 仍以適配為主,等待時間只是加權,避免把不合適的動物硬推到前面。
+    if (f.waitingRanking) {
+      return [...matched].sort((x, y) => waitWeight(y) - waitWeight(x))
+    }
+    return matched
+  }, [filters, sort, f.waitingRanking])
 
   return (
     <Section
@@ -152,16 +167,16 @@ export default function Animals() {
             <p className="text-ink-soft" role="status">
               找到 <span className="font-bold text-ink">{result.length}</span> 位等待中的夥伴
             </p>
-            {flags().waitingVisibility && (
+            {f.waitingVisibility && (
             <div className="flex items-center gap-2">
               <label htmlFor="f-sort" className="text-sm text-ink-soft">排序</label>
               <select
                 id="f-sort"
                 value={sort}
-                onChange={(e) => setSort(e.target.value as 'default' | 'waiting')}
+                onChange={(e) => { if (e.target.value === 'waiting') track('waiting_sort_used'); setSort(e.target.value as 'default' | 'waiting') }}
                 className="min-h-11 rounded-lg border border-cream-dark bg-white px-3 py-2 text-sm"
               >
-                <option value="default">預設</option>
+                <option value="default">{f.waitingRanking ? '預設(已納入等待時間)' : '預設'}</option>
                 <option value="waiting">等待較久的優先</option>
               </select>
             </div>

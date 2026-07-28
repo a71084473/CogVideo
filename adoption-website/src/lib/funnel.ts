@@ -8,6 +8,7 @@ import { cohort, type Cohort } from './canary'
 
 export type FunnelEvent =
   | 'visit'            // 進站
+  | 'animal_impression'// 動物卡片被列出(曝光)——用來區分「看不到」與「看到但不敢」
   | 'animal_view'      // 看動物詳情(對應報告的「互動」前段)
   | 'quiz_start'
   | 'quiz_mid'         // 第 6 題:R1-6 中途回饋的觀測點
@@ -18,6 +19,7 @@ export type FunnelEvent =
   | 'prep_done'        // 準備清單全數完成
   | 'help_request'     // 主動求助(正向訊號,非失敗)
   | 'happiness_report' // 幸福回報(對應報告的「追蹤完成率」)
+  | 'waiting_sort_used'// 使用「等待較久優先」排序(第二階的成效訊號)
 
 export interface EventRecord {
   e: FunnelEvent
@@ -76,12 +78,20 @@ export interface CohortStats {
   bookingConversion: number | null
   /** 未校準預約率 —— 護欄:衝動認養 */
   uncalibratedBookingRate: number | null
+  /** 久候動物曝光占比 —— 判斷是「看不到」還是「看到但不敢」 */
+  longWaitImpressionShare: number | null
+  /** 久候動物詳情頁瀏覽占比 */
+  longWaitViewShare: number | null
+  /** 久候動物「看了詳情 → 送出預約」的轉換率 */
+  longWaitViewToBooking: number | null
+  /** 一般動物「看了詳情 → 送出預約」的轉換率(對照用) */
+  regularViewToBooking: number | null
 }
 
 const EVENTS: FunnelEvent[] = [
-  'visit', 'animal_view', 'quiz_start', 'quiz_mid', 'quiz_complete',
+  'visit', 'animal_impression', 'animal_view', 'quiz_start', 'quiz_mid', 'quiz_complete',
   'calibration_view', 'booking_start', 'booking_submit', 'prep_done',
-  'help_request', 'happiness_report',
+  'help_request', 'happiness_report', 'waiting_sort_used',
 ]
 
 const ratio = (a: number, b: number) => (b > 0 ? a / b : null)
@@ -95,6 +105,13 @@ export function statsFor(log: EventRecord[], c: Cohort): CohortStats {
   const longWaitBookings = bookings.filter((r) => r.longWait).length
   const calib = counts.calibration_view
 
+  const imps = mine.filter((r) => r.e === 'animal_impression')
+  const lwImps = imps.filter((r) => r.longWait).length
+  const views = mine.filter((r) => r.e === 'animal_view')
+  const lwViews = views.filter((r) => r.longWait).length
+  const regViews = views.length - lwViews
+  const regBookings = bookings.length - longWaitBookings
+
   return {
     cohort: c,
     counts,
@@ -105,6 +122,10 @@ export function statsFor(log: EventRecord[], c: Cohort): CohortStats {
     quizMidRetention: ratio(counts.quiz_mid, counts.quiz_start),
     bookingConversion: ratio(counts.booking_submit, counts.booking_start),
     uncalibratedBookingRate: ratio(Math.max(0, bookings.length - calib), bookings.length),
+    longWaitImpressionShare: ratio(lwImps, imps.length),
+    longWaitViewShare: ratio(lwViews, views.length),
+    longWaitViewToBooking: ratio(longWaitBookings, lwViews),
+    regularViewToBooking: ratio(regBookings, regViews),
   }
 }
 
@@ -124,8 +145,24 @@ const pct = (v: number) => `${Math.round(v * 100)}%`
  * 護欄取自市場報告的風險表:「若只衝活動量,可能提高短期完成、卻增加後續退養」。
  * 因此金絲雀若拉高預約量但同時拉高未校準預約,即視為失敗並回滾。
  */
-export function guardrails(canary: CohortStats): Guardrail[] {
+export function guardrails(canary: CohortStats, control?: CohortStats): Guardrail[] {
+  // 總量護欄:把久候動物排前面,可能只是把一般動物的機會讓出去,
+  // 久候「占比」漂亮但總認養數下降——整體是負向的。
+  // 這一條是策略階梯 S3 實測時才發現需要的。
+  const volumeDrop =
+    control && control.totalBookings > 0
+      ? (control.totalBookings - canary.totalBookings) / control.totalBookings
+      : null
+
   return [
+    {
+      name: '整體預約量下降',
+      basis: '久候占比可能靠犧牲總量換來;S3 實測即發生此情形',
+      value: volumeDrop,
+      threshold: 0.1,
+      breached: (volumeDrop ?? 0) > 0.1,
+      format: (v) => (v <= 0 ? '未下降' : `-${Math.round(v * 100)}%`),
+    },
     {
       name: '未校準預約率',
       basis: '報告風險表:過度追求數量導致衝動認養',

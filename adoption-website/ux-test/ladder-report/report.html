@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>久候動物策略階梯金絲雀測試報告</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  :root {
+    --paper:#FDFCF9; --ink:#23282B; --ink-soft:#5B6560;
+    --brand:#B9662F; --brand-tint:#F6E7DA; --sage:#5F7A66; --sage-tint:#E4EBE4;
+    --rule:#DFD8C9; --info-tint:#E6ECF1; --warn:#96413A; --warn-tint:#F4E3E1;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Noto Sans TC","WenQuanYi Zen Hei","PingFang TC",sans-serif;
+    font-size:10.2pt; line-height:1.75; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4 { text-wrap:balance; margin:0; }
+  .cover { height:245mm; display:flex; flex-direction:column; justify-content:center; page-break-after:always; }
+  .eyebrow { font-size:9pt; letter-spacing:.22em; color:var(--brand); font-weight:700; }
+  .cover h1 { font-size:29pt; line-height:1.3; margin:14px 0 0; letter-spacing:-.01em; }
+  .cover .sub { font-size:12.5pt; color:var(--ink-soft); margin-top:14px; max-width:132mm; line-height:1.85; }
+  .cover-rule { height:4px; width:62px; background:var(--brand); margin:26px 0; }
+  .meta { margin-top:30px; display:grid; grid-template-columns:32mm 1fr; gap:7px 18px; font-size:9.6pt; }
+  .meta dt { color:var(--ink-soft); } .meta dd { margin:0; }
+  section.chapter { page-break-before:always; }
+  h2.ch { font-size:17pt; padding-bottom:9px; margin-bottom:20px; border-bottom:2px solid var(--ink); }
+  h2.ch .num { color:var(--brand); margin-right:12px; }
+  h3 { font-size:12.2pt; margin:26px 0 9px; }
+  h4 { font-size:10.6pt; margin:18px 0 6px; }
+  p { margin:0 0 10px; }
+  ul,ol { margin:0 0 12px; padding-left:1.25em; } li { margin-bottom:5px; }
+  .lead { font-size:11pt; color:var(--ink-soft); margin-bottom:20px; }
+  code { font-family:ui-monospace,Menlo,monospace; font-size:9pt; background:#F1ECE1; padding:1px 4px; border-radius:3px; }
+  blockquote.evidence { margin:12px 0; padding:11px 16px; border-left:3px solid var(--sage);
+    background:var(--sage-tint); font-size:9.8pt; line-height:1.8; break-inside:avoid; }
+  blockquote.evidence .src { display:block; margin-top:6px; font-size:8.6pt; color:var(--ink-soft); }
+  table { width:100%; border-collapse:collapse; margin:12px 0 18px; font-size:9.4pt; break-inside:avoid; }
+  th { text-align:left; background:#F2EDE2; border-bottom:1.5px solid var(--rule); padding:8px 10px; font-weight:700; }
+  td { border-bottom:1px solid var(--rule); padding:8px 10px; vertical-align:top; }
+  td.h { font-weight:700; white-space:nowrap; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  tr { break-inside:avoid; }
+  figure { margin:16px 0 22px; break-inside:avoid; }
+  figure img { width:100%; display:block; border:1px solid var(--rule); border-radius:5px; }
+  figcaption { font-size:8.8pt; color:var(--ink-soft); margin-top:7px; line-height:1.6; }
+  .ba { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start; }
+  .tag { font-size:8.4pt; font-weight:700; letter-spacing:.06em; padding:2px 8px; border-radius:3px; display:inline-block; margin-bottom:6px; }
+  .tag.a { background:var(--warn-tint); color:var(--warn); }
+  .tag.b { background:var(--sage-tint); color:var(--sage); }
+  .card { border:1px solid var(--rule); border-radius:7px; padding:14px 16px; margin:12px 0; background:#fff; break-inside:avoid; }
+  .card h4 { margin-top:0; }
+  .rung { border-left:3px solid var(--brand); border-radius:0 7px 7px 0; }
+  .rung .code { color:var(--brand); font-weight:700; font-family:ui-monospace,Menlo,monospace; font-size:9.4pt; }
+  .callout { background:var(--info-tint); border-radius:7px; padding:13px 16px; margin:14px 0; font-size:9.6pt; break-inside:avoid; }
+  .callout.warn { background:var(--warn-tint); }
+  .callout.good { background:var(--sage-tint); }
+  .big { font-size:20pt; font-weight:700; font-variant-numeric:tabular-nums; }
+  .up { color:var(--sage); } .down { color:var(--warn); }
+  .foot { margin-top:28px; padding-top:12px; border-top:1px solid var(--rule); font-size:8.8pt; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">CANARY · STRATEGY LADDER</div>
+  <h1>久候動物領養率<br>策略階梯金絲雀測試</h1>
+  <div class="cover-rule"></div>
+  <p class="sub">
+    把金絲雀從「流量百分比」重新設計成<strong>策略階梯</strong>:每一階只加一根槓桿,
+    逐階測量久候動物在「曝光 → 瀏覽 → 預約」的變化,才能歸因是哪一個介入奏效。
+  </p>
+  <dl class="meta">
+    <dt>目標函數</dt><dd>久候動物(等待 ≥120 天)的領養率,而非預約總量</dd>
+    <dt>依據</dt><dd>四篇中途之家訪談 + 台灣流浪動物領養問題分析報告(114 年度)</dd>
+    <dt>測試規模</dt><dd>4 階 × 5 位 Persona × 2 組 = 40 條路徑,574 筆事件</dd>
+    <dt>關鍵發現</dt><dd>第三階單獨上線會<strong>拉高久候占比卻讓總認養量下降 60%</strong></dd>
+    <dt>報告日期</dt><dd>2026 年 7 月 28 日</dd>
+  </dl>
+  <div class="callout warn" style="margin-top:30px">
+    <strong>研究效度聲明:</strong>Persona 的選擇偏好依訪談與市場報告寫定
+    (「容易被領養的動物先被帶走」、「玳瑁真的不太好送」),因此結果<strong>部分是設計的產物</strong>。
+    本測試證明的是<strong>機制與量測管線</strong>——即「只改排序不降門檻」這個失敗模式會發生,
+    而且儀表板抓得到——不是效果量的實證。
+  </div>
+</div>
+
+<!-- 01 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">01</span>為什麼要把金絲雀重新設計</h2>
+
+  <p class="lead">
+    上一版的金絲雀階段只有兩個變數:流量百分比與地理範圍,而且九個旗標一次全開。
+    這對「提高久候動物領養率」這個目標是不夠的。
+  </p>
+
+  <h3>1.1 兩個結構性問題</h3>
+  <div class="card">
+    <h4>① 全開就無法歸因</h4>
+    <p style="margin:0">九個旗標同時生效,久候占比就算動了,也不知道是哪一個造成的——
+    那就沒辦法決定下一步該加碼哪一項、砍掉哪一項。</p>
+  </div>
+  <div class="card">
+    <h4>② 原本的久候槓桿是被動的</h4>
+    <p style="margin:0">
+      <code>waitingVisibility</code> 只做兩件事:卡片加一行等待天數、外加一個<strong>選填</strong>排序。
+      使用者<strong>預設看到的東西完全沒變</strong>。這等於把責任丟給使用者:
+      「資訊給你了,你要不要自己去挑久候的動物?」
+    </p>
+  </div>
+
+  <h3>1.2 改成策略階梯</h3>
+  <p>
+    流量與地理範圍仍隨信心成長而放寬,但<strong>策略槓桿一次只加一根</strong>,
+    上一階的指標有動才往上加。程式上以 <code>RUNG</code> 定義各階新增的旗標,累積生效。
+  </p>
+
+  <table>
+    <thead><tr><th style="width:9%">階</th><th style="width:20%">名稱</th><th style="width:32%">新增槓桿</th><th>要驗證的假設</th></tr></thead>
+    <tbody>
+      <tr><td class="h">S1</td><td>信任與摩擦</td><td>兩輪 UX 優化共 8 項</td><td>先移除整體阻力,久候動物才有被看見的基礎</td></tr>
+      <tr><td class="h">S2</td><td>久候曝光(被動)</td><td>等待天數 + 選填排序</td><td>只要誠實揭露,願意的人自己會選</td></tr>
+      <tr><td class="h">S3</td><td>久候媒合(主動)</td><td>預設排序納入等待時間;測驗推薦保證含久候</td><td>被動揭露不夠,必須改變預設看到的東西</td></tr>
+      <tr><td class="h">S4</td><td>久候門檻(降成本)</td><td>醫療補助、兩週試養、接送、行為諮詢</td><td>看見了但不敢,是因為照顧成本讓人卻步</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.3 新增的診斷:把漏斗拆成三段</h3>
+  <p>
+    只看「久候預約占比」無法區分兩種完全不同的病因。因此新增
+    <code>animal_impression</code> 埋點,把久候動物拆成<strong>曝光 → 瀏覽 → 預約</strong>三段:
+  </p>
+  <div class="callout">
+    若<strong>曝光占比低</strong> → 久候動物根本沒被列出來,問題在<strong>排序</strong>(S3 的槓桿)。<br>
+    若<strong>曝光高但預約占比低</strong> → 看得到卻不敢認養,問題在<strong>照顧門檻</strong>(S4 的槓桿)。
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">02</span>各階槓桿的實際畫面</h2>
+
+  <div class="card rung">
+    <h4><span class="code">S3 · waitingRanking</span>　預設排序納入等待時間</h4>
+    <p style="margin:0">
+      不再等使用者自己改排序。加權公式刻意封頂
+      (<code>min(waitingDays − 120, 150)</code>),讓等待時間只是加權而非壓過適配——
+      硬把不合適的動物推到前面會製造錯誤媒合,反而增加退養。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag a">S2 久候曝光(被動)</span>
+      <img src="shots/l-list-s2.png" alt="第二階的探索頁列表,前排是豆腐等年輕動物,排序下拉顯示預設">
+      <figcaption>列表前排仍是年輕、外型討喜的動物;排序是選填的。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag b">S3 久候媒合(主動)</span>
+      <img src="shots/l-list-s3.png" alt="第三階的探索頁列表,前排換成等待最久的雪見與奧利歐,排序下拉顯示預設已納入等待時間">
+      <figcaption>前排換成久候夥伴;排序標示為「預設(已納入等待時間)」,不隱藏這件事。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card rung">
+    <h4><span class="code">S4 · longWaitSupport</span>　久候專屬支持包</h4>
+    <p style="margin:0">
+      實作市場報告的「長住動物加速專案」:醫療支持、暫托體驗。
+      只出現在等待 ≥120 天的動物頁,並直接寫出牠等了幾天。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag a">S3(尚無支持包)</span>
+      <img src="shots/l-support-s3.png" alt="第三階的奧利歐詳情頁,一起生活的真實樣貌之後直接進入健康與醫療">
+      <figcaption>看得到牠了,但照顧成本仍全部由認養人承擔。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag b">S4(加上支持包)</span>
+      <img src="shots/l-support-s4.png" alt="第四階的奧利歐詳情頁,多出已經等了209天所以我們多做了這些區塊,含四張支持卡片">
+      <figcaption>多出四項支持:6 個月醫療補助、兩週試養期、接送到府、行為諮詢。</figcaption>
+    </figure>
+  </div>
+
+  <blockquote class="evidence">
+    「試養期不是『先試試看不行再退』——是讓你在真實生活裡確認合不合適,我們會全程陪你判斷。
+    若最後不適合,牠回到中途、你不必有罪惡感。」
+    <span class="src">支持包的收尾文案。試養期最大的風險是變成退養的方便門,因此措辭必須把它定位成「共同判斷」而非「無責試用」。</span>
+  </blockquote>
+</section>
+
+<!-- 03 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">03</span>階梯實測結果</h2>
+
+  <p class="lead">
+    每階 5 位 Persona × 2 組。Persona 依訪談設定為<strong>只看列表前段、不主動改排序</strong>,
+    這正是報告所說「容易被領養的動物先被帶走」的行為模型。
+  </p>
+
+  <table>
+    <thead>
+      <tr><th style="width:30%">階段(金絲雀組)</th><th class="num">瀏覽到久候</th><th class="num">預約總數</th><th class="num">久候預約</th><th class="num">久候占比</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="h">S1 信任與摩擦</td><td class="num">1 / 5</td><td class="num">5</td><td class="num">1</td><td class="num">20%</td></tr>
+      <tr><td class="h">S2 久候曝光(被動)</td><td class="num">1 / 5</td><td class="num">5</td><td class="num">1</td><td class="num">20%</td></tr>
+      <tr style="background:var(--warn-tint)"><td class="h">S3 久候媒合(主動)</td><td class="num">5 / 5</td><td class="num"><strong>2</strong></td><td class="num">2</td><td class="num">100%</td></tr>
+      <tr style="background:var(--sage-tint)"><td class="h">S4 久候門檻(降成本)</td><td class="num">5 / 5</td><td class="num"><strong>5</strong></td><td class="num">5</td><td class="num">100%</td></tr>
+      <tr><td class="h" style="color:var(--ink-soft)">對照組(全程不變)</td><td class="num">1 / 5</td><td class="num">5</td><td class="num">1</td><td class="num">20%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.1 三個發現</h3>
+
+  <div class="card">
+    <h4>① 被動揭露完全沒有作用</h4>
+    <p style="margin:0">
+      S2 的久候占比是 <strong>20%</strong>,和對照組<strong>一模一樣</strong>。
+      加了等待天數、加了排序選項,結果沒有任何改變——因為沒有人去動那個排序。
+      這驗證了 §1.1 的第二個問題:把責任丟給使用者等於沒做。
+    </p>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--warn)">
+    <h4>② S3 單獨上線是個陷阱</h4>
+    <p>
+      改成預設排序後,久候動物的瀏覽從 1/5 跳到 <strong>5/5</strong>,久候預約占比衝到 <strong>100%</strong>——
+      主要成功指標看起來大獲全勝。
+    </p>
+    <p style="margin:0">
+      但<strong>預約總數從 5 掉到 2</strong>。5 位 Persona 中有 3 位看到久候動物後直接放棄,
+      沒有轉去看別的動物。<strong>久候占比的提升是靠犧牲總認養量換來的。</strong>
+    </p>
+  </div>
+
+  <div class="callout warn">
+    <p style="margin:0">
+      如果只盯主要成功指標,S3 會被判定成功並繼續擴大——
+      實際上它讓總認養量掉了 <span class="down big">60%</span>。
+      這是把「久候占比」當單一目標函數的必然風險:<strong>提高占比最快的方法就是減少分母。</strong>
+    </p>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--sage)">
+    <h4>③ S4 把量補了回來</h4>
+    <p style="margin:0">
+      加上支持包後,預約總數回到 <strong>5</strong>,且 5 筆全是久候動物。
+      原本因為照顧成本而放棄的三位 Persona,在看到醫療補助與兩週試養後改變了決定。
+      這說明<strong>排序與降門檻必須成對出現</strong>——S3 負責讓人看見,S4 負責讓人敢。
+    </p>
+  </div>
+
+  <h3>3.2 儀表板診斷</h3>
+  <figure>
+    <img src="shots/l-dash-diag.png" alt="儀表板的久候動物診斷表,顯示曝光占比60%對64%、詳情頁瀏覽占比20%對60%、預約占比20%對53%,以及久候詳情到預約轉換率100%對75%">
+    <figcaption>
+      四階合併後的診斷。曝光占比兩組接近(+4pt)——因為對照組也列出全部 8 隻動物;
+      真正的差別在<strong>詳情頁瀏覽占比 20% → 60%</strong>(排序生效)與
+      <strong>預約占比 20% → 53%</strong>。最後一列「久候詳情→預約轉換率」金絲雀組較低(75%),
+      正是久候動物本身較難成交的證據——這一格就是 S4 要打的目標。
+    </figcaption>
+  </figure>
+</section>
+
+<!-- 04 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">04</span>因此新增的護欄</h2>
+
+  <p class="lead">
+    S3 的失敗模式是這次測試最有價值的產出。它不是靠推理想出來的,是跑出來才看到的,
+    因此必須把它固化成程式裡的護欄,而不是報告裡的一句提醒。
+  </p>
+
+  <div class="card">
+    <h4>新增護欄:整體預約量下降 &gt; 10% 即回滾</h4>
+    <p>
+      實作於 <code>guardrails(canary, control)</code>,直接比較兩組的預約總數。
+      這條護欄的存在理由就是 S3——沒有它,S3 會通過所有既有檢查。
+    </p>
+    <p style="margin:0">
+      同時把 S3 的出場條件改寫為「整體預約量未下降超過 10%
+      (<strong>S3 單獨上線時實測會破線</strong>)」,並在 S4 加上
+      「整體預約量回到 S2 水準(S4 的作用是把 S3 讓出去的量補回來)」。
+    </p>
+  </div>
+
+  <figure>
+    <img src="shots/l-dash-guard.png" alt="儀表板護欄區塊,顯示整體預約量下降、未校準預約率、求助未被使用三條護欄">
+    <figcaption>護欄現在有三條,每一條都標註它來自報告、訪談或實測的哪一個依據。</figcaption>
+  </figure>
+
+  <h3>4.1 對發布順序的修正</h3>
+  <div class="callout">
+    <strong>S3 不得單獨上線。</strong>原本階梯設計是「上一階指標有動才往上加」,
+    但 S3 的指標會動、而且動得很漂亮,卻是有害的。
+    因此修正為:<strong>S3 與 S4 必須綁在一起發布</strong>,
+    或 S3 的 rollout 維持在最小規模直到 S4 就緒。
+  </div>
+
+  <figure>
+    <img src="shots/l-dash-stages.png" alt="儀表板的發布階段區塊,六張卡片顯示各階的rollout百分比、新增槓桿與範圍,並顯示當前階段的假設與出場條件">
+    <figcaption>階段卡現在顯示每一階新增的槓桿;下方列出當前階段的假設、槓桿、主要指標與出場條件。</figcaption>
+  </figure>
+</section>
+
+<!-- 05 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">05</span>擴大計畫(修正後)</h2>
+
+  <table>
+    <thead><tr><th style="width:9%">階</th><th style="width:20%">範圍</th><th class="num">Rollout</th><th>出場條件</th></tr></thead>
+    <tbody>
+      <tr><td class="h">S1</td><td>1 家合作中途</td><td class="num">5%</td><td>測驗完成率高於對照組;未校準預約率 ≤20%;無新增 P1 錯誤</td></tr>
+      <tr><td class="h">S2</td><td>同一家中途</td><td class="num">15%</td><td>久候預約占比高於對照組;<strong>排序使用率 ≥10%</strong>(實測遠低於此 → 直接進 S3)</td></tr>
+      <tr><td class="h">S3</td><td>台中市</td><td class="num">30%</td><td>久候曝光占比 ≥40%;久候預約占比高於 S2;<strong>整體預約量未下降 &gt;10%</strong></td></tr>
+      <tr><td class="h">S4</td><td>六都</td><td class="num">60%</td><td>久候詳情頁轉換率高於 S3;整體預約量回到 S2 水準;180 天追蹤完成率 ≥85%;六個月退養率 &lt;5%</td></tr>
+      <tr><td class="h">S5</td><td>全國含偏鄉</td><td class="num">100%</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.1 為什麼 S3 選台中</h3>
+  <table>
+    <thead><tr><th>縣市</th><th class="num">認領養率</th><th class="num">所內死亡率</th><th>判斷</th></tr></thead>
+    <tbody>
+      <tr><td class="h">新北市</td><td class="num">94%</td><td class="num">3%</td><td>接近天花板;且 2025 已自行上線 AI 媒合會混淆效果</td></tr>
+      <tr><td class="h">臺北市</td><td class="num">90%</td><td class="num">10%</td><td>同樣接近上限</td></tr>
+      <tr style="background:var(--brand-tint)"><td class="h"><strong>臺中市</strong></td><td class="num"><strong>78%</strong></td><td class="num"><strong>12%</strong></td><td><strong>改善空間最大、難送養個案最集中,且已有送養專車與友善商家認養站可承接</strong></td></tr>
+      <tr><td class="h">高雄市</td><td class="num">70%</td><td class="num">3%</td><td>備選</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 S4 特有的風險</h3>
+  <div class="callout warn">
+    <strong>兩週試養期可能變成退養的方便門。</strong>
+    報告的 KPI 是「六個月退養率 &lt;5%」;若試養期讓人以更輕的心態帶走動物,
+    退養率會上升,而且對動物的傷害比沒被認養更大——訪談中接回來的貓「全身跳蚤、瘦到脫形」。
+    因此 S4 的出場條件明列退養率,且文案刻意把試養定位成「共同判斷」而非「無責試用」。
+  </div>
+
+  <h3>5.3 這次測試不能拿來說什麼</h3>
+  <div class="callout warn">
+    <ul style="margin:0">
+      <li>Persona 的 <code>willAcceptLongWait</code> 與 <code>needsSupportToAccept</code> 是我依訪談<strong>寫定</strong>的,
+        因此 S3 掉量與 S4 補回,<strong>在機制上是被設計出來的</strong>。</li>
+      <li>N=5,「總量下降 60%」是 5 掉到 2,不是統計上的效果量。</li>
+      <li>真正能證明的是:<strong>這個失敗模式會發生,而且量測管線抓得到它</strong>——
+        以及在沒有總量護欄之前,它會被漏掉。</li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    <p style="margin:0 0 6px"><strong>可重現性</strong></p>
+    <p style="margin:0">
+      <code>ux-test/canary-ladder.mjs</code>(四階實測,<code>EXPORT=</code> 匯出事件流)、
+      <code>ux-test/canary-stage0.mjs</code>(埋點驗證)、
+      <code>ux-test/round2-verify.mjs</code>(兩輪 UX 優化迴歸,32 項全數通過)。
+      儀表板在 <code>/#/canary</code>,可切換階段與強制分組。
+      本報告截圖皆為同一網址、同一視窗尺寸,僅切換階段或分組的實際畫面,未經修圖;
+      儀表板載入的是本次實測產生的 574 筆事件。
+    </p>
+  </div>
+</section>
+
+</body>
+</html>

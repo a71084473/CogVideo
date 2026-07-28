@@ -40,7 +40,7 @@ export default function Canary() {
   const log = readLog()
   const canary = statsFor(log, 'canary')
   const control = statsFor(log, 'control')
-  const rails = guardrails(canary)
+  const rails = guardrails(canary, control)
   const stage = currentStage()
   const me = cohort()
   const anyBreach = rails.some((r) => r.breached)
@@ -78,12 +78,19 @@ export default function Canary() {
               <p className="text-xs text-ink-soft">Stage {s.id}</p>
               <p className="font-bold">{s.name}</p>
               <p className="mt-1 text-2xl font-bold text-brand-dark">{s.rollout}%</p>
+              <p className="mt-1 text-xs font-medium text-sage-dark">{s.lever}</p>
               <p className="mt-1 text-xs text-ink-soft">{s.scope}</p>
             </button>
           ))}
         </div>
         <div className="mt-3 rounded-card border border-cream-dark bg-white p-5">
-          <p className="font-medium">Stage {stage.id}「{stage.name}」的出場條件</p>
+          <p className="font-medium">Stage {stage.id}「{stage.name}」</p>
+          <dl className="mt-2 grid gap-x-6 gap-y-2 text-sm md:grid-cols-2">
+            <div><dt className="text-ink-soft">假設</dt><dd>{stage.hypothesis}</dd></div>
+            <div><dt className="text-ink-soft">新增槓桿</dt><dd>{stage.lever}</dd></div>
+            <div className="md:col-span-2"><dt className="text-ink-soft">主要指標</dt><dd className="font-medium">{stage.metric}</dd></div>
+          </dl>
+          <p className="mt-3 font-medium">出場條件</p>
           <ul className="mt-2 space-y-1 text-sm text-ink-soft">
             {stage.exitCriteria.map((c) => <li key={c}>・{c}</li>)}
           </ul>
@@ -146,8 +153,58 @@ export default function Canary() {
           </table>
         </div>
 
+        {/* 久候動物診斷 —— 本次金絲雀的目標函數 */}
+        <h2 className="mt-8 text-xl font-bold">久候動物診斷</h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          把「曝光 → 瀏覽 → 預約」拆開看,才知道久候動物是<strong>看不到</strong>,還是<strong>看到了但不敢</strong>。
+          前者要改排序,後者要降門檻——兩者的解法完全不同。
+        </p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[620px] border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-ink text-left">
+                <th className="py-2 pr-4">久候動物(≥120 天)</th>
+                <th className="py-2 pr-4 text-right">對照組</th>
+                <th className="py-2 pr-4 text-right">金絲雀組</th>
+                <th className="py-2 text-right">差異</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: '① 曝光占比(列表中出現的比例)', c: control.longWaitImpressionShare, k: canary.longWaitImpressionShare },
+                { label: '② 詳情頁瀏覽占比', c: control.longWaitViewShare, k: canary.longWaitViewShare },
+                { label: '③ 預約占比(主要成功指標)', c: control.longWaitShare, k: canary.longWaitShare },
+              ].map((r) => (
+                <tr key={r.label} className="border-b border-cream-dark">
+                  <td className="py-2 pr-4">{r.label}</td>
+                  <td className="py-2 pr-4 text-right tabular-nums">{fmtPct(r.c)}</td>
+                  <td className="py-2 pr-4 text-right font-medium tabular-nums">{fmtPct(r.k)}</td>
+                  <td className="py-2 text-right"><Delta canary={r.k} control={r.c} /></td>
+                </tr>
+              ))}
+              <tr className="border-b border-cream-dark bg-cream/60">
+                <td className="py-2 pr-4">久候動物 詳情→預約 轉換率</td>
+                <td className="py-2 pr-4 text-right tabular-nums">{fmtPct(control.longWaitViewToBooking)}</td>
+                <td className="py-2 pr-4 text-right font-medium tabular-nums">{fmtPct(canary.longWaitViewToBooking)}</td>
+                <td className="py-2 text-right"><Delta canary={canary.longWaitViewToBooking} control={control.longWaitViewToBooking} /></td>
+              </tr>
+              <tr className="border-b border-cream-dark">
+                <td className="py-2 pr-4 text-ink-soft">(對照)一般動物 詳情→預約 轉換率</td>
+                <td className="py-2 pr-4 text-right tabular-nums">{fmtPct(control.regularViewToBooking)}</td>
+                <td className="py-2 pr-4 text-right tabular-nums">{fmtPct(canary.regularViewToBooking)}</td>
+                <td className="py-2 text-right text-ink-soft">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-3 rounded-lg bg-info-light px-4 py-3 text-sm">
+          <span className="font-medium">怎麼讀:</span>
+          若 ① 低 → 久候動物根本沒被列出來,問題在排序(第三階的槓桿)。
+          若 ① 高但 ③ 低 → 看得到卻不敢認養,問題在照顧門檻(第四階的槓桿)。
+        </div>
+
         {/* 關鍵比率 */}
-        <h2 className="mt-8 text-xl font-bold">關鍵比率</h2>
+        <h2 className="mt-8 text-xl font-bold">整體關鍵比率</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[620px] border-collapse text-sm">
             <thead>
@@ -160,7 +217,6 @@ export default function Canary() {
             </thead>
             <tbody>
               {[
-                { label: '久候動物預約占比(主要成功指標)', c: control.longWaitShare, k: canary.longWaitShare },
                 { label: '測驗完成率', c: control.quizCompletion, k: canary.quizCompletion },
                 { label: '第 6 題留存率', c: control.quizMidRetention, k: canary.quizMidRetention },
                 { label: '預約轉換率', c: control.bookingConversion, k: canary.bookingConversion },

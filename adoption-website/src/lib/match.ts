@@ -1,6 +1,7 @@
 import type { MatchResult, CareLevel } from '../types'
 import type { QuizAnswers } from './storage'
-import { animals } from '../data/animals'
+import { animals, getAnimal } from '../data/animals'
+import { currentStage, flagsForStage } from './canary'
 
 // 測驗中途就能看到的初步結果:讓填答者不必走完全部題目才有回饋。
 // 訪談證據:「大家點進去表單,看到那一堆問題的時候,就不會有人填了」
@@ -69,7 +70,21 @@ export function computeMatch(answers: QuizAnswers): MatchResult {
     })
     .sort((x, y) => y.s - x.s)
 
-  const recommendedAnimalIds = scored.slice(0, 3).map((x) => x.id)
+  let recommendedAnimalIds = scored.slice(0, 3).map((x) => x.id)
+
+  // 第三階:推薦名單保證至少含一位久候夥伴(若牠確實合適)。
+  // 只從「分數仍在合格區間」的候選中挑,不硬塞不適合的動物——
+  // 硬推會製造錯誤媒合,反而增加退養,違背報告的風險提醒。
+  if (flagsForStage(currentStage().id).waitingRanking) {
+    const hasLongWait = recommendedAnimalIds.some((id) => (getAnimal(id)?.waitingDays ?? 0) >= 120)
+    if (!hasLongWait) {
+      const threshold = (scored[2]?.s ?? 0) - 2
+      const candidate = scored.find(
+        (x) => (getAnimal(x.id)?.waitingDays ?? 0) >= 120 && x.s >= threshold,
+      )
+      if (candidate) recommendedAnimalIds = [...recommendedAnimalIds.slice(0, 2), candidate.id]
+    }
+  }
 
   // 三種結果狀態(絕不使用「不合格」)
   const uniquePrep = [...new Set(preparationIds)]
