@@ -38,7 +38,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Section title="我的認養進度" subtitle="你填過的資料我們都記得,不會要求你重複填寫。">
+      <Section title="我的認養進度" level={1} subtitle="你填過的資料我們都記得,不會要求你重複填寫。">
         <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <div className="space-y-6">
             {/* 測驗結果 */}

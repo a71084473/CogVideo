@@ -40,9 +40,32 @@ export default function Support90() {
   return (
     <>
       <Section
-        title="認養後 90 天支持"
+        title="認養後 90 天支持" level={1}
         subtitle="一次審核無法保證未來 15–20 年,持續的陪伴才可以。前 90 天,我們陪你度過最容易出狀況的適應期。"
       >
+        {/* 直接處理「被監視」的疑慮,而不是等使用者自己猜 */}
+        <div className="mb-8 rounded-card border border-info/30 bg-info-light/60 p-6">
+          <h2 className="text-lg font-bold">先說清楚:這不是在盯著你</h2>
+          <ul className="mt-3 grid gap-2 text-ink-soft md:grid-cols-2">
+            <li>
+              <span className="font-medium text-ink">系統提醒你,不是人來催你。</span>
+              到了節點你會收到一則通知,沒回也不會有人打電話追問。
+            </li>
+            <li>
+              <span className="font-medium text-ink">你的回報只有中途團隊看得到。</span>
+              除非你自己勾選公開,否則不會出現在網站任何地方。
+            </li>
+            <li>
+              <span className="font-medium text-ink">節奏可以自己調。</span>
+              覺得太頻繁,在會員中心改成低頻或暫停;90 天之後就改為你想說再說。
+            </li>
+            <li>
+              <span className="font-medium text-ink">回報一句話就夠。</span>
+              「都很好」也是完整的回答,不需要拍照、不需要交代細節。
+            </li>
+          </ul>
+        </div>
+
         <ol className="relative space-y-6 border-l-2 border-sage/40 pl-6">
           {timeline.map((t) => (
             <li key={t.day} className="relative">
@@ -57,6 +80,41 @@ export default function Support90() {
             </li>
           ))}
         </ol>
+      </Section>
+
+      {/* 同儕互助:實務上,新手的問題最常被其他認養人解決,而不是中途 */}
+      <Section
+        title="其他認養人,通常比我們更快回你"
+        subtitle="半夜牠一直叫、第一次吐毛球、突然不用貓砂——這些問題,走過同一段路的人最有答案。"
+      >
+        <div className="grid gap-5 md:grid-cols-3">
+          {[
+            {
+              q: '牠第三天還躲在沙發底下不出來,正常嗎?',
+              a: '正常。我家那隻躲了快兩週,不要拖牠出來,把飯放在牠看得到的地方就好。',
+              by: '養了 1 年的認養人',
+            },
+            {
+              q: '幼貓一直咬手怎麼辦?會不會養成習慣?',
+              a: '不要用手當玩具,換逗貓棒。被咬時發出「痛!」然後停止互動,大概兩週就會改。',
+              by: '養了 3 年的認養人',
+            },
+            {
+              q: '第一次帶去打針,牠在外出籠裡叫到我心碎。',
+              a: '出發前一晚把外出籠放出來讓牠當窩睡,蓋條熟悉味道的布,下次就會好很多。',
+              by: '養了 5 年的認養人',
+            },
+          ].map((c) => (
+            <div key={c.q} className="rounded-card border border-cream-dark bg-white p-5">
+              <p className="font-medium">Q・{c.q}</p>
+              <p className="mt-2 text-sm text-ink-soft">{c.a}</p>
+              <p className="mt-2 text-xs text-ink-soft">—— {c.by}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-sm text-ink-soft">
+          認養後你會收到認養人社群的邀請,可以只看不說話,也可以隨時退出。以上為示意內容。
+        </p>
       </Section>
 
       <Section>

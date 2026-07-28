@@ -2,6 +2,20 @@ import type { MatchResult, CareLevel } from '../types'
 import type { QuizAnswers } from './storage'
 import { animals } from '../data/animals'
 
+// 測驗中途就能看到的初步結果:讓填答者不必走完全部題目才有回饋。
+// 訪談證據:「大家點進去表單,看到那一堆問題的時候,就不會有人填了」
+export function partialMatchCount(answers: QuizAnswers): number {
+  const work = answers.work as string
+  const experience = answers.experience as string
+  const aloneNeed = work === 'gt12' || work === '9to12' ? 12 : work === '6to9' ? 9 : 6
+  const beginner = experience === 'none-learn' || experience === 'none'
+  return animals.filter((a) => {
+    if (a.aloneHours < aloneNeed) return false
+    if (beginner && !a.beginnerFriendly) return false
+    return true
+  }).length
+}
+
 // 媒合邏輯:不以單一條件淘汰,而是把缺口轉成準備項目
 export function computeMatch(answers: QuizAnswers): MatchResult {
   const reasons: string[] = []

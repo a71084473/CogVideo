@@ -45,7 +45,7 @@ export default function Crisis() {
 
   return (
     <>
-      <Section title="遇到困難了?一起找方法" subtitle="遇到問題不代表你不適合。越早告訴我們,越容易一起找到方法。">
+      <Section title="遇到困難了?一起找方法" level={1} subtitle="遇到問題不代表你不適合。越早告訴我們,越容易一起找到方法。">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {scenarios.map((s) => (
             <div key={s.t} className="rounded-card border border-cream-dark bg-white p-5">

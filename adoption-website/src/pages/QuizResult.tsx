@@ -10,7 +10,7 @@ export default function QuizResult() {
 
   if (!result) {
     return (
-      <Section>
+      <Section title="測驗結果" level={1}>
         <EmptyState title="還沒有測驗結果" hint="先完成 5–10 分鐘的生活適配測驗,我們就能為你推薦合適的夥伴。" action={{ label: '開始測驗', to: '/quiz' }} />
       </Section>
     )
@@ -30,7 +30,7 @@ export default function QuizResult() {
       badge: '完成幾項準備後進入媒合',
       cls: 'bg-brand-light text-brand-dark',
       title: '還有幾項準備完成後,就能更安心進入媒合',
-      desc: '這不是「不合格」——只是把可能的風險,提早變成具體的準備。每一項都有做法可以參考。',
+      desc: '你沒有被擋下來,也沒有被扣分。我們只是把可能的風險,提早換成幾件具體、做得到的事。每一項都附做法。',
     },
     'other-ways': {
       badge: '現階段先用其他方式參與',

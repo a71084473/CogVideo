@@ -33,6 +33,8 @@ const steps = [
     prepare: '雙證件(依動保法規定辦理寵物登記)。',
     youGet: '合約副本、醫療紀錄、兩週份銜接糧與照護手冊。',
     privacy: '身分資料僅用於寵物登記與合約,依法保存,不作其他用途。',
+    note:
+      '合約是雙向的:它寫明你不得棄養或私下轉送,但也寫明我們的義務——提供完整病史、90 天內的支持,以及任何時候你無法繼續時,我們一定接回。我們核對證件但不留存影本。',
   },
   {
     title: '認養後 90 天陪伴',
@@ -48,7 +50,7 @@ export default function Process() {
   return (
     <>
       <Section
-        title="認養流程與共同準備"
+        title="認養流程與共同準備" level={1}
         subtitle="五個步驟,每一步都清楚知道:為什麼、要多久、你會得到什麼。"
       >
         <ol className="space-y-5">
@@ -65,9 +67,57 @@ export default function Process() {
                 <div><dt className="text-sm font-medium text-sage-dark">你會得到</dt><dd className="text-ink-soft">{s.youGet}</dd></div>
                 <div><dt className="text-sm font-medium text-sage-dark">個資如何被使用</dt><dd className="text-ink-soft">{s.privacy}</dd></div>
               </dl>
+              {'note' in s && s.note && (
+                <p className="mt-3 rounded-lg bg-sage-light/60 px-4 py-2 text-sm text-sage-dark">{s.note}</p>
+              )}
             </li>
           ))}
         </ol>
+      </Section>
+
+      {/* 卡點常不在認養人身上,而在房東與家人。給他們可以直接轉傳的東西 */}
+      <Section
+        title="卡住的通常不是你,是還沒點頭的人"
+        subtitle="房東擔心房子、家人擔心過敏和麻煩——這些疑慮都很具體,也都有答案。以下內容可以直接轉給他們看。"
+      >
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="rounded-card border border-cream-dark bg-white p-6">
+            <h3 className="text-lg font-bold">給房東的說明</h3>
+            <p className="mt-1 text-sm text-ink-soft">針對房東最常見的三個擔心,提供可直接轉傳的說法:</p>
+            <ul className="mt-3 space-y-2 text-sm text-ink-soft">
+              <li>
+                <span className="font-medium text-ink">「會不會抓壞牆壁地板?」</span>
+                貓抓板與定期剪指甲可以解決;我們提供貓抓板並在交接時示範。
+              </li>
+              <li>
+                <span className="font-medium text-ink">「會不會有味道、吵到鄰居?」</span>
+                結紮後的貓不噴尿也不發情叫;每日清砂就沒有異味。牠們都已完成結紮。
+              </li>
+              <li>
+                <span className="font-medium text-ink">「搬走後房子怎麼辦?」</span>
+                可加簽恢復原狀條款;門窗防護是外加式的,退租時可完整拆除不留痕。
+              </li>
+            </ul>
+            <p className="mt-3 rounded-lg bg-cream px-3 py-2 text-sm">
+              房東同意用訊息或口頭都可以,我們不需要正式文件,也不會聯絡他。
+            </p>
+          </div>
+          <div className="rounded-card border border-cream-dark bg-white p-6">
+            <h3 className="text-lg font-bold">給同住家人的說明</h3>
+            <p className="mt-1 text-sm text-ink-soft">
+              家人的反對幾乎都不是「討厭動物」,而是怕麻煩落到自己身上。與其說服,不如先把分工講清楚:
+            </p>
+            <ul className="mt-3 space-y-2 text-sm text-ink-soft">
+              <li>誰負責清砂、餵食、就醫,寫下來給家人看,比保證「我會顧好」有用。</li>
+              <li>擔心過敏?可以先到中途之家實際相處一小時,反應通常當場就知道。</li>
+              <li>擔心小孩被抓?我們會依家中孩子年齡推薦性格穩定的夥伴,並示範互動方式。</li>
+              <li>還是談不攏,可以約線上三方對談——由我們回答問題,你不必一個人扛。</li>
+            </ul>
+            <p className="mt-3 rounded-lg bg-brand-light/60 px-3 py-2 text-sm">
+              同住者同意是必要條件。不是規定,是因為在反對聲中生活的動物,最後多半會被送回來。
+            </p>
+          </div>
+        </div>
       </Section>
 
       <Section>

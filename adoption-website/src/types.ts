@@ -43,6 +43,8 @@ export interface Animal {
   dailyMedication: boolean
   spaceNeed: '小套房可' | '需一般住家' | '需較大空間'
   mustAdoptInPair: boolean
+  /** 在中途之家等待的天數。誠實揭露,不用來賣慘,只用來讓久候者也被看見。 */
+  waitingDays: number
   similarIds: string[]
 }
 

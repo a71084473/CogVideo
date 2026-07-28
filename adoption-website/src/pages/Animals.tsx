@@ -79,12 +79,13 @@ function Check({ id, label, checked, onChange }: { id: string; label: string; ch
 
 export default function Animals() {
   const [filters, setFilters] = useState<Filters>(initialFilters)
+  const [sort, setSort] = useState<'default' | 'waiting'>('default')
   const [layout, setLayout] = useState<'card' | 'list'>('card')
   const [favs, setFavs] = useState<string[]>(getFavorites)
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => setFilters((f) => ({ ...f, [k]: v }))
 
   const result = useMemo(() => {
-    return animals.filter((a) => {
+    const matched = animals.filter((a) => {
       if (filters.species !== 'all' && a.species !== filters.species) return false
       if (filters.beginner && !a.beginnerFriendly) return false
       if (filters.aloneLong && a.aloneHours < 9) return false
@@ -101,11 +102,12 @@ export default function Animals() {
       if (filters.pair === 'pair' && !a.mustAdoptInPair) return false
       return true
     })
-  }, [filters])
+    return sort === 'waiting' ? [...matched].sort((x, y) => y.waitingDays - x.waitingDays) : matched
+  }, [filters, sort])
 
   return (
     <Section
-      title="尋找適合的夥伴"
+      title="尋找適合的夥伴" level={1}
       subtitle="篩選條件以「生活適配」為主——因為適合,比可愛更能走得長遠。"
     >
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
@@ -149,6 +151,18 @@ export default function Animals() {
             <p className="text-ink-soft" role="status">
               找到 <span className="font-bold text-ink">{result.length}</span> 位等待中的夥伴
             </p>
+            <div className="flex items-center gap-2">
+              <label htmlFor="f-sort" className="text-sm text-ink-soft">排序</label>
+              <select
+                id="f-sort"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as 'default' | 'waiting')}
+                className="min-h-11 rounded-lg border border-cream-dark bg-white px-3 py-2 text-sm"
+              >
+                <option value="default">預設</option>
+                <option value="waiting">等待較久的優先</option>
+              </select>
+            </div>
             <div role="group" aria-label="檢視方式" className="flex rounded-lg border border-cream-dark bg-white p-1">
               <button type="button" onClick={() => setLayout('card')} aria-pressed={layout === 'card'}
                 className={`min-h-9 rounded-md px-3 text-sm ${layout === 'card' ? 'bg-brand-light font-medium text-brand-dark' : 'text-ink-soft'}`}>

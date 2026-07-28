@@ -5,15 +5,19 @@ export function Section({
   subtitle,
   children,
   className = '',
+  level = 2,
 }: {
   title?: string
   subtitle?: string
   children: React.ReactNode
   className?: string
+  /** 每頁的第一個 Section 用 1,讓頁面有唯一的主標題 */
+  level?: 1 | 2
 }) {
+  const Heading = level === 1 ? 'h1' : 'h2'
   return (
     <section className={`mx-auto max-w-6xl px-4 py-10 ${className}`}>
-      {title && <h2 className="text-2xl font-bold">{title}</h2>}
+      {title && <Heading className={level === 1 ? 'text-3xl font-bold' : 'text-2xl font-bold'}>{title}</Heading>}
       {subtitle && <p className="mt-1 max-w-2xl text-ink-soft">{subtitle}</p>}
       <div className={title ? 'mt-6' : ''}>{children}</div>
     </section>

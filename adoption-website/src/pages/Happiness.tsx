@@ -43,7 +43,7 @@ export default function Happiness() {
   return (
     <>
       <Section
-        title="幸福回報"
+        title="幸福回報" level={1}
         subtitle="一張照片、一句近況就夠了。這不是追蹤,是讓曾經照顧牠的人,看見牠現在過得很好。"
       >
         <div className="grid gap-8 lg:grid-cols-2">
@@ -89,6 +89,14 @@ export default function Happiness() {
                 ✓ 已送出,謝謝你的分享!中途與曾照顧牠的志工都會很開心。
               </p>
             )}
+            <div className="rounded-lg bg-sage-light/60 px-4 py-3 text-sm">
+              <p className="font-medium">回報一次,就有一張抽獎券</p>
+              <p className="mt-1 text-ink-soft">
+                合作廠商每月提供不同物資(罐頭、貓砂、保健品),你可以自己決定要把券投進哪一個獎箱。
+                回報幾次就有幾張,不回報也不會有任何影響——這是謝謝,不是條件。
+              </p>
+              <p className="mt-1 text-xs text-ink-soft">※ 原型示意,尚未實際開放。</p>
+            </div>
             <p className="text-xs text-ink-soft">
               回報節奏:前 90 天配合支持節點,之後由系統溫和提醒;滿一年後改為自主回報,不會無限期高頻追蹤。
             </p>

@@ -47,6 +47,7 @@ export const animals: Animal[] = [
     dailyMedication: false,
     spaceNeed: '小套房可',
     mustAdoptInPair: false,
+    waitingDays: 34,
     similarIds: ['tofu', 'latte'],
   },
   {
@@ -94,6 +95,7 @@ export const animals: Animal[] = [
     dailyMedication: false,
     spaceNeed: '需一般住家',
     mustAdoptInPair: true,
+    waitingDays: 96,
     similarIds: ['mochi', 'nori'],
   },
   {
@@ -141,6 +143,7 @@ export const animals: Animal[] = [
     dailyMedication: false,
     spaceNeed: '小套房可',
     mustAdoptInPair: false,
+    waitingDays: 188,
     similarIds: ['mochi', 'yuki'],
   },
   {
@@ -188,6 +191,7 @@ export const animals: Animal[] = [
     dailyMedication: true,
     spaceNeed: '需較大空間',
     mustAdoptInPair: false,
+    waitingDays: 121,
     similarIds: ['hazel', 'tofu'],
   },
   {
@@ -235,6 +239,7 @@ export const animals: Animal[] = [
     dailyMedication: true,
     spaceNeed: '小套房可',
     mustAdoptInPair: false,
+    waitingDays: 243,
     similarIds: ['latte', 'anzu'],
   },
   {
@@ -282,6 +287,7 @@ export const animals: Animal[] = [
     dailyMedication: true,
     spaceNeed: '需一般住家',
     mustAdoptInPair: false,
+    waitingDays: 164,
     similarIds: ['nori', 'latte'],
   },
   {
@@ -329,6 +335,7 @@ export const animals: Animal[] = [
     dailyMedication: false,
     spaceNeed: '小套房可',
     mustAdoptInPair: false,
+    waitingDays: 77,
     similarIds: ['mochi', 'yuki'],
   },
   {
@@ -376,6 +383,7 @@ export const animals: Animal[] = [
     dailyMedication: true,
     spaceNeed: '需一般住家',
     mustAdoptInPair: false,
+    waitingDays: 209,
     similarIds: ['hazel', 'yuki'],
   },
 ]

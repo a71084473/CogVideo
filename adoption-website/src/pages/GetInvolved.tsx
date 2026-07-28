@@ -62,7 +62,7 @@ const options = [
 export default function GetInvolved() {
   return (
     <Section
-      title="助養、捐款與志工"
+      title="助養、捐款與志工" level={1}
       subtitle="還沒準備好認養,不代表不能改變牠們的生活。每個選項都清楚寫著需要的時間、技能與責任——選一個放得進你生活的。"
     >
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

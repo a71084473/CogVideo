@@ -6,7 +6,8 @@ import {
   getQuizAnswers, getQuizStep, saveQuizAnswers, saveQuizStep, saveMatchResult,
   type QuizAnswers,
 } from '../lib/storage'
-import { computeMatch } from '../lib/match'
+import { computeMatch, partialMatchCount } from '../lib/match'
+import { Link } from 'react-router-dom'
 
 export default function Quiz() {
   const navigate = useNavigate()
@@ -62,7 +63,7 @@ export default function Quiz() {
 
   if (!started) {
     return (
-      <Section title="生活適配測驗" subtitle="找到適合彼此的關係,從誠實認識自己的生活開始。">
+      <Section title="生活適配測驗" level={1} subtitle="找到適合彼此的關係,從誠實認識自己的生活開始。">
         <div className="max-w-2xl space-y-5 rounded-card border border-cream-dark bg-white p-8">
           <ul className="space-y-2 text-ink-soft">
             <li>・約 {totalMinutes} 分鐘、共 {quizQuestions.length} 題,一步一題,可以隨時離開,進度會自動儲存。</li>
@@ -97,7 +98,26 @@ export default function Quiz() {
   return (
     <Section>
       <div className="mx-auto max-w-2xl">
+        <h1 className="mb-3 text-lg font-bold text-ink-soft">生活適配測驗</h1>
         <ProgressBar value={step + 1} max={quizQuestions.length} label={`第 ${step + 1} 題,共 ${quizQuestions.length} 題・預估還需 ${remaining} 分鐘`} />
+
+        {/* 中途回饋:走到一半就先給一次結果,不必填完才有回報 */}
+        {step >= 5 && (
+          <div className="mt-4 rounded-lg border border-sage/40 bg-sage-light/50 px-4 py-3">
+            <p className="text-sm">
+              <span className="font-medium">已經看得出方向了:</span>
+              依你目前的回答,有 <strong>{partialMatchCount(answers)}</strong> 位夥伴的作息和你合得來。
+              再幾題,我們就能告訴你是哪幾位。
+            </p>
+            <Link
+              to="/animals"
+              className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-sage-dark underline underline-offset-4"
+            >
+              想先看看?答案都會留著,回來接著填就好
+            </Link>
+          </div>
+        )}
+
         <form
           onSubmit={(e) => { e.preventDefault(); goNext() }}
           className="mt-6 rounded-card border border-cream-dark bg-white p-6 md:p-8"

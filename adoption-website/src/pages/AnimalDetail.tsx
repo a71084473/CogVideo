@@ -6,6 +6,7 @@ import { AnimalCard } from '../components/AnimalCard'
 import { Tag, CareLevelBadge } from '../components/Badges'
 import { EmptyState, Section } from '../components/shared'
 import { saveBooking } from '../lib/storage'
+import type { Animal } from '../types'
 
 // 快速適配確認(3-5 題)→ 預約互動,不直接送出認養申請
 const quickQuestions = [
@@ -30,6 +31,28 @@ const quickQuestions = [
     options: ['合得來', '大致可以', '差距有點大'],
   },
 ]
+
+// 期待校準:被故事打動的當下,就把最容易落差的地方講明白。
+// 訪談證據:共感而來的認養人退養率低,但前提是他共感的是「真實的牠」。
+function expectationChecks(a: Animal): string[] {
+  const out: string[] = []
+  if (a.affection === 1)
+    out.push(`如果三個月後${a.name}還是不主動靠近你、也不讓你抱,你願意繼續用牠的節奏相處嗎?`)
+  else if (a.affection === 2)
+    out.push(`${a.name}熟了才親人,前幾週可能都在觀察你。這段「還不算朋友」的時間,你能享受嗎?`)
+  if (a.activityLevel === 3)
+    out.push(`牠每天都需要大量放電,下雨天、加班日、生病時也一樣。這件事沒辦法跳過,你排得進去嗎?`)
+  if (a.dailyMedication || a.careLevel === 'special')
+    out.push(`每天固定餵藥、定期回診會成為你生活的一部分,連旅行都要先安排好。這是你願意接下的日常嗎?`)
+  if (a.mustAdoptInPair)
+    out.push(`牠必須和手足一起走,食量、砂量、醫療費都是兩份。你的預算和空間是以兩隻計算的嗎?`)
+  if (a.ageYears >= 8)
+    out.push(`牠已經是熟齡了,陪你的時間可能不是十五年。即使如此,你仍然想給牠一個家嗎?`)
+  if (a.aloneHours <= 6)
+    out.push(`牠不太能忍受長時間獨處,你的工作型態能讓牠每天有人在家嗎?`)
+  out.push(`你現在心動的,是牠的故事,還是上面這些每一天都要做的事?兩個答案都可以,但值得先問自己一次。`)
+  return out.slice(0, 3)
+}
 
 export default function AnimalDetail() {
   const { id } = useParams()
@@ -87,6 +110,21 @@ export default function AnimalDetail() {
             <section aria-labelledby="story">
               <h2 id="story" className="text-xl font-bold">牠的故事</h2>
               <p className="mt-2 text-ink-soft">{animal.story}</p>
+            </section>
+
+            <section aria-labelledby="calib" className="rounded-card border border-brand/30 bg-brand-light/40 p-6">
+              <h2 id="calib" className="text-xl font-bold">在你心動之前,想先問你三件事</h2>
+              <p className="mt-1 text-sm text-ink-soft">
+                沒有正確答案,也不會被記錄。只是被故事打動之後,這幾件事最容易被忽略——而它們才是往後每一天的樣子。
+              </p>
+              <ul className="mt-3 space-y-2">
+                {expectationChecks(animal).map((q) => (
+                  <li key={q} className="flex gap-2 text-ink-soft">
+                    <span aria-hidden="true" className="text-brand-dark">?</span>
+                    {q}
+                  </li>
+                ))}
+              </ul>
             </section>
 
             <section aria-labelledby="daily" className="rounded-card border border-cream-dark bg-white p-6">

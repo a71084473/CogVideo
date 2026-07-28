@@ -60,6 +60,12 @@ export function AnimalCard({
           <span className="font-medium text-ink">為什麼可能適合你:</span>
           {animal.whyMaybeFit}
         </p>
+        {animal.waitingDays >= 120 && (
+          <p className="text-sm text-ink-soft">
+            <span aria-hidden="true">◷</span> 已在中途之家等待 {animal.waitingDays} 天。
+            性格穩定的成貓成犬常因為外型不搶眼而被略過,牠值得被多看一眼。
+          </p>
+        )}
         <div className="mt-auto pt-2">
           <Link
             to={`/animals/${animal.id}`}
