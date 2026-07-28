@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>金絲雀測試報告</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  :root {
+    --paper: #FDFCF9; --ink: #23282B; --ink-soft: #5B6560;
+    --brand: #B9662F; --brand-tint: #F6E7DA;
+    --sage: #5F7A66; --sage-tint: #E4EBE4;
+    --rule: #DFD8C9; --info-tint: #E6ECF1;
+    --warn: #96413A; --warn-tint: #F4E3E1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Noto Sans TC", "WenQuanYi Zen Hei", "PingFang TC", sans-serif;
+    font-size: 10.2pt; line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,h4 { text-wrap: balance; margin: 0; }
+
+  .cover { height: 245mm; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
+  .eyebrow { font-size: 9pt; letter-spacing: .22em; color: var(--brand); font-weight: 700; }
+  .cover h1 { font-size: 30pt; line-height: 1.3; margin: 14px 0 0; letter-spacing: -.01em; }
+  .cover .sub { font-size: 12.5pt; color: var(--ink-soft); margin-top: 14px; max-width: 132mm; line-height: 1.85; }
+  .cover-rule { height: 4px; width: 62px; background: var(--brand); margin: 26px 0; }
+  .meta { margin-top: 30px; display: grid; grid-template-columns: 32mm 1fr; gap: 7px 18px; font-size: 9.6pt; }
+  .meta dt { color: var(--ink-soft); } .meta dd { margin: 0; }
+
+  section.chapter { page-break-before: always; }
+  h2.ch { font-size: 17pt; padding-bottom: 9px; margin-bottom: 20px; border-bottom: 2px solid var(--ink); }
+  h2.ch .num { color: var(--brand); margin-right: 12px; }
+  h3 { font-size: 12.2pt; margin: 26px 0 9px; }
+  h4 { font-size: 10.6pt; margin: 18px 0 6px; }
+  p { margin: 0 0 10px; }
+  ul, ol { margin: 0 0 12px; padding-left: 1.25em; }
+  li { margin-bottom: 5px; }
+  .lead { font-size: 11pt; color: var(--ink-soft); margin-bottom: 20px; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 9pt; background: #F1ECE1; padding: 1px 4px; border-radius: 3px; }
+
+  blockquote.evidence {
+    margin: 12px 0; padding: 11px 16px; border-left: 3px solid var(--sage);
+    background: var(--sage-tint); font-size: 9.8pt; line-height: 1.8; break-inside: avoid;
+  }
+  blockquote.evidence .src { display: block; margin-top: 6px; font-size: 8.6pt; color: var(--ink-soft); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 9.4pt; break-inside: avoid; }
+  th { text-align: left; background: #F2EDE2; border-bottom: 1.5px solid var(--rule); padding: 8px 10px; font-weight: 700; }
+  td { border-bottom: 1px solid var(--rule); padding: 8px 10px; vertical-align: top; }
+  td.h { font-weight: 700; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr { break-inside: avoid; }
+
+  figure { margin: 16px 0 22px; break-inside: avoid; }
+  figure img { width: 100%; display: block; border: 1px solid var(--rule); border-radius: 5px; }
+  figcaption { font-size: 8.8pt; color: var(--ink-soft); margin-top: 7px; line-height: 1.6; }
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .tag { font-size: 8.4pt; font-weight: 700; letter-spacing: .06em; padding: 2px 8px; border-radius: 3px; display: inline-block; margin-bottom: 6px; }
+  .tag.ctrl { background: var(--warn-tint); color: var(--warn); }
+  .tag.can { background: var(--sage-tint); color: var(--sage); }
+  .tag.new { background: var(--brand-tint); color: var(--brand); }
+
+  .card { border: 1px solid var(--rule); border-radius: 7px; padding: 14px 16px; margin: 12px 0; background: #fff; break-inside: avoid; }
+  .card h4 { margin-top: 0; }
+  .flagcard { border-left: 3px solid var(--brand); border-radius: 0 7px 7px 0; }
+  .flagcard .code { color: var(--brand); font-weight: 700; font-family: ui-monospace, Menlo, monospace; font-size: 9.4pt; }
+
+  .callout { background: var(--info-tint); border-radius: 7px; padding: 13px 16px; margin: 14px 0; font-size: 9.6pt; break-inside: avoid; }
+  .callout.warn { background: var(--warn-tint); }
+  .callout.good { background: var(--sage-tint); }
+
+  .pass { color: var(--sage); font-weight: 700; }
+  .fail { color: var(--warn); font-weight: 700; }
+  ul.checks { list-style: none; padding: 0; margin: 0; }
+  ul.checks li { margin-bottom: 4px; }
+  ul.checks .pass, ul.checks .fail { font-size: 8.4pt; letter-spacing: .05em; margin-right: 5px; }
+
+  .foot { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 8.8pt; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">CANARY RELEASE REPORT</div>
+  <h1>金絲雀測試報告<br>Stage 0 實測與擴大計畫</h1>
+  <div class="cover-rule"></div>
+  <p class="sub">
+    以四篇中途之家訪談建立的五位領養者 Persona 做小規模實測,
+    再依《台灣流浪動物領養問題分析報告》規劃逐步擴大範圍。
+    分流、旗標、埋點與護欄皆已實作於程式中,可執行、可回滾。
+  </p>
+  <dl class="meta">
+    <dt>受測產品</dt><dd>安心託付 × 共同陪伴|中途之家認養平台(原型)</dd>
+    <dt>測試型態</dt><dd>金絲雀發布(Canary Release),對照組 = 九旗標全關 = 兩輪優化前狀態</dd>
+    <dt>Stage 0 規模</dt><dd>5 位訪談衍生 Persona × 2 組 = 10 條完整路徑</dd>
+    <dt>擴大依據</dt><dd>台灣流浪動物領養問題分析報告(114 年度農業部統計)</dd>
+    <dt>報告日期</dt><dd>2026 年 7 月 28 日</dd>
+  </dl>
+  <div class="callout warn" style="margin-top:34px">
+    <strong>研究效度聲明:</strong>Stage 0 為內部乾跑,N=5,且 Persona 行為規則依訪談寫定。
+    其結果<strong>僅能證明分流、旗標、埋點與護欄正常運作</strong>,不構成效果量的證據。
+    真正的效果必須在 Stage 1 以真實使用者測量。所有截圖為實際執行畫面,未經修圖。
+  </div>
+</div>
+
+<!-- 01 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">01</span>先修正一個策略前提</h2>
+
+  <p class="lead">
+    原本的產品目標是「提高領養率」。但市場報告的數字說明這個目標設定需要修正——
+    否則金絲雀會朝錯的方向優化。
+  </p>
+
+  <table>
+    <thead><tr><th>指標(114 年度)</th><th class="num">數值</th><th>意涵</th></tr></thead>
+    <tbody>
+      <tr><td class="h">全國認領養率</td><td class="num"><strong>68%</strong></td><td>不算低</td></tr>
+      <tr><td class="h">新北 / 台北</td><td class="num">94% / 90%</td><td>都會區已接近上限</td></tr>
+      <tr><td class="h">所內死亡</td><td class="num">2,294 隻(+22%)</td><td>照護壓力上升</td></tr>
+      <tr><td class="h">依法人道處理</td><td class="num">664 隻(+83%)</td><td>高難度個案增加</td></tr>
+      <tr><td class="h">全國遊蕩犬推估</td><td class="num">141,584 隻</td><td>末端解決不了源頭</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote class="evidence">
+    「台灣現在不是『沒人領養』,而是<strong>『容易被領養的動物先被帶走,剩下的動物越來越難媒合』</strong>。」
+    <span class="src">—— 台灣流浪動物領養問題分析報告・問題診斷</span>
+  </blockquote>
+
+  <h3>1.1 因此金絲雀量的不是預約總量</h3>
+  <div class="card">
+    <h4>主要成功指標</h4>
+    <p style="margin:0"><strong>久候動物(≥120 天)的預約占比。</strong>認養總量在都會區已近天花板,
+    平台真正能貢獻的是把久候個案的機會拉高。</p>
+  </div>
+  <div class="card">
+    <h4>次要指標</h4>
+    <p style="margin:0">測驗完成率(對應報告指出的「流程複雜性影響認養意願」)、
+    認養後穩定度(對應報告 KPI「六個月退養率 &lt;5%」)。</p>
+  </div>
+  <div class="card" style="border-left:3px solid var(--warn)">
+    <h4>護欄</h4>
+    <p style="margin:0">
+      取自報告風險表原句:<strong>「若只衝活動量,可能提高短期完成、卻增加後續退養。」</strong>
+      金絲雀若拉高預約量但同時拉高<strong>未校準預約</strong>,即判定失敗並回滾。
+    </p>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">02</span>已實作的金絲雀基礎設施</h2>
+
+  <table>
+    <thead><tr><th style="width:16%">模組</th><th style="width:30%">檔案</th><th>作用</th></tr></thead>
+    <tbody>
+      <tr><td class="h">分流</td><td><code>src/lib/canary.ts</code></td><td>FNV-1a 雜湊將訪客穩定分桶(0–99),依階段 rollout% 決定分組</td></tr>
+      <tr><td class="h">旗標</td><td>同上</td><td>九個可獨立開關的優化項,對應兩輪 UX 測試產出</td></tr>
+      <tr><td class="h">埋點</td><td><code>src/lib/funnel.ts</code></td><td>11 種事件,含 <code>longWait</code> 維度</td></tr>
+      <tr><td class="h">護欄</td><td>同上</td><td>未校準預約率、求助入口是否被使用</td></tr>
+      <tr><td class="h">儀表板</td><td><code>src/pages/Canary.tsx</code>(<code>/canary</code>)</td><td>分組漏斗、關鍵比率、護欄狀態、階段切換</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>回滾成本:</strong>對照組把九個旗標全部關閉,即回到兩輪優化前的版本。
+    因此<strong>回滾只需把 rollout 設為 0</strong>,不需要重新部署。
+  </div>
+
+  <h3>2.1 儀表板即是報告的第一優先建議</h3>
+  <blockquote class="evidence">
+    「建立全國一致的『認養漏斗儀表板』:統一欄位定義,追蹤上架、互動、申請、核准、完成、退養、追蹤完成率。」
+    <span class="src">—— 報告・策略建議與 KPI(列為短期第一項)</span>
+  </blockquote>
+  <p>
+    報告同時指出官方目前<strong>未公開</strong>平均收容天數、領養者年齡與地區、渠道轉換率與退養率。
+    這一頁就是要補這些洞的網站端實作。
+  </p>
+
+  <figure>
+    <span class="tag new">新增頁面</span>
+    <img src="shots/dash-stages.png" alt="金絲雀儀表板的發布階段區塊,顯示 Stage 0 到 Stage 4 五張卡片與各自的 rollout 百分比與範圍">
+    <figcaption>五個發布階段,可直接點選切換。目前停在 Stage 1(單一中途、5%)。</figcaption>
+  </figure>
+
+  <figure>
+    <img src="shots/dash-guardrail.png" alt="儀表板護欄區塊,顯示所有護欄正常可評估擴大,並列出未校準預約率與求助未被使用兩項">
+    <figcaption>護欄區塊。每一條都標註了它來自報告或訪談的哪一句話,而不是憑空設定的門檻。</figcaption>
+  </figure>
+
+  <figure>
+    <img src="shots/dash-funnel.png" alt="儀表板分組漏斗表格,列出進站、瀏覽動物、開始測驗、撐到第6題、完成測驗、進入適配確認、送出預約、主動求助、幸福回報各階段的兩組數字">
+    <figcaption>分組漏斗,載入的是 Stage 0 實測產生的 61 筆真實事件。</figcaption>
+  </figure>
+
+  <div class="ba">
+    <figure>
+      <img src="shots/dash-ratios.png" alt="儀表板關鍵比率表格,比較兩組的久候動物預約占比、測驗完成率、第6題留存率與預約轉換率">
+      <figcaption>關鍵比率與差異(pt)。</figcaption>
+    </figure>
+    <figure>
+      <img src="shots/dash-flags.png" alt="儀表板顯示目前分組生效中的九個旗標名稱">
+      <figcaption>目前分組生效中的九個旗標。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">03</span>分組差異:九個旗標的實際畫面</h2>
+
+  <p class="lead">
+    以下每一組都是<strong>同一個網址、同一個視窗尺寸</strong>,只有分組不同。
+    左為對照組(旗標全關,等同兩輪優化前),右為金絲雀組。
+  </p>
+
+  <div class="card flagcard">
+    <h4><span class="code">midQuizFeedback</span>　測驗中途回饋</h4>
+    <p style="margin:0">對抗訪談最強證據:「大家點進去表單,看到那一堆問題的時候,就不會有人填了」。</p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-quiz-control.png" alt="對照組的測驗第7題,進度條下方直接是題目卡片">
+      <figcaption>只有進度條,填到一半沒有任何收穫。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-quiz-canary.png" alt="金絲雀組的測驗第7題,進度條下方多出綠色回饋區塊顯示有8位夥伴合得來">
+      <figcaption>顯示「有 8 位夥伴的作息和你合得來」與保留答案的出口。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card flagcard">
+    <h4><span class="code">expectationCalibration</span>　期待校準前置</h4>
+    <p style="margin:0">在讀完故事、心動的當下插入校準,而不是等點了 CTA 才問。</p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-calib-control.png" alt="對照組的拿鐵詳情頁,故事之後直接進入一起生活的真實樣貌">
+      <figcaption>故事後直接進入日常描述,中間沒有停頓點。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-calib-canary.png" alt="金絲雀組的拿鐵詳情頁,故事與日常之間多出在你心動之前想先問你三件事的區塊">
+      <figcaption>插入「在你心動之前,想先問你三件事」,依動物特性動態生成。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card flagcard">
+    <h4><span class="code">fosterCandor</span>　中途處境揭露</h4>
+    <p style="margin:0">雙向透明的另一半。對應訪談:認養人與送養人的對立、中途「被妖魔化」。</p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-trust-control.png" alt="對照組的信任頁,認養標準之後直接接到你的資料如何被對待">
+      <figcaption>認養標準之後直接跳到隱私說明,中途自身的處境從未出現。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-trust-canary.png" alt="金絲雀組的信任頁,多出我們這邊的實話四張卡片">
+      <figcaption>多出「我們這邊的實話」四張卡,含「你有拒絕的權利」。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card flagcard">
+    <h4><span class="code">thirdPartyTools</span>　房東與家人工具</h4>
+    <p style="margin:0">卡點常不在認養人身上,而在他說服不了的第三方。</p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-process-control.png" alt="對照組的流程頁,五步驟之後直接接到居家安全確認與改善協助說明">
+      <figcaption>五步驟之後沒有任何可轉傳給第三方的內容。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-process-canary.png" alt="金絲雀組的流程頁,多出卡住的通常不是你是還沒點頭的人區塊,含給房東與給同住家人兩張卡">
+      <figcaption>多出「給房東的說明」與「給同住家人的說明」兩張可轉傳卡片。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card flagcard">
+    <h4><span class="code">waitingVisibility</span>　久候動物可見度</h4>
+    <p style="margin:0">直接服務本次金絲雀的主要成功指標。對應訪談:「玳瑁真的不太好送,因為顏色花花的不討喜」。</p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-waiting-control.png" alt="對照組的探索頁,卡片沒有等待天數,也沒有排序控制項">
+      <figcaption>卡片無等待資訊,亦無排序控制項。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-waiting-canary.png" alt="金絲雀組的探索頁,右上多出排序下拉,卡片顯示已在中途之家等待天數">
+      <figcaption>右上多出「等待較久的優先」排序;久候卡片顯示等待天數。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card flagcard">
+    <h4><span class="code">surveillanceRelief</span>　解除監視感</h4>
+    <p style="margin:0">對應訪談:「幸福回報⋯有點像電子腳鐐」「他很有可能只是非常在意自己的隱私而已」。</p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-support-top-control.png" alt="對照組的90天支持頁頂端,標題後直接進入時間軸">
+      <figcaption>標題後直接進入時間軸,對「會不會被監視」毫無回應。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-support-top-canary.png" alt="金絲雀組的180天支持頁頂端,標題後多出先說清楚這不是在盯著你四點說明">
+      <figcaption>多出「先說清楚:這不是在盯著你」四點;標題亦變為「180 天支持」。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card flagcard">
+    <h4><span class="code">reportIncentive</span>　回報的正向回饋</h4>
+    <p style="margin:0">實作訪談提出的抽獎券構想,但措辭必須排除「不回報會被懲罰」的暗示。</p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-incentive-control.png" alt="對照組的幸福回報表單,送出按鈕下方只有回報節奏說明">
+      <figcaption>回報是純付出,沒有任何回饋。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-incentive-canary.png" alt="金絲雀組的幸福回報表單,多出回報一次就有一張抽獎券的說明區塊">
+      <figcaption>多出抽獎券說明,並明寫「這是謝謝,不是條件」。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card flagcard">
+    <h4><span class="code">extendTo180</span>　追蹤期延長至 180 天</h4>
+    <p style="margin:0">
+      報告 KPI 要求 180 天追蹤完成率 ≥85%,但訪談說高頻追蹤讓人反感。
+      處理方式是<strong>延長但降頻</strong>:90 天後改為三個月一次。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag ctrl">對照組</span>
+      <img src="shots/c-timeline-control.png" alt="對照組的支持時間軸,共五個節點:第3天、第7天、第30天、第60天、第90天">
+      <figcaption>5 個節點,止於第 90 天。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag can">金絲雀組</span>
+      <img src="shots/c-timeline-canary.png" alt="金絲雀組的支持時間軸,共七個節點,多出第120天低頻關心與第180天正式畢業">
+      <figcaption>7 個節點,多出第 120 天「低頻關心」與第 180 天「正式畢業」。</figcaption>
+    </figure>
+  </div>
+
+  <div class="callout">
+    第九個旗標 <code>peerSupport</code>(同儕互助)的畫面已在前一份 UX 測試報告中呈現,此處不重複。
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">04</span>Stage 0 內部乾跑:實測結果</h2>
+
+  <p class="lead">
+    五位 Persona × 兩組,以真實瀏覽器執行(<code>ux-test/canary-stage0.mjs</code>)。
+    Persona 的行為規則直接來自訪談,不是隨機模擬。
+  </p>
+
+  <table>
+    <thead><tr><th style="width:26%">Persona</th><th>組別</th><th>測驗</th><th>看到校準</th><th style="width:24%">阻力</th><th>預約</th></tr></thead>
+    <tbody>
+      <tr><td class="h">P1 小昀・表單逃跑者</td><td>對照</td><td>第 6 題放棄</td><td>無</td><td>—</td><td class="fail">✘</td></tr>
+      <tr><td class="h"></td><td>金絲雀</td><td>完成</td><td>有</td><td>—</td><td class="pass">✔</td></tr>
+      <tr><td class="h">P2 阿哲・隱私敏感</td><td>對照</td><td>完成</td><td>無</td><td>90 天頁未解除監視感</td><td class="fail">✘</td></tr>
+      <tr><td class="h"></td><td>金絲雀</td><td>完成</td><td>有</td><td>—</td><td class="pass">✔</td></tr>
+      <tr><td class="h">P3 宜庭・共感型</td><td>對照</td><td>完成</td><td>無</td><td>—</td><td>✔(未校準)</td></tr>
+      <tr><td class="h"></td><td>金絲雀</td><td>完成</td><td>有</td><td>—</td><td class="pass">✔</td></tr>
+      <tr><td class="h">P4 至凱・家庭決策者</td><td>對照</td><td>完成</td><td>無</td><td>無說服家人/房東的工具</td><td class="fail">✘</td></tr>
+      <tr><td class="h"></td><td>金絲雀</td><td>完成</td><td>有</td><td>—</td><td class="pass">✔</td></tr>
+      <tr><td class="h">P5 Wendy・戒心回流者</td><td>對照</td><td>完成</td><td>無</td><td>中途處境未揭露</td><td class="fail">✘</td></tr>
+      <tr><td class="h"></td><td>金絲雀</td><td>完成</td><td>有</td><td>—</td><td class="pass">✔</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.1 匯總</h3>
+  <table>
+    <thead><tr><th></th><th class="num">對照組</th><th class="num">金絲雀組</th></tr></thead>
+    <tbody>
+      <tr><td>測驗完成率</td><td class="num">80%</td><td class="num">100%</td></tr>
+      <tr><td>送出預約數</td><td class="num">1</td><td class="num">5</td></tr>
+      <tr><td>其中久候動物(≥120 天)</td><td class="num">1</td><td class="num">3</td></tr>
+      <tr><td><strong>未經校準的預約(護欄)</strong></td><td class="num"><strong>1</strong></td><td class="num"><strong>0</strong></td></tr>
+      <tr><td>被阻力擋下</td><td class="num">3</td><td class="num">0</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    對照組三位被擋下的原因,正好分別對應兩輪 UX 優化各自要解的問題:
+    阿哲卡在監視感、至凱卡在說服家人、Wendy 卡在對中途的戒心。
+  </p>
+
+  <h3>4.2 埋點驗證</h3>
+  <div class="callout good">
+    <ul class="checks">
+      <li><span class="pass">PASS</span> 觸發 8 種事件:<code>visit</code>、<code>quiz_start</code>、<code>quiz_mid</code>、<code>quiz_complete</code>、<code>animal_view</code>、<code>calibration_view</code>、<code>booking_start</code>、<code>booking_submit</code></li>
+      <li><span class="pass">PASS</span> 金絲雀事件全部標記為 canary</li>
+      <li><span class="pass">PASS</span> 對照事件全部標記為 control</li>
+      <li><span class="pass">PASS</span> <code>longWait</code> 維度有被記錄</li>
+      <li><span class="pass">PASS</span> JavaScript 錯誤:0</li>
+    </ul>
+  </div>
+
+  <h3>4.3 過程中修掉的一個真實問題</h3>
+  <div class="card" style="border-left:3px solid var(--warn)">
+    <h4>首個 pageview 會被歸錯組</h4>
+    <p>
+      第一次執行時,「金絲雀事件全為 canary」檢查是 <span class="fail">false</span>。
+      原因是測試在首次導覽<strong>之後</strong>才寫入分組,導致第一個 <code>visit</code>
+      事件被貼到自動分配的組別。改用 <code>addInitScript</code> 在任何頁面程式碼執行前寫入後修正。
+    </p>
+    <p style="margin:0">
+      這雖然是測試腳本的問題,但指向一個正式上線必須遵守的設計約束:
+      <strong>分組必須在第一個事件送出前就決定</strong>,否則漏斗頂端會被污染,
+      而漏斗頂端錯了,底下所有轉換率都不可信。
+    </p>
+  </div>
+
+  <h3>4.4 出場判定</h3>
+  <div class="callout good">
+    <ul class="checks">
+      <li><span class="pass">PASS</span> 所有埋點正確觸發</li>
+      <li><span class="pass">PASS</span> 護欄計算正確(對照組那 1 筆未校準預約被正確標記)</li>
+      <li><span class="pass">PASS</span> 零 JavaScript 錯誤</li>
+    </ul>
+    <p style="margin:8px 0 0"><strong>判定:通過,可進入 Stage 1。</strong></p>
+  </div>
+
+  <h3>4.5 這個結果不能拿來說什麼</h3>
+  <div class="callout warn">
+    <ul style="margin:0">
+      <li>「金絲雀 5 vs 對照 1」<strong>不是效果量</strong>,只是確認阻力點移除後路徑會通。</li>
+      <li>久候動物占比在對照組顯示 100%,是因為<strong>分母只有 1</strong>——這種比率在小樣本下沒有意義。</li>
+      <li>Persona 的行為規則是依訪談<strong>寫死</strong>的(例如「P1 沒看到中途回饋就在第 6 題放棄」),
+        因此結果部分是設計的產物而非發現。</li>
+    </ul>
+    <p style="margin:8px 0 0">
+      Stage 0 唯一能證明的是:<strong>分流、旗標、埋點與護欄都正常運作,可以拿去接真人流量。</strong>
+    </p>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">05</span>逐步擴大計畫</h2>
+
+  <p class="lead">
+    擴散順序依市場報告的資源分布設計:全國僅 32 處公立收容所、動保人力 1,127 人,
+    六都明顯高於其他縣市,因此從單點往六都推,最後才是偏鄉。
+  </p>
+
+  <table>
+    <thead><tr><th style="width:14%">Stage</th><th style="width:22%">範圍</th><th class="num">Rollout</th><th>出場條件(取自報告 KPI)</th><th class="num">觀察期</th></tr></thead>
+    <tbody>
+      <tr><td class="h">0 內部乾跑</td><td>5 位 Persona</td><td class="num">100%</td><td>埋點正確、護欄正確、零錯誤</td><td class="num">已完成</td></tr>
+      <tr><td class="h">1 單一中途</td><td>1 家合作中途,8–15 隻在養</td><td class="num">5%</td><td>久候動物預約占比高於對照組;校準完成率 ≥80%;無新增 P1 錯誤</td><td class="num">4 週</td></tr>
+      <tr><td class="h">2 單一縣市</td><td><strong>台中市</strong></td><td class="num">25%</td><td>90 天回報完成率 ≥85%;六個月退養率 &lt;5%;長住動物認養量高於對照組</td><td class="num">8 週</td></tr>
+      <tr><td class="h">3 六都</td><td>新北/台北/台中/台南/桃園/高雄</td><td class="num">50%</td><td>180 天追蹤完成率 ≥85%;熟齡與特殊照護動物認養量 +30%;中途端工作負荷未上升</td><td class="num">12 週</td></tr>
+      <tr><td class="h">4 全國</td><td>含偏鄉離島</td><td class="num">100%</td><td>—</td><td class="num">—</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.1 為什麼 Stage 2 選台中</h3>
+  <table>
+    <thead><tr><th>縣市</th><th class="num">認領養率</th><th class="num">所內死亡率</th><th>判斷</th></tr></thead>
+    <tbody>
+      <tr><td class="h">新北市</td><td class="num">94%</td><td class="num">3%</td><td>已接近天花板,改善訊號會被雜訊淹沒;且 2025 已自行上線 AI 媒合系統會混淆效果</td></tr>
+      <tr><td class="h">臺北市</td><td class="num">90%</td><td class="num">10%</td><td>同樣接近上限</td></tr>
+      <tr><td class="h" style="background:var(--brand-tint)"><strong>臺中市</strong></td><td class="num" style="background:var(--brand-tint)"><strong>78%</strong></td><td class="num" style="background:var(--brand-tint)"><strong>12%</strong></td><td style="background:var(--brand-tint)"><strong>改善空間最大、難送養個案最集中,且已有送養專車與友善商家認養站可承接線上媒合</strong></td></tr>
+      <tr><td class="h">高雄市</td><td class="num">70%</td><td class="num">3%</td><td>可作為 Stage 2 的備選</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 回滾條件</h3>
+  <p>任一條成立即停止擴大並將 rollout 設為 0:</p>
+  <ol>
+    <li>未校準預約率 &gt; 20%(護欄:衝動認養)</li>
+    <li>六個月退養率 ≥ 5%(報告 KPI 反向)</li>
+    <li>求助入口零使用且預約數 &gt; 5(代表求助管道形同虛設)</li>
+    <li><strong>中途端回報工作負荷上升</strong>(需中途端問卷,不能只看認養人端)</li>
+  </ol>
+  <div class="callout">
+    第 4 條特別重要。訪談中「我沒空」「我哪會記得」反覆出現;
+    若平台提高了認養人端轉換卻把工作推給中途,整體是負向的——
+    而這件事只看認養人端的漏斗<strong>永遠看不出來</strong>。
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">06</span>報告與訪談的衝突,以及平台的邊界</h2>
+
+  <h3>6.1 唯一的直接衝突:追蹤期</h3>
+  <table>
+    <thead><tr><th style="width:22%">來源</th><th>主張</th></tr></thead>
+    <tbody>
+      <tr><td class="h">市場報告</td><td>追蹤期應為 <strong>180 天</strong>;KPI 為 180 天追蹤完成率 ≥85%、六個月退養率 &lt;5%</td></tr>
+      <tr><td class="h">訪談</td><td>「有點像<strong>電子腳鐐</strong>」「過了一年兩年之後就不太回報了,我覺得是很容易發生的事情」</td></tr>
+    </tbody>
+  </table>
+  <p>
+    處理方式不是二選一,而是<strong>延長但降頻</strong>:新增 120 天與 180 天兩個低頻節點,
+    90 天後明確改為三個月一次,並在頁面寫明「回一句『都很好』就完成了,不需要照片」。
+    節點數從 5 個增加到 7 個(見 §03 <code>extendTo180</code> 對照圖)。
+  </p>
+
+  <h3>6.2 報告指出、但這個平台解決不了的事</h3>
+  <div class="card">
+    <h4>① 源頭管理</h4>
+    <p style="margin:0">報告明言「最好的領養政策,最終應該是讓需要被領養的動物變少」。
+    遊蕩犬 141,584 隻的問題靠媒合平台解決不了,需要熱區絕育、寵登強化與放養執法。</p>
+  </div>
+  <div class="card">
+    <h4>② 交通可近性</h4>
+    <p style="margin:0">報告舉例瑞芳動物之家過去每日僅 4 班公車。線上諮詢能部分替代到場,
+    但無法取代實體互動——而訪談與各縣市流程都要求實際見面。</p>
+  </div>
+  <div class="card">
+    <h4>③ FB 演算法的結構性阻礙</h4>
+    <p style="margin:0">訪談指出「文章裡面有連結超過兩個以上,基本上可能會降到幾乎快到零」。
+    平台的導流策略仍未解,需要可直接貼進 FB 的圖卡而非外部連結。</p>
+  </div>
+  <div class="card">
+    <h4>④ 公立收容所整合</h4>
+    <p style="margin:0">本平台面向民間中途。報告顯示真正的量體在 32 處公立收容所,
+    若不接官方 API,影響範圍有限。</p>
+  </div>
+  <div class="card">
+    <h4>⑤ 中途端工作台</h4>
+    <p style="margin:0">認養人端做得再好,中途端沒有省力工具就跑不動。這也是回滾條件第 4 條的由來。</p>
+  </div>
+
+  <div class="foot">
+    <p style="margin:0 0 6px"><strong>可重現性</strong></p>
+    <p style="margin:0">
+      <code>ux-test/canary-stage0.mjs</code>(Stage 0 乾跑,<code>EXPORT=</code> 可匯出事件流)、
+      <code>ux-test/capture-canary-shots.mjs</code>(本報告全部截圖)、
+      <code>ux-test/round2-verify.mjs</code>(兩輪 UX 優化迴歸,固定在金絲雀組)。
+      儀表板在 <code>/#/canary</code>,可切換階段、強制分組、檢視漏斗與護欄。
+    </p>
+    <p style="margin:8px 0 0">
+      本報告所有分組對照截圖皆為<strong>同一網址、同一視窗尺寸、僅切換分組</strong>的實際畫面,未經修圖。
+      儀表板截圖載入的是 Stage 0 實測產生的 61 筆事件。
+      網站中所有信任數字、捐款流向與幸福回報時間軸皆標註為示意資料,未假造任何真實認養成效。
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
