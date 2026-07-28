@@ -13,6 +13,7 @@ import Crisis from './pages/Crisis'
 import Happiness from './pages/Happiness'
 import GetInvolved from './pages/GetInvolved'
 import Trust from './pages/Trust'
+import Canary from './pages/Canary'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/happiness" element={<Happiness />} />
           <Route path="/get-involved" element={<GetInvolved />} />
           <Route path="/trust" element={<Trust />} />
+          <Route path="/canary" element={<Canary />} />
         </Route>
       </Routes>
     </HashRouter>

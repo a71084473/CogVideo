@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Section } from '../components/shared'
+import { flags } from '../lib/canary'
 
 const timeline = [
   {
@@ -34,16 +35,34 @@ const timeline = [
   },
 ]
 
+// 市場報告建議追蹤期為 180 天(180 天追蹤完成率 ≥85%、六個月退養率 <5%)。
+// 但訪談指出高頻追蹤會讓人反感,因此 90 天後改為低頻、且明說可以只回一句話。
+const extended = [
+  {
+    day: 120,
+    title: '第 120 天|低頻關心',
+    items: ['季節轉換的照護(換毛、寒流、梅雨)', '有沒有新的行為問題出現?', '醫療與支出還在預期內嗎?'],
+    tip: '這之後就是三個月一次。回一句「都很好」就完成了,不需要照片。',
+  },
+  {
+    day: 180,
+    title: '第 180 天|正式畢業',
+    items: ['半年了,整體生活穩定嗎?', '需不需要進階照護或行為資源?', '之後改為你想說再說'],
+    tip: '半年是退養風險真正下降的分界。走到這裡,你們已經是彼此的家人了。',
+  },
+]
+
 const helpCategories = ['健康與醫療', '行為與互動', '飲食與排泄', '家庭與居住', '經濟與物資', '暫時無法照顧', '其他']
 
 export default function Support90() {
   return (
     <>
       <Section
-        title="認養後 90 天支持" level={1}
-        subtitle="一次審核無法保證未來 15–20 年,持續的陪伴才可以。前 90 天,我們陪你度過最容易出狀況的適應期。"
+        title={flags().extendTo180 ? '認養後 180 天支持' : '認養後 90 天支持'} level={1}
+        subtitle="一次審核無法保證未來 15–20 年,持續的陪伴才可以。前 90 天密集陪伴,之後改為低頻關心,直到滿半年。"
       >
         {/* 直接處理「被監視」的疑慮,而不是等使用者自己猜 */}
+        {flags().surveillanceRelief && (
         <div className="mb-8 rounded-card border border-info/30 bg-info-light/60 p-6">
           <h2 className="text-lg font-bold">先說清楚:這不是在盯著你</h2>
           <ul className="mt-3 grid gap-2 text-ink-soft md:grid-cols-2">
@@ -65,9 +84,10 @@ export default function Support90() {
             </li>
           </ul>
         </div>
+        )}
 
         <ol className="relative space-y-6 border-l-2 border-sage/40 pl-6">
-          {timeline.map((t) => (
+          {[...timeline, ...(flags().extendTo180 ? extended : [])].map((t) => (
             <li key={t.day} className="relative">
               <span aria-hidden="true" className="absolute top-1 -left-[35px] flex h-4 w-4 rounded-full border-2 border-sage bg-cream" />
               <div className="rounded-card border border-cream-dark bg-white p-6">
@@ -83,6 +103,7 @@ export default function Support90() {
       </Section>
 
       {/* 同儕互助:實務上,新手的問題最常被其他認養人解決,而不是中途 */}
+      {flags().peerSupport && (
       <Section
         title="其他認養人,通常比我們更快回你"
         subtitle="半夜牠一直叫、第一次吐毛球、突然不用貓砂——這些問題,走過同一段路的人最有答案。"
@@ -116,6 +137,7 @@ export default function Support90() {
           認養後你會收到認養人社群的邀請,可以只看不說話,也可以隨時退出。以上為示意內容。
         </p>
       </Section>
+      )}
 
       <Section>
         <div className="rounded-card bg-brand-light/60 p-8 text-center">

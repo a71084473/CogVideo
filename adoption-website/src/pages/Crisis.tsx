@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Section } from '../components/shared'
 import { addSupportRequest, getSupportRequests } from '../lib/storage'
 import type { SupportCategory, SupportRequest } from '../types'
+import { track } from '../lib/funnel'
 
 const scenarios = [
   { t: '即將搬家', d: '我們提供「帶牠搬家指南」與新居安全檢核;找租屋時也有可養寵物的溝通範本。' },
@@ -38,6 +39,7 @@ export default function Crisis() {
       status: '已送出',
       createdAt: new Date().toISOString().slice(0, 10),
     }
+    track('help_request')
     addSupportRequest(req)
     setRequests(getSupportRequests())
     setSubmitted(true)

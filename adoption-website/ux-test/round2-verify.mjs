@@ -5,6 +5,10 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 const errors = []
 const squash = (s) => (s || '').replace(/\s+/g, ' ').trim()
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } })
+// 兩輪優化現在由金絲雀旗標控制,驗證時固定在金絲雀組
+await ctx.addInitScript(() => {
+  try { localStorage.setItem('adopt.canary.override', 'canary') } catch { /* 忽略 */ }
+})
 const p = await ctx.newPage()
 p.on('pageerror', (e) => errors.push(e.message))
 const say = (ok, label) => console.log(`  ${ok ? 'PASS' : 'FAIL'} ${label}`)

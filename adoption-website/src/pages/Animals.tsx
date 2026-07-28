@@ -3,6 +3,7 @@ import { animals } from '../data/animals'
 import { AnimalCard } from '../components/AnimalCard'
 import { EmptyState, Section } from '../components/shared'
 import { getFavorites, toggleFavorite } from '../lib/storage'
+import { flags } from '../lib/canary'
 
 interface Filters {
   species: string
@@ -151,6 +152,7 @@ export default function Animals() {
             <p className="text-ink-soft" role="status">
               找到 <span className="font-bold text-ink">{result.length}</span> 位等待中的夥伴
             </p>
+            {flags().waitingVisibility && (
             <div className="flex items-center gap-2">
               <label htmlFor="f-sort" className="text-sm text-ink-soft">排序</label>
               <select
@@ -163,6 +165,7 @@ export default function Animals() {
                 <option value="waiting">等待較久的優先</option>
               </select>
             </div>
+            )}
             <div role="group" aria-label="檢視方式" className="flex rounded-lg border border-cream-dark bg-white p-1">
               <button type="button" onClick={() => setLayout('card')} aria-pressed={layout === 'card'}
                 className={`min-h-9 rounded-md px-3 text-sm ${layout === 'card' ? 'bg-brand-light font-medium text-brand-dark' : 'text-ink-soft'}`}>

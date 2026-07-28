@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Section } from '../components/shared'
+import { flags } from '../lib/canary'
 
 const steps = [
   {
@@ -76,6 +77,7 @@ export default function Process() {
       </Section>
 
       {/* 卡點常不在認養人身上,而在房東與家人。給他們可以直接轉傳的東西 */}
+      {flags().thirdPartyTools && (
       <Section
         title="卡住的通常不是你,是還沒點頭的人"
         subtitle="房東擔心房子、家人擔心過敏和麻煩——這些疑慮都很具體,也都有答案。以下內容可以直接轉給他們看。"
@@ -119,6 +121,7 @@ export default function Process() {
           </div>
         </div>
       </Section>
+      )}
 
       <Section>
         <div className="rounded-card bg-sage-light/70 p-8">

@@ -3,6 +3,8 @@ import { Section } from '../components/shared'
 import { animals } from '../data/animals'
 import { addHappinessUpdate, getHappinessUpdates } from '../lib/storage'
 import type { HappinessUpdate } from '../types'
+import { flags } from '../lib/canary'
+import { track } from '../lib/funnel'
 
 // 示意的公開成長時間軸(不顯示認養人姓名或聯絡資料)
 const publicTimeline = [
@@ -34,6 +36,7 @@ export default function Happiness() {
       date: new Date().toISOString().slice(0, 10),
       photoColor: animals.find((a) => a.id === animalId)?.photoColor ?? '#D9B48F',
     }
+    track('happiness_report')
     addHappinessUpdate(u)
     setUpdates(getHappinessUpdates())
     setNote('')
@@ -89,6 +92,7 @@ export default function Happiness() {
                 ✓ 已送出,謝謝你的分享!中途與曾照顧牠的志工都會很開心。
               </p>
             )}
+            {flags().reportIncentive && (
             <div className="rounded-lg bg-sage-light/60 px-4 py-3 text-sm">
               <p className="font-medium">回報一次,就有一張抽獎券</p>
               <p className="mt-1 text-ink-soft">
@@ -97,6 +101,7 @@ export default function Happiness() {
               </p>
               <p className="mt-1 text-xs text-ink-soft">※ 原型示意,尚未實際開放。</p>
             </div>
+            )}
             <p className="text-xs text-ink-soft">
               回報節奏:前 90 天配合支持節點,之後由系統溫和提醒;滿一年後改為自主回報,不會無限期高頻追蹤。
             </p>

@@ -1,4 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { track } from '../lib/funnel'
 
 const navItems = [
   { to: '/animals', label: '尋找適合的夥伴' },
@@ -20,6 +22,13 @@ const bottomNav = [
 ]
 
 export function Layout() {
+  // 每個瀏覽器工作階段只記一次進站
+  useEffect(() => {
+    if (sessionStorage.getItem('adopt.visited')) return
+    sessionStorage.setItem('adopt.visited', '1')
+    track('visit')
+  }, [])
+
   return (
     <div className="flex min-h-screen flex-col pb-20 md:pb-0">
       <a href="#main" className="skip-link">

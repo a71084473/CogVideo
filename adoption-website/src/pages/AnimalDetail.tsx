@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { animals, getAnimal, careLevelLabel } from '../data/animals'
 import { AnimalPhoto } from '../components/AnimalPhoto'
@@ -7,6 +7,8 @@ import { Tag, CareLevelBadge } from '../components/Badges'
 import { EmptyState, Section } from '../components/shared'
 import { saveBooking } from '../lib/storage'
 import type { Animal } from '../types'
+import { flags } from '../lib/canary'
+import { track } from '../lib/funnel'
 
 // 快速適配確認(3-5 題)→ 預約互動,不直接送出認養申請
 const quickQuestions = [
@@ -63,6 +65,13 @@ export default function AnimalDetail() {
   const [bookDate, setBookDate] = useState('')
   const [dateError, setDateError] = useState('')
 
+  // 埋點:瀏覽動物;金絲雀組會同時看到期待校準
+  useEffect(() => {
+    if (!animal) return
+    track('animal_view', { animalId: animal.id, longWait: animal.waitingDays >= 120 })
+    if (flags().expectationCalibration) track('calibration_view', { animalId: animal.id })
+  }, [animal])
+
   if (!animal) {
     return (
       <Section>
@@ -81,6 +90,7 @@ export default function AnimalDetail() {
       return
     }
     setDateError('')
+    track('booking_submit', { animalId: animal!.id, longWait: animal!.waitingDays >= 120 })
     saveBooking({ animalId: animal!.id, type: bookType, date: bookDate, createdAt: new Date().toISOString() })
     setStep('done')
   }
@@ -112,6 +122,7 @@ export default function AnimalDetail() {
               <p className="mt-2 text-ink-soft">{animal.story}</p>
             </section>
 
+            {flags().expectationCalibration && (
             <section aria-labelledby="calib" className="rounded-card border border-brand/30 bg-brand-light/40 p-6">
               <h2 id="calib" className="text-xl font-bold">在你心動之前,想先問你三件事</h2>
               <p className="mt-1 text-sm text-ink-soft">
@@ -126,6 +137,7 @@ export default function AnimalDetail() {
                 ))}
               </ul>
             </section>
+            )}
 
             <section aria-labelledby="daily" className="rounded-card border border-cream-dark bg-white p-6">
               <h2 id="daily" className="text-xl font-bold">一起生活的真實樣貌</h2>
@@ -189,7 +201,7 @@ export default function AnimalDetail() {
                 <p className="text-sm text-ink-soft">
                   先花 1 分鐘確認彼此的生活合不合,再預約實際見面。我們不用倒數或名額話術——牠值得你想清楚再來。
                 </p>
-                <button type="button" onClick={() => setStep('check')}
+                <button type="button" onClick={() => { track('booking_start', { animalId: animal.id }); setStep('check') }}
                   className="min-h-12 w-full rounded-lg bg-brand px-5 py-3 font-bold text-white hover:bg-brand-dark">
                   看看我們是否適合彼此
                 </button>

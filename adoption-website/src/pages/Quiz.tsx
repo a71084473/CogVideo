@@ -8,6 +8,8 @@ import {
 } from '../lib/storage'
 import { computeMatch, partialMatchCount } from '../lib/match'
 import { Link } from 'react-router-dom'
+import { flags } from '../lib/canary'
+import { track } from '../lib/funnel'
 
 export default function Quiz() {
   const navigate = useNavigate()
@@ -36,12 +38,14 @@ export default function Quiz() {
   }
 
   function goNext() {
+    if (step === 5) track('quiz_mid')
     const a = answers[q.id]
     if (!a || (Array.isArray(a) && a.length === 0)) {
       setError(q.multi ? '請至少選擇一個選項。如果都不確定,可以選最接近的。' : '請選擇一個最接近你狀況的選項,才能繼續下一題。')
       return
     }
     if (step + 1 >= quizQuestions.length) {
+      track('quiz_complete')
       const result = computeMatch(answers)
       saveMatchResult(result)
       saveQuizStep(0)
@@ -76,7 +80,7 @@ export default function Quiz() {
             <p>回答僅儲存在你自己的瀏覽器中(原型階段),只用於推薦與準備建議,不會傳送給第三方。正式版將提供查看、修改與刪除功能。</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button type="button" onClick={() => setStarted(true)}
+            <button type="button" onClick={() => { track('quiz_start'); setStarted(true) }}
               className="min-h-12 rounded-lg bg-brand px-6 py-3 text-lg font-bold text-white hover:bg-brand-dark">
               {hasSaved ? '繼續上次的測驗' : '開始測驗'}
             </button>
@@ -102,7 +106,7 @@ export default function Quiz() {
         <ProgressBar value={step + 1} max={quizQuestions.length} label={`第 ${step + 1} 題,共 ${quizQuestions.length} 題・預估還需 ${remaining} 分鐘`} />
 
         {/* 中途回饋:走到一半就先給一次結果,不必填完才有回報 */}
-        {step >= 5 && (
+        {flags().midQuizFeedback && step >= 5 && (
           <div className="mt-4 rounded-lg border border-sage/40 bg-sage-light/50 px-4 py-3">
             <p className="text-sm">
               <span className="font-medium">已經看得出方向了:</span>

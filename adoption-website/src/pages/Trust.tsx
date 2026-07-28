@@ -1,4 +1,5 @@
 import { Section } from '../components/shared'
+import { flags } from '../lib/canary'
 
 const standards = [
   { rule: '門窗與陽台防護(必要安全條件)', why: '墜樓與走失是意外死亡與失蹤的首要原因,這一項沒有彈性,但我們會協助你完成。' },
@@ -37,6 +38,7 @@ export default function Trust() {
       </Section>
 
       {/* 雙向透明的另一半:我們要求動物資訊完整揭露,也該說明中途自己的處境 */}
+      {flags().fosterCandor && (
       <Section
         title="我們這邊的實話"
         subtitle="我們請你誠實說明生活,那我們也該說清楚:這些要求是從哪裡來的,以及我們能力的邊界在哪。"
@@ -67,6 +69,7 @@ export default function Trust() {
           ))}
         </div>
       </Section>
+      )}
 
       <Section title="你的資料如何被對待">
         <div className="grid gap-4 md:grid-cols-2">
