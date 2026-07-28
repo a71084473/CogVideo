@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>領養意願 UX 體驗測試報告</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+
+  :root {
+    --paper: #FDFCF9;
+    --ink: #23282B;
+    --ink-soft: #5B6560;
+    --brand: #B9662F;
+    --brand-tint: #F6E7DA;
+    --sage: #5F7A66;
+    --sage-tint: #E4EBE4;
+    --rule: #DFD8C9;
+    --info-tint: #E6ECF1;
+    --warn: #96413A;
+    --warn-tint: #F4E3E1;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "WenQuanYi Zen Hei", "PingFang TC", sans-serif;
+    font-size: 10.2pt;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
+
+  /* ---------- 封面 ---------- */
+  .cover { height: 245mm; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
+  .eyebrow { font-size: 9pt; letter-spacing: .22em; color: var(--brand); font-weight: 700; }
+  .cover h1 { font-size: 30pt; line-height: 1.3; margin: 14px 0 0; letter-spacing: -.01em; }
+  .cover .sub { font-size: 12.5pt; color: var(--ink-soft); margin-top: 14px; max-width: 128mm; line-height: 1.85; }
+  .cover-rule { height: 4px; width: 62px; background: var(--brand); margin: 26px 0; }
+  .meta { margin-top: 30px; display: grid; grid-template-columns: 30mm 1fr; gap: 7px 18px; font-size: 9.6pt; }
+  .meta dt { color: var(--ink-soft); }
+  .meta dd { margin: 0; }
+
+  /* ---------- 一般結構 ---------- */
+  section.chapter { page-break-before: always; }
+  h2.ch {
+    font-size: 17pt; padding-bottom: 9px; margin-bottom: 20px;
+    border-bottom: 2px solid var(--ink);
+  }
+  h2.ch .num { color: var(--brand); margin-right: 12px; }
+  h3 { font-size: 12.2pt; margin: 26px 0 9px; }
+  h4 { font-size: 10.6pt; margin: 18px 0 6px; }
+  p { margin: 0 0 10px; }
+  ul, ol { margin: 0 0 12px; padding-left: 1.25em; }
+  li { margin-bottom: 5px; }
+  strong { font-weight: 700; }
+  .lead { font-size: 11pt; color: var(--ink-soft); margin-bottom: 20px; }
+
+  /* ---------- 訪談引文 ---------- */
+  blockquote.evidence {
+    margin: 12px 0; padding: 11px 16px;
+    border-left: 3px solid var(--sage);
+    background: var(--sage-tint);
+    font-size: 9.8pt; line-height: 1.8;
+    break-inside: avoid;
+  }
+  blockquote.evidence .src { display: block; margin-top: 6px; font-size: 8.6pt; color: var(--ink-soft); }
+
+  /* ---------- 表格 ---------- */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 9.4pt; break-inside: avoid; }
+  th { text-align: left; background: #F2EDE2; border-bottom: 1.5px solid var(--rule); padding: 8px 10px; font-weight: 700; }
+  td { border-bottom: 1px solid var(--rule); padding: 8px 10px; vertical-align: top; }
+  td.h { font-weight: 700; white-space: nowrap; }
+  tr { break-inside: avoid; }
+
+  /* ---------- 截圖 ---------- */
+  figure { margin: 16px 0 22px; break-inside: avoid; }
+  figure img { width: 100%; display: block; border: 1px solid var(--rule); border-radius: 5px; }
+  figcaption { font-size: 8.8pt; color: var(--ink-soft); margin-top: 7px; line-height: 1.6; }
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ba .tag {
+    font-size: 8.4pt; font-weight: 700; letter-spacing: .06em;
+    padding: 2px 8px; border-radius: 3px; display: inline-block; margin-bottom: 6px;
+  }
+  .tag.before { background: var(--warn-tint); color: var(--warn); }
+  .tag.after { background: var(--sage-tint); color: var(--sage); }
+  .tag.new { background: var(--brand-tint); color: var(--brand); }
+
+  /* ---------- 卡片 ---------- */
+  .card {
+    border: 1px solid var(--rule); border-radius: 7px; padding: 14px 16px;
+    margin: 12px 0; background: #fff; break-inside: avoid;
+  }
+  .card h4 { margin-top: 0; }
+  .hyp {
+    border-left: 3px solid var(--brand); background: #fff;
+    border-radius: 0 7px 7px 0;
+  }
+  .hyp .code { color: var(--brand); font-weight: 700; }
+
+  .callout {
+    background: var(--info-tint); border-radius: 7px; padding: 13px 16px;
+    margin: 14px 0; font-size: 9.6pt; break-inside: avoid;
+  }
+  .callout.warn { background: var(--warn-tint); }
+
+  .pass { color: var(--sage); font-weight: 700; }
+  .fail { color: var(--warn); font-weight: 700; }
+  ul.checks { list-style: none; padding: 0; margin: 0; }
+  ul.checks li { margin-bottom: 4px; }
+  ul.checks li:last-child { margin-bottom: 0; }
+  ul.checks .pass { font-size: 8.4pt; letter-spacing: .05em; margin-right: 5px; }
+
+  .foot { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 8.8pt; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ 封面 ══════════ -->
+<div class="cover">
+  <div class="eyebrow">UX RESEARCH REPORT</div>
+  <h1>領養意願 UX 體驗測試<br>兩輪迭代報告</h1>
+  <div class="cover-rule"></div>
+  <p class="sub">
+    以四篇中途之家深度訪談為證據,建立五位領養者 Persona,<br>
+    對「安心託付 × 共同陪伴」認養網站執行兩輪
+    <strong>測試&nbsp;→&nbsp;假設&nbsp;→&nbsp;優化</strong>迴圈。
+  </p>
+  <dl class="meta">
+    <dt>受測產品</dt><dd>安心託付 × 共同陪伴|中途之家認養平台(原型)</dd>
+    <dt>證據來源</dt><dd>四篇中途之家訪談逐字稿(大型協會 ×1、社團管理員 ×1、個人中途 ×1,含兩段續訪)</dd>
+    <dt>測試方法</dt><dd>Playwright 驅動真實瀏覽器,桌機 1240×900 與行動 390×844 雙裝置</dd>
+    <dt>迭代輪次</dt><dd>第一輪 7 項假設 / 7 項優化;第二輪 5 項假設 / 5 項優化</dd>
+    <dt>報告日期</dt><dd>2026 年 7 月 28 日</dd>
+  </dl>
+  <div class="callout warn" style="margin-top:34px">
+    <strong>研究效度聲明:</strong>本報告的 Persona 行為為依訪談證據建立的<strong>情境模擬</strong>,
+    非真人可用性測試。全文刻意不使用任何百分比或統計數字,以避免造成有真實量測的錯覺。
+    所有截圖皆為實際執行畫面,未經修圖。
+  </div>
+</div>
+
+<!-- ══════════ 一、方法 ══════════ -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">01</span>研究方法與證據基礎</h2>
+
+  <p class="lead">
+    本次測試不從介面直覺出發,而是從四位中途之家經營者親口描述的<strong>認養人真實行為</strong>反推。
+    他們是每天面對認養人的人,他們看過的流失,就是網站要防的流失。
+  </p>
+
+  <h3>1.1 測試怎麼執行</h3>
+  <p>
+    以 Playwright 開啟真實 Chromium,依五位 Persona 的實際點擊路徑逐頁操作,
+    擷取他們在每個決策點<strong>真正看得到的文字</strong>,再對照訪談證據逐條檢核。
+    測試腳本保留於 <code>adoption-website/ux-test/</code>,可重複執行。
+  </p>
+  <p>
+    為了產生 before / after 對照,將優化前的版本(commit <code>2bc54d9</code>)以 git worktree
+    另行建置並掛在獨立連接埠,與優化後版本並行截圖,確保兩張圖是同一位置、同一視窗尺寸的實際畫面。
+  </p>
+
+  <h3>1.2 四篇訪談中,直接決定「領養意願」的六個發現</h3>
+
+  <table>
+    <thead><tr><th style="width:26%">發現</th><th>訪談原文(節錄)</th><th style="width:26%">對網站的意涵</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="h">表單即流失</td>
+        <td>「我 po 送養文就會把 Google 表單放在裡面,但我發現<strong>大家點進去表單,看到那一堆問題的時候,就不會有人填了</strong>」<br>另一位:「<strong>問卷一出去人就不見了</strong>」</td>
+        <td>12 題測驗有同樣風險,長度本身就是最大流失點。</td>
+      </tr>
+      <tr>
+        <td class="h">追蹤=電子腳鐐</td>
+        <td>「幸福回報⋯我覺得它有點像<strong>電子腳鐐</strong>⋯這個或多或少都會讓一些認養的人不舒服,甚至非常明顯的抗拒,但我們沒辦法說抗拒這樣事情的人就是壞人,<strong>他很有可能只是非常在意自己的隱私而已</strong>」</td>
+        <td>不主動解除監視感,等於默認被監視。</td>
+      </tr>
+      <tr>
+        <td class="h">系統催 ≠ 人催</td>
+        <td>「<strong>系統來提醒你,不是人來提醒你</strong>」<br>「我送養 100 隻貓,一個月要回報一次,我哪會記得」</td>
+        <td>自動化同時解決中途負擔與認養人壓迫感。</td>
+      </tr>
+      <tr>
+        <td class="h">雙方對立</td>
+        <td>「越來越多的人<strong>不喜歡到中途之家去認養貓,他覺得說要被檢查很多東西</strong>」<br>「認養人跟送養人的對立跟衝突越來越明顯⋯他們有沒有<strong>被妖魔化</strong>」</td>
+        <td>網站要求中途透明,卻沒讓認養人理解中途——雙向透明只做了一半。</td>
+      </tr>
+      <tr>
+        <td class="h">卡點在第三方</td>
+        <td>「<strong>同住家人一定要同意</strong>,因為曾經碰過小孩想認養,可是後來父母不同意」<br>「<strong>他的房東有沒有同意讓他養貓</strong>」</td>
+        <td>卡住的常不是認養人,是他說服不了的人。</td>
+      </tr>
+      <tr>
+        <td class="h">外型決定送出</td>
+        <td>「橘白貓是最搶手⋯<strong>玳瑁真的不太好送</strong>,因為顏色花花的不討喜」<br>「奶貓潮⋯量變大了,所以你的貓會變得比較送不出去」</td>
+        <td>只按適配分排序,久候者依然沉底。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>1.3 支撐既有設計的證據</h3>
+  <p>訪談同時確認了原設計中四項判斷是對的,這些不需要改,但值得記錄為已驗證的設計決策:</p>
+
+  <blockquote class="evidence">
+    「我們家訪的目的是,<strong>協助你做的防護是不是很安全穩固</strong>⋯如果他那邊做得不好的話,我們就請他加強,我們會教他怎麼做。」
+    <span class="src">— 個人中途(雙北)。網站將「家訪」改稱「居家安全確認與改善協助」,與這位中途的實務定義完全一致。</span>
+  </blockquote>
+
+  <blockquote class="evidence">
+    「我並不會試著把牠寫得很可憐⋯<strong>我會把牠敘述成是一個人</strong>⋯而當這樣的文出去的時候,會有部分跟這些文字共鳴的人會來認養⋯
+    <strong>退養或是說放棄照顧這隻貓的可能性小很多</strong>。」
+    <span class="src">— 大型協會負責人。支持「不賣慘、不商品化」的動物敘事原則。</span>
+  </blockquote>
+
+  <blockquote class="evidence">
+    「我問職業的時候我都不會去問收入,因為<strong>有些人雖然沒什麼錢但是他很用心</strong>⋯有些人他很有錢,但是他可能不願意花一兩百塊在貓上面。」
+    <span class="src">— 社團管理員。支持「不以收入、職業、有無房產單一判斷」的測驗設計。</span>
+  </blockquote>
+
+  <blockquote class="evidence">
+    「<strong>與其讓這一個人把這隻貓退回來</strong>⋯倒不如我們現在投入時間人力物資,去協助他們一起跨越那個困難,讓他繼續留下這隻貓。」
+    <span class="src">— 大型協會負責人。支持「90 天支持勝過嚴格審核」的核心論證。</span>
+  </blockquote>
+
+  <h3>1.4 五位受測 Persona</h3>
+  <table>
+    <thead><tr><th style="width:23%">Persona</th><th style="width:32%">訪談出處</th><th style="width:20%">初始領養意願</th><th>最脆弱環節</th></tr></thead>
+    <tbody>
+      <tr><td class="h">P1 小昀<br><span style="font-weight:400;color:#5B6560">25 歲・租屋新手</span></td><td>「看到那一堆問題就不會有人填了」</td><td>高,但脆弱</td><td>測驗長度</td></tr>
+      <tr><td class="h">P2 阿哲<br><span style="font-weight:400;color:#5B6560">32 歲・工程師,常出差</span></td><td>「電子腳鐐」「只是非常在意自己的隱私」</td><td>中高</td><td>追蹤與家訪</td></tr>
+      <tr><td class="h">P3 宜庭<br><span style="font-weight:400;color:#5B6560">28 歲・被故事打動</span></td><td>「有部分跟這些文字共鳴的人會來認養」</td><td>極高(可能衝動)</td><td>期待落差</td></tr>
+      <tr><td class="h">P4 至凱<br><span style="font-weight:400;color:#5B6560">38 歲・已婚有幼兒</span></td><td>「小孩想認養,可是後來父母不同意」</td><td>中</td><td>說服家人</td></tr>
+      <tr><td class="h">P5 Wendy<br><span style="font-weight:400;color:#5B6560">30 歲・曾被拒過</span></td><td>「認養人都說送養人是很機車的」</td><td>低</td><td>對中途的戒心</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════ 二、第一輪 ══════════ -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">02</span>第一輪:測試結果與假設</h2>
+
+  <h3>2.1 通過的項目</h3>
+  <p>
+    測驗 12 題<strong>每一題都附有「為什麼要問這題」</strong>(0 題遺漏)、結果頁有「不是人格評分」聲明、
+    動物頁有「可能不適合」與每月支出、成對認養有社會化理由與雙倍成本揭露、危機頁七情境齊備、
+    行動版底部導覽完整、全站零 JavaScript 錯誤。
+  </p>
+
+  <h3>2.2 發現的七個意願崩落點</h3>
+  <table>
+    <thead><tr><th style="width:9%">假設</th><th style="width:29%">內容</th><th style="width:20%">崩落 Persona</th><th>實測證據</th></tr></thead>
+    <tbody>
+      <tr><td class="h">H1</td><td>中途無回饋的長表單會流失</td><td>P1(第 6–8 題放棄)</td><td>訪談 1、3 直證</td></tr>
+      <tr><td class="h">H2</td><td>未主動解除監視感 = 默認被監視</td><td>P2</td><td>90 天頁<span class="fail">沒有</span>「系統提醒不是人催」、<span class="fail">沒有</span>說明誰看得到回報</td></tr>
+      <tr><td class="h">H3</td><td>否定句仍會觸發防禦</td><td>P4、P5</td><td>結果頁字面出現「不合格」三字</td></tr>
+      <tr><td class="h">H4</td><td>單向透明加深對立</td><td>P5(全程戒心未解)</td><td>信任頁<span class="fail">沒有</span>任何中途自身處境揭露</td></tr>
+      <tr><td class="h">H5</td><td>第三方卡點無工具可用</td><td>P4</td><td>流程頁<span class="fail">沒有</span>說服家人/房東的內容</td></tr>
+      <tr><td class="h">H6</td><td>心動當下看不到校準</td><td>P3(衝動預約)</td><td>期待校準題藏在 CTA 之後,首屏不可見</td></tr>
+      <tr><td class="h">H7</td><td>頁面缺主標題</td><td>全部</td><td>7 個頁面 H1 為 0(Section 全用 h2)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════ 三、第一輪優化(截圖) ══════════ -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">03</span>第一輪優化:修改前後對照</h2>
+
+  <div class="card hyp">
+    <h4><span class="code">R1-1</span> ／ 對應 H3　結果頁移除「不合格」字面</h4>
+    <p style="margin:0">
+      即使是「這不是『不合格』」這樣的否定句,三個字本身仍會觸發防禦。改為正面陳述使用者的實際處境。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag before">修改前</span>
+      <img src="shots/r1-1-before.png" alt="優化前的測驗結果頁,副標寫著「這不是「不合格」——只是把可能的風險,提早變成具體的準備」">
+      <figcaption>副標出現「這不是<strong>「不合格」</strong>——只是把可能的風險⋯」</figcaption>
+    </figure>
+    <figure>
+      <span class="tag after">修改後</span>
+      <img src="shots/r1-1-after.png" alt="優化後的測驗結果頁,副標改為「你沒有被擋下來,也沒有被扣分」">
+      <figcaption>改為「<strong>你沒有被擋下來,也沒有被扣分。</strong>我們只是把可能的風險,提早換成幾件具體、做得到的事。」</figcaption>
+    </figure>
+  </div>
+
+  <div class="card hyp">
+    <h4><span class="code">R1-2</span> ／ 對應 H2　90 天支持頁新增「先說清楚:這不是在盯著你」</h4>
+    <p style="margin:0">
+      把使用者心裡的疑慮直接說破,而不是等他自己猜。四點:系統提醒不是人催、只有中途看得到、
+      節奏可自己調或暫停、一句話就夠。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag before">修改前</span>
+      <img src="shots/r1-2-before.png" alt="優化前的 90 天支持頁,標題下方直接進入時間軸,沒有任何隱私說明">
+      <figcaption>標題後直接進入時間軸,對「會不會被監視」完全沒有回應。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag after">修改後</span>
+      <img src="shots/r1-2-after.png" alt="優化後的 90 天支持頁,標題下方新增「先說清楚:這不是在盯著你」四點說明區塊">
+      <figcaption>新增藍灰色說明區塊,四點主動解除監視感。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card hyp">
+    <h4><span class="code">R1-3</span> ／ 對應 H4　信任頁新增「我們這邊的實話」</h4>
+    <p style="margin:0">
+      這是本次最關鍵的發現:網站要求中途完整揭露動物資訊,卻沒有讓認養人理解中途的處境。
+      補上這半邊,把「被審查」重新框定為「一起承擔」。
+    </p>
+  </div>
+  <figure>
+    <span class="tag new">新增區塊</span>
+    <img src="shots/r1-3-after.png" alt="信任頁新增的「我們這邊的實話」四張卡片:我們沒有公權力所以只能靠問、審核不是在挑人是在怕重來一次、我們是小團隊回覆可能會慢、你有拒絕的權利">
+    <figcaption>
+      四張卡片直接引用訪談中的無力感:「我們沒有公權力,所以只能靠問」、「審核不是在挑人,是在怕重來一次」、
+      「我們是小團隊,回覆可能會慢」、以及最重要的「<strong>你有拒絕的權利</strong>」。
+    </figcaption>
+  </figure>
+
+  <div class="card hyp">
+    <h4><span class="code">R1-4</span> ／ 對應 H5　流程頁新增「卡住的通常不是你,是還沒點頭的人」</h4>
+    <p style="margin:0">
+      訪談顯示認養最常卡在房東與同住家人。提供可直接轉傳給第三方的說明,是能實質提高成案率的介入。
+    </p>
+  </div>
+  <figure>
+    <span class="tag new">新增區塊</span>
+    <img src="shots/r1-4-after.png" alt="流程頁新增的兩張卡片:給房東的說明與給同住家人的說明,各自列出常見疑慮與回應方式">
+    <figcaption>
+      左卡針對房東的三個常見疑慮(抓壞牆面、氣味吵鬧、恢復原狀)逐一回應;
+      右卡給同住家人,主張「與其說服,不如先把分工講清楚」,並提供三方對談選項。
+    </figcaption>
+  </figure>
+
+  <div class="card hyp">
+    <h4><span class="code">R1-5</span> ／ 對應 H6　動物詳情頁前置期待校準</h4>
+    <p style="margin:0">
+      原本校準問題藏在 CTA 點擊之後,但共感型使用者在讀完故事的當下就已經決定了。
+      將校準移到「牠的故事」與「一起生活的真實樣貌」之間,並依動物特性動態生成。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag before">修改前</span>
+      <img src="shots/r1-5-before.png" alt="優化前的動物詳情頁,故事之後直接進入一起生活的真實樣貌">
+      <figcaption>故事後直接進入日常描述,中間沒有停頓點。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag after">修改後(拿鐵・慢熟貓)</span>
+      <img src="shots/r1-5-after.png" alt="優化後的拿鐵詳情頁,新增「在你心動之前,想先問你三件事」區塊,包含三個月不主動靠近的提問">
+      <figcaption>針對慢熟特性,問「三個月後還是不讓你抱,你願意嗎」。</figcaption>
+    </figure>
+  </div>
+  <figure>
+    <span class="tag new">同一元件,不同動物</span>
+    <img src="shots/r1-5b-after.png" alt="雪見詳情頁的期待校準區塊,問題改為每天餵藥的日常與熟齡貓陪伴時間可能不是十五年">
+    <figcaption>
+      校準問題由 <code>affection / activityLevel / careLevel / ageYears / mustAdoptInPair</code> 等欄位衍生,
+      因此雪見(11 歲・慢性腎病)顯示的是「每天固定餵藥會成為生活的一部分」與
+      「陪你的時間可能不是十五年」。末題固定為「<strong>你現在心動的,是牠的故事,還是上面這些每一天都要做的事?</strong>」
+    </figcaption>
+  </figure>
+
+  <div class="card hyp">
+    <h4><span class="code">R1-6</span> ／ 對應 H1　測驗第 6 題起提供中途回饋</h4>
+    <p style="margin:0">
+      這是對抗訪談中最強證據(「看到那一堆問題就不會有人填了」)的直接手段:
+      讓填答者不必走完 12 題才有回報。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag before">修改前</span>
+      <img src="shots/r1-6-before.png" alt="優化前的測驗第 7 題,進度條下方直接是題目卡片,沒有任何回饋">
+      <figcaption>只有進度條,填到一半沒有任何收穫,棄填成本極低。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag after">修改後</span>
+      <img src="shots/r1-6-after.png" alt="優化後的測驗第 7 題,進度條下方新增綠色回饋區塊,顯示有 8 位夥伴的作息和你合得來">
+      <figcaption>顯示「有 <strong>8</strong> 位夥伴的作息和你合得來」,並提供「想先看看?答案都會留著」的出口。</figcaption>
+    </figure>
+  </div>
+
+  <div class="card hyp">
+    <h4><span class="code">R1-7</span> ／ 對應 H7　每頁唯一 H1</h4>
+    <p style="margin:0">
+      <code>Section</code> 元件新增 <code>level</code> 參數,各頁第一個區塊改用 <code>h1</code>。
+      這同時是無障礙缺陷(螢幕閱讀器失去頁面定向)與 SEO 問題。
+    </p>
+  </div>
+  <div class="callout">
+    修正前:<code>/quiz</code>、<code>/process</code>、<code>/support-90</code>、<code>/crisis</code>、
+    <code>/happiness</code>、<code>/get-involved</code>、<code>/trust</code> 共 <span class="fail">7 頁 H1 數為 0</span>。
+    修正後:12 條路由<span class="pass">全部恰好 1 個 H1</span>。
+  </div>
+</section>
+
+<!-- ══════════ 四、第二輪 ══════════ -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">04</span>第二輪:驗證與新發現</h2>
+
+  <h3>4.1 第一輪修正驗證:全數通過</h3>
+  <div class="callout">
+    <ul class="checks">
+      <li><span class="pass">PASS</span> 測驗中途回饋出現(實測顯示「有 8 位夥伴的作息和你合得來」)</li>
+      <li><span class="pass">PASS</span> 監視感四點齊備</li>
+      <li><span class="pass">PASS</span>「不合格」已從結果頁消失</li>
+      <li><span class="pass">PASS</span> 中途處境四張卡到位</li>
+      <li><span class="pass">PASS</span> 房東與家人工具到位</li>
+      <li><span class="pass">PASS</span> 期待校準隨動物而異(拿鐵顯示慢熟提問、雪見顯示餵藥與熟齡壽命)</li>
+    </ul>
+  </div>
+
+  <h3>4.2 第二輪新發現的五個假設</h3>
+  <table>
+    <thead><tr><th style="width:9%">假設</th><th style="width:30%">內容</th><th>實測發現</th></tr></thead>
+    <tbody>
+      <tr><td class="h">H8</td><td>久候動物仍會沉底</td><td>卡片<span class="fail">沒有</span>等待天數,探索頁<span class="fail">沒有</span>排序功能</td></tr>
+      <tr><td class="h">H9</td><td>支持全靠中途,無法規模化</td><td>訪談中最有效的支持是「我沒空,<strong>其他認養人都會幫忙回答</strong>」,網站<span class="fail">完全沒有</span>同儕互助</td></tr>
+      <tr><td class="h">H10</td><td>回報是純付出</td><td>訪談 2 的抽獎券構想未實作,回報缺乏正向回饋</td></tr>
+      <tr><td class="h">H11</td><td>合約看起來只約束認養人</td><td>流程頁只寫「簽署認養合約」,<span class="fail">未說明</span>它同時保護誰</td></tr>
+      <tr><td class="h">H12</td><td>測驗作答中畫面無 H1</td><td>第一輪只修了有 <code>Section title</code> 的頁面</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════ 五、第二輪優化(截圖) ══════════ -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">05</span>第二輪優化:修改前後對照</h2>
+
+  <div class="card hyp">
+    <h4><span class="code">R2-2</span> ／ 對應 H8　久候動物的可見度</h4>
+    <p style="margin:0">
+      <code>Animal</code> 型別新增 <code>waitingDays</code>。等待超過 120 天的卡片顯示等待天數,
+      探索頁新增「等待較久的優先」排序。<strong>刻意不使用倒數或稀缺話術</strong>——訪談 1 明確反對賣慘。
+    </p>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag before">修改前</span>
+      <img src="shots/r2-2-before.png" alt="優化前的動物卡片,只有個性標籤與為什麼可能適合你,沒有等待資訊">
+      <figcaption>卡片無等待資訊,外型不搶眼者無從被看見。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag after">修改後</span>
+      <img src="shots/r2-2-after.png" alt="優化後的動物卡片,新增已在中途之家等待天數與說明文字">
+      <figcaption>新增「已在中途之家等待 <strong>243</strong> 天。性格穩定的成貓成犬常因為外型不搶眼而被略過,牠值得被多看一眼。」</figcaption>
+    </figure>
+  </div>
+  <figure style="max-width:70mm">
+    <span class="tag new">新增控制項</span>
+    <img src="shots/r2-2-sort.png" alt="探索頁新增的排序下拉選單,選項為預設與等待較久的優先">
+    <figcaption>新增排序控制,實測選擇後等待最久的雪見(243 天)排至首位。</figcaption>
+  </figure>
+
+  <div class="card hyp">
+    <h4><span class="code">R2-3</span> ／ 對應 H9　90 天支持頁新增同儕互助</h4>
+    <p style="margin:0">
+      訪談 4 描述的認養人 LINE 群組是實務中最有效的支持機制——中途沒空時,
+      其他認養人會接手回答。這是唯一能隨規模成長的支持形式。
+    </p>
+  </div>
+  <figure>
+    <span class="tag new">新增區塊</span>
+    <img src="shots/r2-3-after.png" alt="90 天支持頁新增的三則認養人問答:躲沙發底下、幼貓咬手、外出籠哀嚎,各附其他認養人的回答">
+    <figcaption>
+      三則真實情境問答(躲沙發底下、幼貓咬手、外出籠哀嚎),回答者標示為
+      「養了 1 年 / 3 年 / 5 年的認養人」,並註明「可以只看不說話,也可以隨時退出」。
+    </figcaption>
+  </figure>
+
+  <div class="card hyp">
+    <h4><span class="code">R2-4</span> ／ 對應 H10　回報的正向回饋</h4>
+    <p style="margin:0">
+      實作訪談 2 提出的抽獎券構想,但關鍵在措辭:必須明確排除「不回報會被懲罰」的暗示。
+    </p>
+  </div>
+  <figure style="max-width:110mm">
+    <span class="tag new">新增區塊</span>
+    <img src="shots/r2-4-after.png" alt="幸福回報頁新增的抽獎券說明區塊,寫明回報一次就有一張抽獎券,不回報也不會有任何影響">
+    <figcaption>
+      關鍵句:「回報幾次就有幾張,<strong>不回報也不會有任何影響——這是謝謝,不是條件。</strong>」
+      並標示為原型示意、尚未實際開放。
+    </figcaption>
+  </figure>
+
+  <div class="card hyp">
+    <h4><span class="code">R2-5</span> ／ 對應 H11　合約的雙向性</h4>
+    <p style="margin:0">
+      訪談 3 指出「有簽合約之後都變乖了」,但認養人視角看到的只有對自己的約束。
+      補上中途的對等義務,讓合約從單向枷鎖變成雙向保障。
+    </p>
+  </div>
+  <figure>
+    <span class="tag new">新增說明</span>
+    <img src="shots/r2-5-after.png" alt="流程頁責任交接步驟新增的綠色說明段,寫明合約是雙向的,包含中途的義務與證件不留存影本">
+    <figcaption>
+      新增:「合約是雙向的:它寫明你不得棄養或私下轉送,<strong>但也寫明我們的義務</strong>——
+      提供完整病史、90 天內的支持,以及<strong>任何時候你無法繼續時,我們一定接回</strong>。我們核對證件但不留存影本。」
+    </figcaption>
+  </figure>
+
+  <h3>5.1 最終驗證結果</h3>
+  <div class="callout">
+    <ul class="checks">
+      <li><span class="pass">PASS</span> 12 條路由全部恰好 1 個 H1(含測驗作答中畫面與結果空狀態)</li>
+      <li><span class="pass">PASS</span> 第二輪五項優化全數通過</li>
+      <li><span class="pass">PASS</span> 第一輪五項修正迴歸未退化</li>
+      <li><span class="pass">PASS</span> 零 JavaScript 錯誤</li>
+    </ul>
+  </div>
+
+  <h3>5.2 行動版</h3>
+  <figure style="max-width:64mm">
+    <img src="shots/mobile-after.png" alt="行動版首頁,顯示主標題、兩個 CTA、信任數字與底部五格導覽">
+    <figcaption>390×844 行動版:主 CTA 在首屏內,底部固定五格導覽(首頁/找夥伴/適配測驗/進度/求助)。</figcaption>
+  </figure>
+</section>
+
+<!-- ══════════ 六、結論 ══════════ -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">06</span>兩輪後的意願變化與後續建議</h2>
+
+  <h3>6.1 各 Persona 的阻力如何被處理</h3>
+  <table>
+    <thead><tr><th style="width:16%">Persona</th><th style="width:20%">主要阻力</th><th style="width:34%">兩輪後的處置</th><th>意義</th></tr></thead>
+    <tbody>
+      <tr><td class="h">P1 小昀</td><td>表單恐懼</td><td>第 6 題起有中途回饋,可先去看動物且答案保留</td><td>從「填不完就走」變成「有理由走完」</td></tr>
+      <tr><td class="h">P2 阿哲</td><td>隱私戒心</td><td>監視感四點 +「你有拒絕的權利」+ 回報僅中途可見</td><td>疑慮被主動說破,而非等他自己猜</td></tr>
+      <tr><td class="h">P3 宜庭</td><td>期待落差</td><td>心動當下就看到三題校準,末題直指「故事 vs 日常」</td><td>保留共感,但共感的是真實的牠</td></tr>
+      <tr><td class="h">P4 至凱</td><td>家人與房東</td><td>可直接轉傳的說明 + 三方對談</td><td>從「一個人去說服」變成「有工具、有人陪」</td></tr>
+      <tr><td class="h">P5 Wendy</td><td>對立戒心</td><td>「我們這邊的實話」揭露中途的無力與界線</td><td>從被審查者,變成知情的共同承擔者</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 尚未處理,建議下一輪</h3>
+
+  <div class="card">
+    <h4>① FB 演算法的結構性阻礙(最高優先)</h4>
+    <blockquote class="evidence" style="margin-top:6px">
+      「假設我今天有 hashtag,hashtag 他會少大概 30% 的觸及率⋯如果你的文章裡面有連結,
+      <strong>超過兩個以上基本上可能會降到幾乎快到零</strong>⋯因為 FB 他的演算法就是這樣,
+      他不希望你連結到外部的網站。」
+      <span class="src">— 社團管理員</span>
+    </blockquote>
+    <p style="margin:8px 0 0">
+      這對「做一個網站」的整體策略是結構性威脅:導流連結會被平台懲罰。
+      下一輪應處理<strong>可直接貼進 FB 的圖卡策略</strong>,而非依賴導流連結。
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>② 中途端的省力工作台</h4>
+    <p style="margin:0">
+      訪談中「我沒空」「我哪會記得」反覆出現。認養人端做得再好,中途端沒有省力工具就跑不動。
+      應包含:動物資料上架檢查表(強制填寫「可能不適合」欄位)、案件看板、求助工單依緊急程度排序。
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>③ 回應時間的可兌現性</h4>
+    <p style="margin:0">
+      目前寫「1–2 個工作天內回覆」,已在信任頁補上「小團隊可能會慢」的說明,
+      但仍需與實際人力對齊,避免過度承諾造成二次失望。
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>④ 黑名單的法律風險</h4>
+    <p style="margin:0">
+      訪談 3 提到發布認養人黑名單後遭對方親友圍剿並揚言提告,律師建議停止發布。
+      網站已承諾不建立公開羞辱式黑名單,但內部風險註記的法遵設計仍待處理。
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>⑤ 以真實量測驗證</h4>
+    <p style="margin:0">
+      本次為情境模擬。正式版建議以<strong>第 6 題完成率、測驗完成率、預約轉換率、90 天回報率</strong>
+      做實際 A/B 驗證,特別是 R1-6(測驗中途回饋)與 R2-2(久候動物排序)兩項。
+    </p>
+  </div>
+
+  <div class="foot">
+    <p style="margin:0 0 6px"><strong>可重現性</strong></p>
+    <p style="margin:0">
+      測試腳本:<code>adoption-website/ux-test/round1-probe.mjs</code>、<code>round2-probe.mjs</code>、
+      <code>round2-verify.mjs</code>、<code>capture-shots.mjs</code>。
+      優化前版本為 commit <code>2bc54d9</code>,優化後為 <code>e4dac64</code>。
+      所有截圖由 <code>capture-shots.mjs</code> 於兩個並行服務的建置版本上自動擷取,未經修圖。
+    </p>
+    <p style="margin:8px 0 0">
+      網站中所有信任數字、捐款流向與幸福回報時間軸皆標註為示意資料,未假造任何真實認養成效。
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
