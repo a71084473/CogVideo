@@ -1,0 +1,661 @@
+{
+  "results": [
+    {
+      "stageId": 0,
+      "met": {
+        "not_judged": false,
+        "info_complete": true,
+        "not_watched": false,
+        "low_friction": false,
+        "help_available": true,
+        "affordable": false,
+        "third_party": false
+      },
+      "rows": [
+        {
+          "persona": {
+            "id": "P1",
+            "name": "可培育新手",
+            "share": 0.28,
+            "weights": {
+              "not_judged": 22,
+              "info_complete": 12,
+              "not_watched": 8,
+              "low_friction": 30,
+              "help_available": 18,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 78
+          },
+          "cov": 30,
+          "csat": 26,
+          "gap": -52,
+          "bucket": "detractor"
+        },
+        {
+          "persona": {
+            "id": "P2",
+            "name": "隱私敏感專業者",
+            "share": 0.18,
+            "weights": {
+              "not_judged": 18,
+              "info_complete": 16,
+              "not_watched": 34,
+              "low_friction": 14,
+              "help_available": 6,
+              "affordable": 6,
+              "third_party": 6
+            },
+            "baseExpectation": 62
+          },
+          "cov": 22,
+          "csat": 19,
+          "gap": -43,
+          "bucket": "detractor"
+        },
+        {
+          "persona": {
+            "id": "P3",
+            "name": "共感陪伴型",
+            "share": 0.22,
+            "weights": {
+              "not_judged": 10,
+              "info_complete": 30,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 22,
+              "affordable": 14,
+              "third_party": 4
+            },
+            "baseExpectation": 85
+          },
+          "cov": 52,
+          "csat": 46,
+          "gap": -39,
+          "bucket": "detractor"
+        },
+        {
+          "persona": {
+            "id": "P4",
+            "name": "家庭決策者",
+            "share": 0.2,
+            "weights": {
+              "not_judged": 12,
+              "info_complete": 18,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 14,
+              "affordable": 10,
+              "third_party": 26
+            },
+            "baseExpectation": 70
+          },
+          "cov": 32,
+          "csat": 28,
+          "gap": -42,
+          "bucket": "detractor"
+        },
+        {
+          "persona": {
+            "id": "P5",
+            "name": "戒心回流者",
+            "share": 0.12,
+            "weights": {
+              "not_judged": 34,
+              "info_complete": 16,
+              "not_watched": 20,
+              "low_friction": 10,
+              "help_available": 10,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 45
+          },
+          "cov": 26,
+          "csat": 23,
+          "gap": -22,
+          "bucket": "detractor"
+        }
+      ],
+      "coverage": 33,
+      "csat": 29,
+      "nps": -100,
+      "promoters": 0,
+      "detractors": 100
+    },
+    {
+      "stageId": 1,
+      "met": {
+        "not_judged": true,
+        "info_complete": true,
+        "not_watched": true,
+        "low_friction": true,
+        "help_available": true,
+        "affordable": false,
+        "third_party": true
+      },
+      "rows": [
+        {
+          "persona": {
+            "id": "P1",
+            "name": "可培育新手",
+            "share": 0.28,
+            "weights": {
+              "not_judged": 22,
+              "info_complete": 12,
+              "not_watched": 8,
+              "low_friction": 30,
+              "help_available": 18,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 78
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 5,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P2",
+            "name": "隱私敏感專業者",
+            "share": 0.18,
+            "weights": {
+              "not_judged": 18,
+              "info_complete": 16,
+              "not_watched": 34,
+              "low_friction": 14,
+              "help_available": 6,
+              "affordable": 6,
+              "third_party": 6
+            },
+            "baseExpectation": 62
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 21,
+          "bucket": "promoter"
+        },
+        {
+          "persona": {
+            "id": "P3",
+            "name": "共感陪伴型",
+            "share": 0.22,
+            "weights": {
+              "not_judged": 10,
+              "info_complete": 30,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 22,
+              "affordable": 14,
+              "third_party": 4
+            },
+            "baseExpectation": 85
+          },
+          "cov": 86,
+          "csat": 76,
+          "gap": -9,
+          "bucket": "detractor"
+        },
+        {
+          "persona": {
+            "id": "P4",
+            "name": "家庭決策者",
+            "share": 0.2,
+            "weights": {
+              "not_judged": 12,
+              "info_complete": 18,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 14,
+              "affordable": 10,
+              "third_party": 26
+            },
+            "baseExpectation": 70
+          },
+          "cov": 90,
+          "csat": 79,
+          "gap": 9,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P5",
+            "name": "戒心回流者",
+            "share": 0.12,
+            "weights": {
+              "not_judged": 34,
+              "info_complete": 16,
+              "not_watched": 20,
+              "low_friction": 10,
+              "help_available": 10,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 45
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 38,
+          "bucket": "promoter"
+        }
+      ],
+      "coverage": 91,
+      "csat": 81,
+      "nps": 8,
+      "promoters": 30,
+      "detractors": 22
+    },
+    {
+      "stageId": 2,
+      "met": {
+        "not_judged": true,
+        "info_complete": true,
+        "not_watched": true,
+        "low_friction": true,
+        "help_available": true,
+        "affordable": false,
+        "third_party": true
+      },
+      "rows": [
+        {
+          "persona": {
+            "id": "P1",
+            "name": "可培育新手",
+            "share": 0.28,
+            "weights": {
+              "not_judged": 22,
+              "info_complete": 12,
+              "not_watched": 8,
+              "low_friction": 30,
+              "help_available": 18,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 78
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 5,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P2",
+            "name": "隱私敏感專業者",
+            "share": 0.18,
+            "weights": {
+              "not_judged": 18,
+              "info_complete": 16,
+              "not_watched": 34,
+              "low_friction": 14,
+              "help_available": 6,
+              "affordable": 6,
+              "third_party": 6
+            },
+            "baseExpectation": 62
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 21,
+          "bucket": "promoter"
+        },
+        {
+          "persona": {
+            "id": "P3",
+            "name": "共感陪伴型",
+            "share": 0.22,
+            "weights": {
+              "not_judged": 10,
+              "info_complete": 30,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 22,
+              "affordable": 14,
+              "third_party": 4
+            },
+            "baseExpectation": 85
+          },
+          "cov": 86,
+          "csat": 76,
+          "gap": -9,
+          "bucket": "detractor"
+        },
+        {
+          "persona": {
+            "id": "P4",
+            "name": "家庭決策者",
+            "share": 0.2,
+            "weights": {
+              "not_judged": 12,
+              "info_complete": 18,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 14,
+              "affordable": 10,
+              "third_party": 26
+            },
+            "baseExpectation": 70
+          },
+          "cov": 90,
+          "csat": 79,
+          "gap": 9,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P5",
+            "name": "戒心回流者",
+            "share": 0.12,
+            "weights": {
+              "not_judged": 34,
+              "info_complete": 16,
+              "not_watched": 20,
+              "low_friction": 10,
+              "help_available": 10,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 45
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 38,
+          "bucket": "promoter"
+        }
+      ],
+      "coverage": 91,
+      "csat": 81,
+      "nps": 8,
+      "promoters": 30,
+      "detractors": 22
+    },
+    {
+      "stageId": 3,
+      "met": {
+        "not_judged": true,
+        "info_complete": true,
+        "not_watched": true,
+        "low_friction": true,
+        "help_available": true,
+        "affordable": false,
+        "third_party": true
+      },
+      "rows": [
+        {
+          "persona": {
+            "id": "P1",
+            "name": "可培育新手",
+            "share": 0.28,
+            "weights": {
+              "not_judged": 22,
+              "info_complete": 12,
+              "not_watched": 8,
+              "low_friction": 30,
+              "help_available": 18,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 78
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 5,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P2",
+            "name": "隱私敏感專業者",
+            "share": 0.18,
+            "weights": {
+              "not_judged": 18,
+              "info_complete": 16,
+              "not_watched": 34,
+              "low_friction": 14,
+              "help_available": 6,
+              "affordable": 6,
+              "third_party": 6
+            },
+            "baseExpectation": 62
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 21,
+          "bucket": "promoter"
+        },
+        {
+          "persona": {
+            "id": "P3",
+            "name": "共感陪伴型",
+            "share": 0.22,
+            "weights": {
+              "not_judged": 10,
+              "info_complete": 30,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 22,
+              "affordable": 14,
+              "third_party": 4
+            },
+            "baseExpectation": 85
+          },
+          "cov": 86,
+          "csat": 76,
+          "gap": -9,
+          "bucket": "detractor"
+        },
+        {
+          "persona": {
+            "id": "P4",
+            "name": "家庭決策者",
+            "share": 0.2,
+            "weights": {
+              "not_judged": 12,
+              "info_complete": 18,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 14,
+              "affordable": 10,
+              "third_party": 26
+            },
+            "baseExpectation": 70
+          },
+          "cov": 90,
+          "csat": 79,
+          "gap": 9,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P5",
+            "name": "戒心回流者",
+            "share": 0.12,
+            "weights": {
+              "not_judged": 34,
+              "info_complete": 16,
+              "not_watched": 20,
+              "low_friction": 10,
+              "help_available": 10,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 45
+          },
+          "cov": 94,
+          "csat": 83,
+          "gap": 38,
+          "bucket": "promoter"
+        }
+      ],
+      "coverage": 91,
+      "csat": 81,
+      "nps": 8,
+      "promoters": 30,
+      "detractors": 22
+    },
+    {
+      "stageId": 4,
+      "met": {
+        "not_judged": true,
+        "info_complete": true,
+        "not_watched": true,
+        "low_friction": true,
+        "help_available": true,
+        "affordable": true,
+        "third_party": true
+      },
+      "rows": [
+        {
+          "persona": {
+            "id": "P1",
+            "name": "可培育新手",
+            "share": 0.28,
+            "weights": {
+              "not_judged": 22,
+              "info_complete": 12,
+              "not_watched": 8,
+              "low_friction": 30,
+              "help_available": 18,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 78
+          },
+          "cov": 100,
+          "csat": 88,
+          "gap": 10,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P2",
+            "name": "隱私敏感專業者",
+            "share": 0.18,
+            "weights": {
+              "not_judged": 18,
+              "info_complete": 16,
+              "not_watched": 34,
+              "low_friction": 14,
+              "help_available": 6,
+              "affordable": 6,
+              "third_party": 6
+            },
+            "baseExpectation": 62
+          },
+          "cov": 100,
+          "csat": 88,
+          "gap": 26,
+          "bucket": "promoter"
+        },
+        {
+          "persona": {
+            "id": "P3",
+            "name": "共感陪伴型",
+            "share": 0.22,
+            "weights": {
+              "not_judged": 10,
+              "info_complete": 30,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 22,
+              "affordable": 14,
+              "third_party": 4
+            },
+            "baseExpectation": 85
+          },
+          "cov": 100,
+          "csat": 88,
+          "gap": 3,
+          "bucket": "passive"
+        },
+        {
+          "persona": {
+            "id": "P4",
+            "name": "家庭決策者",
+            "share": 0.2,
+            "weights": {
+              "not_judged": 12,
+              "info_complete": 18,
+              "not_watched": 8,
+              "low_friction": 12,
+              "help_available": 14,
+              "affordable": 10,
+              "third_party": 26
+            },
+            "baseExpectation": 70
+          },
+          "cov": 100,
+          "csat": 88,
+          "gap": 18,
+          "bucket": "promoter"
+        },
+        {
+          "persona": {
+            "id": "P5",
+            "name": "戒心回流者",
+            "share": 0.12,
+            "weights": {
+              "not_judged": 34,
+              "info_complete": 16,
+              "not_watched": 20,
+              "low_friction": 10,
+              "help_available": 10,
+              "affordable": 6,
+              "third_party": 4
+            },
+            "baseExpectation": 45
+          },
+          "cov": 100,
+          "csat": 88,
+          "gap": 43,
+          "bucket": "promoter"
+        }
+      ],
+      "coverage": 100,
+      "csat": 88,
+      "nps": 50,
+      "promoters": 50,
+      "detractors": 0
+    }
+  ],
+  "drivers": [
+    {
+      "id": "not_judged",
+      "label": "不被審判",
+      "evidence": "訪談1:「認養人被檢核的過程裡面也很不舒服」"
+    },
+    {
+      "id": "info_complete",
+      "label": "資訊完整可判斷",
+      "evidence": "報告:資訊完整性、便利性、流程複雜性直接影響認養意願"
+    },
+    {
+      "id": "not_watched",
+      "label": "不被監視",
+      "evidence": "訪談2:「有點像電子腳鐐」「只是非常在意自己的隱私而已」"
+    },
+    {
+      "id": "low_friction",
+      "label": "流程不繁瑣",
+      "evidence": "訪談3:「看到那一堆問題的時候,就不會有人填了」"
+    },
+    {
+      "id": "help_available",
+      "label": "遇到問題有人幫",
+      "evidence": "訪談2:「我們可以提供經驗協助、物資協助,甚至提供人力過去陪你」"
+    },
+    {
+      "id": "affordable",
+      "label": "負擔得起",
+      "evidence": "報告:影響認養最強的因素之一是行為控制知覺,即經濟能力"
+    },
+    {
+      "id": "third_party",
+      "label": "說得動家人房東",
+      "evidence": "訪談4:「同住家人一定要同意」;訪談3:「他的房東有沒有同意」"
+    }
+  ]
+}

@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>台灣認養市場推估與網站進入市場的用戶反應模擬</title>
+<style>
+  @page { size:A4; margin:16mm 15mm 18mm; }
+  :root { --paper:#FDFCF9; --ink:#23282B; --ink-soft:#5B6560; --brand:#B9662F; --brand-tint:#F6E7DA;
+    --sage:#5F7A66; --sage-tint:#E4EBE4; --rule:#DFD8C9; --info-tint:#E6ECF1; --warn:#96413A; --warn-tint:#F4E3E1; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Noto Sans TC","WenQuanYi Zen Hei","PingFang TC",sans-serif;
+    font-size:10.2pt; line-height:1.75; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4 { text-wrap:balance; margin:0; }
+  .cover { height:245mm; display:flex; flex-direction:column; justify-content:center; page-break-after:always; }
+  .eyebrow { font-size:9pt; letter-spacing:.22em; color:var(--brand); font-weight:700; }
+  .cover h1 { font-size:27pt; line-height:1.35; margin:14px 0 0; letter-spacing:-.01em; }
+  .cover .sub { font-size:12.5pt; color:var(--ink-soft); margin-top:14px; max-width:134mm; line-height:1.85; }
+  .cover-rule { height:4px; width:62px; background:var(--brand); margin:26px 0; }
+  .meta { margin-top:28px; display:grid; grid-template-columns:30mm 1fr; gap:7px 18px; font-size:9.6pt; }
+  .meta dt { color:var(--ink-soft); } .meta dd { margin:0; }
+  section.chapter { page-break-before:always; }
+  h2.ch { font-size:17pt; padding-bottom:9px; margin-bottom:20px; border-bottom:2px solid var(--ink); }
+  h2.ch .num { color:var(--brand); margin-right:12px; }
+  h3 { font-size:12.2pt; margin:26px 0 9px; }
+  h4 { font-size:10.6pt; margin:18px 0 6px; }
+  p { margin:0 0 10px; }
+  ul,ol { margin:0 0 12px; padding-left:1.25em; } li { margin-bottom:5px; }
+  .lead { font-size:11pt; color:var(--ink-soft); margin-bottom:20px; }
+  code { font-family:ui-monospace,Menlo,monospace; font-size:9pt; background:#F1ECE1; padding:1px 4px; border-radius:3px; }
+  blockquote.ev { margin:12px 0; padding:11px 16px; border-left:3px solid var(--sage); background:var(--sage-tint);
+    font-size:9.8pt; line-height:1.8; break-inside:avoid; }
+  blockquote.ev .src { display:block; margin-top:6px; font-size:8.6pt; color:var(--ink-soft); }
+  table { width:100%; border-collapse:collapse; margin:12px 0 18px; font-size:9.3pt; break-inside:avoid; }
+  th { text-align:left; background:#F2EDE2; border-bottom:1.5px solid var(--rule); padding:8px 10px; font-weight:700; }
+  td { border-bottom:1px solid var(--rule); padding:8px 10px; vertical-align:top; }
+  td.h { font-weight:700; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  tr { break-inside:avoid; }
+  .card { border:1px solid var(--rule); border-radius:7px; padding:14px 16px; margin:12px 0; background:#fff; break-inside:avoid; }
+  .card h4 { margin-top:0; }
+  .callout { background:var(--info-tint); border-radius:7px; padding:13px 16px; margin:14px 0; font-size:9.6pt; break-inside:avoid; }
+  .callout.warn { background:var(--warn-tint); }
+  .callout.good { background:var(--sage-tint); }
+  .big { font-size:19pt; font-weight:700; font-variant-numeric:tabular-nums; }
+  .up { color:var(--sage); } .down { color:var(--warn); }
+  .bar { height:14px; background:var(--rule); border-radius:3px; overflow:hidden; }
+  .bar span { display:block; height:100%; background:var(--brand); }
+  .foot { margin-top:28px; padding-top:12px; border-top:1px solid var(--rule); font-size:8.8pt; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">MARKET SIZING &amp; USER RESPONSE SIMULATION</div>
+  <h1>台灣認養市場推估<br>與網站進入市場的用戶反應模擬</h1>
+  <div class="cover-rule"></div>
+  <p class="sub">
+    彙整四篇中途之家訪談與《台灣流浪動物領養問題分析報告》,推估市場結構與規模,
+    並以可實測的驅動因子模擬「安心託付 × 共同陪伴」進入市場後的
+    <strong>需求覆蓋率、滿意度、期待落差與推薦傾向</strong>。
+  </p>
+  <dl class="meta">
+    <dt>資料來源</dt><dd>四篇中途之家訪談逐字稿;農業部 114 年度統計;監察院調查;政大 2021 研究</dd>
+    <dt>模擬方法</dt><dd>7 個滿意度驅動因子在真實網站上實測 × 5 個 Persona 權重</dd>
+    <dt>核心發現</dt><dd>推薦率完全建立在「承諾能否兌現」上;<strong>單一項未兌現即讓 NPS 掉 70 分</strong></dd>
+    <dt>報告日期</dt><dd>2026 年 7 月 28 日</dd>
+  </dl>
+  <div class="callout warn" style="margin-top:28px">
+    <strong>推估性質聲明:</strong>民間中途的量體<strong>無官方統計</strong>——
+    市場報告本身即指出平均收容天數、領養者年齡地區、渠道轉換率與退養率皆未公開揭露。
+    本報告的市場規模為<strong>帶假設的區間推估</strong>,非統計結果;
+    用戶反應為<strong>模型推估</strong>,非真人問卷。所有假設均在文中標明。
+  </div>
+</div>
+
+<!-- 01 市場結構 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">01</span>市場結構:這不是一個市場</h2>
+
+  <p class="lead">
+    彙整訪談與報告後,最重要的判斷是:台灣的「領養市場」由兩個運作邏輯完全不同的體系構成,
+    而它們的瓶頸不一樣。把它們當成同一個市場來估算或設計產品,會得到錯的結論。
+  </p>
+
+  <table>
+    <thead><tr><th style="width:14%">體系</th><th style="width:26%">規模(可得資料)</th><th>運作邏輯與瓶頸</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="h">公立收容</td>
+        <td>32 處收容所<br>114 年度收容 27,438 隻<br>認領養 18,754 隻(68%)</td>
+        <td>有公權力、有預算、有官方平台。瓶頸是<strong>高難度個案累積</strong>——
+          所內死亡年增 22%、依法人道處理年增 83%。新北 94%、台北 90% 已近天花板。</td>
+      </tr>
+      <tr>
+        <td class="h">民間中途</td>
+        <td>列冊民間狗場 188 場、35,003 隻(2021 監察院)<br><strong>貓與個人中途無統計</strong></td>
+        <td>無公權力、無預算、多為個人運作。瓶頸是<strong>人力與系統</strong>,不是曝光。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <blockquote class="ev">
+    「最困擾的可能是協會要能夠維持穩定的運作⋯很多人都會以為說是錢,<strong>但我覺得是系統</strong>,
+    比如說穩定的 SOP 跟人力。」
+    <span class="src">訪談 1・大型協會負責人(8–9 年經驗)</span>
+  </blockquote>
+
+  <blockquote class="ev">
+    「雖然如果你們認真去(調查)的話,你會發現說<strong>台灣的中途之家有夠多,可是你在走在路上的時候你看不到任何一家</strong>⋯
+    他也不敢讓鄰居知道自己是中途之家。」
+    <span class="src">訪談 1。這解釋了為何民間量體無法統計——它在結構上是隱形的。</span>
+  </blockquote>
+
+  <h3>1.1 本平台服務的是民間中途,不是公立收容</h3>
+  <p>
+    這個定位決定了市場推估的分母。訪談 1 明確指出民間中途完全獨立運作:
+  </p>
+  <blockquote class="ev">
+    「我們現在<strong>沒有使用任何特定的媒合平台</strong>⋯後面的媒合或者是認養這種都是協會裡面獨立在做⋯
+    因為我現在看到所有的認養平台,它的都有一個共通性,就是<strong>它只做到了幫助擴散</strong>。」
+    <span class="src">訪談 1。這句話同時是市場機會與市場阻力:沒有平台在做媒合,但中途也不信任平台能做媒合。</span>
+  </blockquote>
+</section>
+
+<!-- 02 市場規模 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">02</span>市場規模推估</h2>
+
+  <div class="callout warn">
+    以下為<strong>帶假設的區間推估</strong>。民間中途的年周轉量無任何官方統計,
+    報告自身亦列明「平均收容天數」「領養者地區」「渠道轉換率」「退養率」皆<strong>未取得一致公開統計</strong>。
+    每一層的假設都寫在表格中,可被替換與檢驗。
+  </div>
+
+  <table>
+    <thead><tr><th style="width:10%">層級</th><th style="width:24%">推估量(隻/年)</th><th>推導與假設</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="h">TAM<br>全市場</td>
+        <td class="num"><strong>29,000 – 36,000</strong></td>
+        <td>
+          公立實際認領養 <strong>18,754</strong>(官方數,114 年度)<br>
+          ＋民間推估 <strong>10,500 – 17,500</strong><br>
+          <em>假設:</em>以監察院列冊犬場在養 35,003 隻為基數,年周轉率取 30–50%
+          (公立為 68%,但民間資源少、周轉較慢,故折減)。此數<strong>未含未列冊的貓中途</strong>,屬保守估計。
+        </td>
+      </tr>
+      <tr>
+        <td class="h">SAM<br>可服務市場</td>
+        <td class="num"><strong>1,600 – 4,400</strong></td>
+        <td>
+          僅計民間中途,且限「有數位能力並願意採用平台」者。<br>
+          <em>假設:</em>採用率 15–25%。依據:訪談顯示多數中途「一個人當作一個單位在運作」,
+          光維持基本運作已用盡力氣;訪談 1 的協會是資源最好的一端,仍自建封閉系統。
+        </td>
+      </tr>
+      <tr style="background:var(--brand-tint)">
+        <td class="h">SOM<br>核心目標</td>
+        <td class="num"><strong>700 – 2,600</strong></td>
+        <td>
+          <strong>久候動物(≥120 天)</strong>。<em>假設:</em>占民間在養 40–60%。<br>
+          依據:訪談 4「從奶貓然後到六七個月、結紮完還送不出去」、「玳瑁真的不太好送」;
+          報告列「180 天以上長住動物占比年減 20%」為 KPI,反證長住占比可觀。
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2.1 需求端的結構性轉變</h3>
+  <table>
+    <thead><tr><th>指標</th><th class="num">數值</th><th>對本平台的意義</th></tr></thead>
+    <tbody>
+      <tr><td>飼養寵物戶數</td><td class="num">28.3%</td><td>基數仍在擴張</td></tr>
+      <tr><td>養貓戶數</td><td class="num">10.4%(+3.8pt)</td><td>都市型飼主快速增加,重視空間效率與資訊透明——正是本平台的設計取向</td></tr>
+      <tr><td>家犬 / 家貓</td><td class="num">148 萬 / 131 萬</td><td>存量龐大,但與新增認養無直接關係</td></tr>
+      <tr><td>遊蕩犬推估</td><td class="num">141,584 隻</td><td>末端媒合解決不了;<strong>平台不應宣稱能解決這個數字</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 市場的真正稀缺品不是需求,是供給端的人力</h3>
+  <p>
+    全國動保四類人力合計僅 <strong>1,127 人</strong>,對應 27,438 隻收容流量與 141,584 隻遊蕩犬。
+    訪談對這件事的描述比數字更直接:
+  </p>
+  <blockquote class="ev">
+    「每一個都在消耗自己,<strong>直到有一天自己沒有了</strong>。」
+    <span class="src">訪談 1。談個人中途的運作模式。</span>
+  </blockquote>
+  <blockquote class="ev">
+    「我送養 100 隻貓,每一隻貓你說一個禮拜要回報一次,或一個月要回報一次,<strong>我哪會記得</strong>。」
+    <span class="src">訪談 2。這句話直接決定了本平台的市場價值主張應該是什麼。</span>
+  </blockquote>
+  <div class="callout good">
+    <strong>市場定位結論:</strong>本平台真正的買方價值不是「幫中途找到認養人」——
+    社群已經能做擴散。真正稀缺的是<strong>把中途從重複勞動中解放出來</strong>:
+    自動化的追蹤提醒、可沿用的準備清單、不需人工催促的回報系統。
+    這也是訪談 2 唯一主動說「所有的中途都會好很多」的功能。
+  </div>
+</section>
+
+<!-- 03 模擬方法 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">03</span>用戶反應模擬:方法</h2>
+
+  <p class="lead">
+    滿意度不能用猜的。本模擬把滿意度拆成 7 個驅動因子,
+    每一個都<strong>到真實網站上實測「有沒有被滿足」</strong>,再依 Persona 權重加權。
+    輸出的是「網站實際做到了什麼」的函數,不是憑空的分數。
+  </p>
+
+  <h3>3.1 七個驅動因子(每個都可追溯)</h3>
+  <table>
+    <thead><tr><th style="width:20%">因子</th><th>證據來源</th><th style="width:26%">網站上的檢測點</th></tr></thead>
+    <tbody>
+      <tr><td class="h">不被審判</td><td>訪談 1:「認養人被檢核的過程裡面也很不舒服」</td><td>信任頁「你有拒絕的權利」</td></tr>
+      <tr><td class="h">資訊完整可判斷</td><td>報告:資訊完整性與流程複雜性直接影響認養意願</td><td>動物頁「可能不適合」+ 支出揭露</td></tr>
+      <tr><td class="h">不被監視</td><td>訪談 2:「有點像電子腳鐐」</td><td>90 天頁「系統提醒你,不是人來催你」</td></tr>
+      <tr><td class="h">流程不繁瑣</td><td>訪談 3:「看到那一堆問題就不會有人填了」</td><td>測驗第 6 題的中途回饋</td></tr>
+      <tr><td class="h">遇到問題有人幫</td><td>訪談 2:「甚至提供人力過去陪你」</td><td>危機頁七情境與非責備文案</td></tr>
+      <tr><td class="h">負擔得起</td><td>報告:行為控制知覺(經濟能力)是最強因素之一</td><td>久候動物的醫療補助與試養期</td></tr>
+      <tr><td class="h">說得動家人房東</td><td>訪談 4:「同住家人一定要同意」</td><td>流程頁給房東/家人的說明</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 換算方式與其限制</h3>
+  <div class="card">
+    <h4>覆蓋率 ≠ 滿意度</h4>
+    <p style="margin:0">
+      實測只能回答「網站<strong>有沒有做</strong>」,不能回答「<strong>做得好不好</strong>」。
+      因此先算<strong>需求覆蓋率</strong>(加權的「有做」比例),再乘上執行品質係數
+      <code>0.88</code> 並設 <code>92</code> 上限,得到滿意度推估值。
+    </p>
+  </div>
+  <div class="card">
+    <h4>係數 0.88 的錨點</h4>
+    <p style="margin:0">
+      報告載新北 2026 年第 1 季完成訪查者中 <strong>97% 表示認養後更幸福</strong>。
+      但那是「已完成追蹤者」的<strong>事後</strong>滿意度,含存活者偏誤
+      (不滿意或已失聯者不會出現在分母),用於新平台的<strong>事前</strong>體驗必須折減。
+      上限 92 反映沒有任何服務能讓所有人滿意。
+    </p>
+  </div>
+  <div class="card">
+    <h4>期待度的設定</h4>
+    <p style="margin:0">
+      每個 Persona 有「進站前期待值」,依訪談中該類型的既有印象設定:
+      共感型 85(期待最高、最容易失望)、戒心回流者 45(曾被拒絕過)。
+      <strong>推薦傾向由落差決定</strong>,不由絕對滿意度決定——
+      這也是為何期待最高的共感型反而最難成為推薦者。
+    </p>
+  </div>
+</section>
+
+<!-- 04 結果 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">04</span>模擬結果</h2>
+
+  <h3>4.1 驅動因子的滿足情形(實測)</h3>
+  <table>
+    <thead><tr><th style="width:26%">因子</th><th class="num">現況市場</th><th class="num">S1</th><th class="num">S2</th><th class="num">S3</th><th class="num">S4</th></tr></thead>
+    <tbody>
+      <tr><td class="h">不被審判</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">資訊完整可判斷</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">不被監視</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">流程不繁瑣</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">遇到問題有人幫</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr style="background:var(--brand-tint)"><td class="h">負擔得起</td><td class="num">✘</td><td class="num">✘</td><td class="num">✘</td><td class="num">✘</td><td class="num">✔</td></tr>
+      <tr><td class="h">說得動家人房東</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 覆蓋率、滿意度與推薦傾向</h3>
+  <table>
+    <thead><tr><th style="width:26%">階段</th><th class="num">需求覆蓋率</th><th class="num">滿意度推估</th><th class="num">推薦者</th><th class="num">貶抑者</th><th class="num">NPS</th></tr></thead>
+    <tbody>
+      <tr><td class="h">現況市場(對照組)</td><td class="num">33</td><td class="num">29</td><td class="num">0%</td><td class="num">100%</td><td class="num down"><strong>−100</strong></td></tr>
+      <tr><td class="h">S1 信任與摩擦</td><td class="num">91</td><td class="num">81</td><td class="num">30%</td><td class="num">22%</td><td class="num">+8</td></tr>
+      <tr><td class="h">S2 久候曝光</td><td class="num">91</td><td class="num">81</td><td class="num">30%</td><td class="num">22%</td><td class="num">+8</td></tr>
+      <tr><td class="h">S3 久候媒合</td><td class="num">91</td><td class="num">81</td><td class="num">30%</td><td class="num">22%</td><td class="num">+8</td></tr>
+      <tr style="background:var(--sage-tint)"><td class="h">S4 久候門檻</td><td class="num">100</td><td class="num">88</td><td class="num">50%</td><td class="num">0%</td><td class="num up"><strong>+50</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 三個發現</h3>
+
+  <div class="card">
+    <h4>① 最大的一躍發生在 S1,不是久候功能</h4>
+    <p style="margin:0">
+      覆蓋率 33 → 91,滿意度 29 → 81。信任與摩擦這一組(監視感、中途處境、房東家人工具、
+      測驗中途回饋)一次補上四個未被滿足的因子。<strong>這是本平台最大的差異化來源。</strong>
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>② S2 與 S3 對「認養人滿意度」毫無貢獻</h4>
+    <p style="margin:0">
+      覆蓋率停在 91 不動。原因很清楚:久候曝光與久候排序是<strong>為動物做的</strong>,不是為認養人做的。
+      它們提升的是久候動物的機會(前一份報告已證實),但不會讓使用者更滿意。
+      <strong>兩者要分開評估,不能用同一組指標。</strong>
+    </p>
+  </div>
+
+  <div class="card">
+    <h4>③ 把 NPS 從 +8 拉到 +50 的是「負擔得起」</h4>
+    <p style="margin:0">
+      S4 的支持包(醫療補助、兩週試養、接送、行為諮詢)補上最後一個未滿足因子,
+      貶抑者歸零。這與報告的判斷一致:行為控制知覺(經濟能力)是影響認養意願最強的因素之一。
+    </p>
+  </div>
+
+  <h3>4.4 各 Persona 的期待落差</h3>
+  <table>
+    <thead><tr><th style="width:26%">Persona</th><th class="num">市場占比推估</th><th class="num">進站前期待</th><th class="num">實際滿意度</th><th class="num">落差</th><th>分類</th></tr></thead>
+    <tbody>
+      <tr><td class="h">可培育新手</td><td class="num">28%</td><td class="num">78</td><td class="num">88</td><td class="num">+10</td><td>被動者</td></tr>
+      <tr><td class="h">隱私敏感專業者</td><td class="num">18%</td><td class="num">62</td><td class="num">88</td><td class="num up">+26</td><td>推薦者</td></tr>
+      <tr><td class="h">共感陪伴型</td><td class="num">22%</td><td class="num">85</td><td class="num">88</td><td class="num">+3</td><td>被動者</td></tr>
+      <tr><td class="h">家庭決策者</td><td class="num">20%</td><td class="num">70</td><td class="num">88</td><td class="num up">+18</td><td>推薦者</td></tr>
+      <tr><td class="h">戒心回流者</td><td class="num">12%</td><td class="num">45</td><td class="num">88</td><td class="num up">+43</td><td>推薦者</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>反直覺的一點:</strong>被平台傷害過的「戒心回流者」落差最大(+43),是最強的推薦者;
+    而期待最高的「共感陪伴型」落差只有 +3,即使滿意度相同也只是被動者。
+    <strong>對期待高的人,做到 88 分不會換來推薦。</strong>
+    這意味著行銷不應該把期待值先拉高——那會直接吃掉推薦率。
+  </div>
+</section>
+
+<!-- 05 壓力測試 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">05</span>最大風險:承諾兌現不了</h2>
+
+  <p class="lead">
+    本平台的滿意度建立在一組承諾上:90/180 天支持、醫療補助、兩週試養、接送到府、行為諮詢。
+    但訪談與報告都指向同一件事——<strong>這些承諾需要人力,而人力正是這個產業最缺的東西</strong>。
+  </p>
+
+  <h3>5.1 履約壓力情境模擬</h3>
+  <table>
+    <thead><tr><th style="width:34%">情境</th><th class="num">滿意度</th><th class="num">NPS</th><th class="num">相對基準</th></tr></thead>
+    <tbody>
+      <tr><td class="h">基準(全部兌現)</td><td class="num">88</td><td class="num">+50</td><td class="num">—</td></tr>
+      <tr style="background:var(--warn-tint)"><td class="h">求助回覆延遲到 3 天</td><td class="num">75</td><td class="num down"><strong>−20</strong></td><td class="num down">NPS −70</td></tr>
+      <tr><td class="h">醫療補助排隊或暫停</td><td class="num">81</td><td class="num">+8</td><td class="num down">NPS −42</td></tr>
+      <tr style="background:var(--warn-tint)"><td class="h">兩者同時發生</td><td class="num">67</td><td class="num down"><strong>−40</strong></td><td class="num down">NPS −90</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <p style="margin:0">
+      <strong>單一項承諾未兌現,NPS 從 +50 掉到 −20,落差 <span class="big down">70 分</span>。</strong>
+      原因是平台的價值主張<strong>就是</strong>那些承諾;承諾落空時,使用者失去的不只是一項功能,
+      而是「這個平台跟以前那些不一樣」這個判斷本身。
+    </p>
+  </div>
+
+  <h3>5.2 這不是假設性風險</h3>
+  <blockquote class="ev">
+    「照顧、就醫、接電話、清潔多半是同幾個人在做⋯我沒空。」
+    <span class="src">訪談 4 描述自己無法像警察一樣盯著認養人的原因。</span>
+  </blockquote>
+  <blockquote class="ev">
+    「你今天花這筆錢開發完,不是開發完就算了,<strong>你要維護</strong>,然後再來就是說,
+    可能有些客服人家打電話來、有些糾紛或爭議什麼,你要協助處理⋯這些都是<strong>持續要燒錢</strong>的。」
+    <span class="src">訪談 2 談自建數位工具時協會內部的抗爭。這是同一個問題的財務面。</span>
+  </blockquote>
+
+  <h3>5.3 因此的產品建議</h3>
+  <div class="card">
+    <h4>① 承諾要與量能綁定,而不是寫死在頁面上</h4>
+    <p style="margin:0">
+      醫療補助、試養期、接送應改為<strong>依中途當期量能動態顯示</strong>——
+      沒有量能時不顯示,而不是顯示了卻做不到。少一項功能的損失,遠小於承諾落空的損失。
+    </p>
+  </div>
+  <div class="card">
+    <h4>② 回應時間應該公開且保守</h4>
+    <p style="margin:0">
+      目前寫「1–2 個工作天」。依訪談的實際狀況,建議改為顯示<strong>該中途近 30 天的實際回覆中位數</strong>,
+      並允許中途設定「本週已滿」。誠實的慢,好過失信的快。
+    </p>
+  </div>
+  <div class="card">
+    <h4>③ 先做中途端減負,再做認養人端擴張</h4>
+    <p style="margin:0">
+      訪談 2 唯一主動說「所有的中途都會好很多」的功能是<strong>自動化的回報系統</strong>。
+      這同時是市場切入點與履約能力的前提:中途省下的時間,才是兌現承諾的原料。
+    </p>
+  </div>
+</section>
+
+<!-- 06 限制 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">06</span>限制與後續驗證</h2>
+
+  <h3>6.1 這份模擬不能拿來說什麼</h3>
+  <div class="callout warn">
+    <ul style="margin:0">
+      <li><strong>覆蓋率是實測的,滿意度與 NPS 不是。</strong>後兩者是覆蓋率經過
+        執行品質係數(0.88)與期待值假設換算出來的推估,沒有任何真人回答過問卷。</li>
+      <li><strong>Persona 權重與市場占比是我設定的。</strong>依據是訪談中各類型反覆表達的在意程度,
+        但沒有量化調查支持——報告本身也指出領養者年齡與地區<strong>全國官方未取得</strong>。</li>
+      <li><strong>市場規模是區間推估。</strong>民間中途年周轉量無官方統計,
+        30–50% 的周轉率假設與 15–25% 的採用率假設都可能有數倍誤差。</li>
+      <li><strong>驅動因子是二元的。</strong>「有做/沒做」無法反映做得好壞,
+        這是為何原始模型會產生 100 分這種不可信的結果,也是必須加上折減係數的原因。</li>
+    </ul>
+  </div>
+
+  <h3>6.2 建議的驗證順序</h3>
+  <table>
+    <thead><tr><th style="width:12%">順序</th><th style="width:30%">要驗證什麼</th><th>方法與最小樣本</th></tr></thead>
+    <tbody>
+      <tr><td class="h">1</td><td>七個驅動因子的<strong>權重</strong>是否正確</td><td>最大差異量表(MaxDiff),n≈120,可在單一中途的既有認養人名單上做</td></tr>
+      <tr><td class="h">2</td><td>進站前<strong>期待值</strong>的真實分布</td><td>落地頁前置單題(1–10),n≈300,成本近乎為零</td></tr>
+      <tr><td class="h">3</td><td>執行品質係數 0.88 是否合理</td><td>S1 金絲雀跑滿 4 週後對實際使用者發 CSAT,與覆蓋率對照回歸</td></tr>
+      <tr><td class="h">4</td><td>履約失敗的真實代價</td><td>不需實驗——直接記錄回覆時間並與該案後續 NPS 相關分析</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 一句話總結</h3>
+  <div class="callout good">
+    <p style="margin:0">
+      市場的瓶頸不在需求端。全國認領養率已達 68%,願意認養的人存在,
+      真正稀缺的是<strong>民間中途的人力與系統</strong>。
+      本平台的差異化來自一組承諾,而那組承諾的兌現能力,
+      取決於它能不能先幫中途把時間省下來——
+      <strong>如果做不到,模擬顯示 NPS 會從 +50 掉到 −20,比不做還糟。</strong>
+    </p>
+  </div>
+
+  <div class="foot">
+    <p style="margin:0 0 6px"><strong>可重現性</strong></p>
+    <p style="margin:0">
+      模擬腳本 <code>ux-test/market-response.mjs</code>,對真實網站執行,
+      輸出含每個驅動因子的實測結果與各階段數值(<code>EXPORT=</code> 可匯出 JSON)。
+      四篇訪談與市場報告的引文均為原文節錄。
+      網站中所有信任數字、捐款流向與幸福回報時間軸皆標註為示意資料,未假造任何真實認養成效。
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
