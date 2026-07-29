@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>進入市場後的用戶反應模擬報告</title>
+<style>
+  @page { size:A4; margin:16mm 15mm 18mm; }
+  :root { --paper:#FDFCF9; --ink:#23282B; --ink-soft:#5B6560; --brand:#B9662F; --brand-tint:#F6E7DA;
+    --sage:#5F7A66; --sage-tint:#E4EBE4; --rule:#DFD8C9; --info-tint:#E6ECF1; --warn:#96413A; --warn-tint:#F4E3E1; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Noto Sans TC","WenQuanYi Zen Hei","PingFang TC",sans-serif;
+    font-size:10.2pt; line-height:1.75; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4 { text-wrap:balance; margin:0; }
+  .cover { height:245mm; display:flex; flex-direction:column; justify-content:center; page-break-after:always; }
+  .eyebrow { font-size:9pt; letter-spacing:.22em; color:var(--brand); font-weight:700; }
+  .cover h1 { font-size:29pt; line-height:1.32; margin:14px 0 0; letter-spacing:-.01em; }
+  .cover .sub { font-size:12.5pt; color:var(--ink-soft); margin-top:14px; max-width:132mm; line-height:1.85; }
+  .cover-rule { height:4px; width:62px; background:var(--brand); margin:26px 0; }
+  .meta { margin-top:28px; display:grid; grid-template-columns:30mm 1fr; gap:7px 18px; font-size:9.6pt; }
+  .meta dt { color:var(--ink-soft); } .meta dd { margin:0; }
+  section.chapter { page-break-before:always; }
+  h2.ch { font-size:17pt; padding-bottom:9px; margin-bottom:20px; border-bottom:2px solid var(--ink); }
+  h2.ch .num { color:var(--brand); margin-right:12px; }
+  h3 { font-size:12.2pt; margin:26px 0 9px; }
+  h4 { font-size:10.6pt; margin:18px 0 6px; }
+  p { margin:0 0 10px; }
+  ul,ol { margin:0 0 12px; padding-left:1.25em; } li { margin-bottom:5px; }
+  .lead { font-size:11pt; color:var(--ink-soft); margin-bottom:20px; }
+  code { font-family:ui-monospace,Menlo,monospace; font-size:9pt; background:#F1ECE1; padding:1px 4px; border-radius:3px; }
+  blockquote.ev { margin:10px 0; padding:10px 15px; border-left:3px solid var(--sage); background:var(--sage-tint);
+    font-size:9.6pt; line-height:1.78; break-inside:avoid; }
+  blockquote.ev .src { display:block; margin-top:5px; font-size:8.5pt; color:var(--ink-soft); }
+  table { width:100%; border-collapse:collapse; margin:12px 0 18px; font-size:9.3pt; break-inside:avoid; }
+  th { text-align:left; background:#F2EDE2; border-bottom:1.5px solid var(--rule); padding:8px 10px; font-weight:700; }
+  td { border-bottom:1px solid var(--rule); padding:8px 10px; vertical-align:top; }
+  td.h { font-weight:700; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  tr { break-inside:avoid; }
+  figure { margin:14px 0 20px; break-inside:avoid; }
+  figure img { width:100%; display:block; border:1px solid var(--rule); border-radius:5px; }
+  figcaption { font-size:8.8pt; color:var(--ink-soft); margin-top:6px; line-height:1.6; }
+  .ba { display:grid; grid-template-columns:1fr 1fr; gap:13px; align-items:start; }
+  .tag { font-size:8.3pt; font-weight:700; letter-spacing:.06em; padding:2px 8px; border-radius:3px; display:inline-block; margin-bottom:5px; }
+  .tag.off { background:var(--warn-tint); color:var(--warn); }
+  .tag.on { background:var(--sage-tint); color:var(--sage); }
+  .tag.both { background:var(--info-tint); color:var(--ink-soft); }
+  .driver { border:1px solid var(--rule); border-left:3px solid var(--brand); border-radius:0 7px 7px 0;
+    padding:13px 16px; margin:14px 0 10px; background:#fff; break-inside:avoid; }
+  .driver h4 { margin:0 0 4px; }
+  .driver .w { float:right; font-size:8.8pt; color:var(--ink-soft); font-weight:400; }
+  .card { border:1px solid var(--rule); border-radius:7px; padding:13px 16px; margin:12px 0; background:#fff; break-inside:avoid; }
+  .card h4 { margin-top:0; }
+  .callout { background:var(--info-tint); border-radius:7px; padding:13px 16px; margin:14px 0; font-size:9.6pt; break-inside:avoid; }
+  .callout.warn { background:var(--warn-tint); }
+  .callout.good { background:var(--sage-tint); }
+  .big { font-size:19pt; font-weight:700; font-variant-numeric:tabular-nums; }
+  .up { color:var(--sage); } .down { color:var(--warn); }
+  .foot { margin-top:26px; padding-top:12px; border-top:1px solid var(--rule); font-size:8.8pt; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">USER RESPONSE SIMULATION</div>
+  <h1>「安心託付 × 共同陪伴」<br>進入市場後的用戶反應模擬</h1>
+  <div class="cover-rule"></div>
+  <p class="sub">
+    滿意度不用猜。拆成 <strong>7 個驅動因子</strong>,每一個都到真實網站上實測「有沒有被滿足」,
+    再依 Persona 權重換算<strong>需求覆蓋率、滿意度、期待落差與推薦率</strong>。
+    本報告附上每一個因子對應的實際網頁設計截圖。
+  </p>
+  <dl class="meta">
+    <dt>模擬對象</dt><dd>安心託付 × 共同陪伴|中途之家認養平台</dd>
+    <dt>方法</dt><dd>7 驅動因子 × 5 Persona × 5 個發布階段,對執行中的網站實測</dd>
+    <dt>證據來源</dt><dd>四篇中途之家訪談;台灣流浪動物領養問題分析報告(114 年度)</dd>
+    <dt>核心結論</dt><dd>NPS 從現況的 −100 升到 +50,但<strong>單一承諾未兌現即掉 70 分</strong></dd>
+    <dt>報告日期</dt><dd>2026 年 7 月 28 日</dd>
+  </dl>
+  <div class="callout warn" style="margin-top:28px">
+    <strong>效度聲明:</strong>「需求覆蓋率」是對網站的<strong>實測值</strong>;
+    「滿意度」與「NPS」是覆蓋率經執行品質係數與期待值假設換算的<strong>推估值</strong>,
+    <strong>沒有任何真人回答過問卷</strong>。Persona 權重與市場占比由我依訪談設定,無量化調查支持。
+    所有截圖為實際執行畫面,未經修圖。
+  </div>
+</div>
+
+<!-- 01 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">01</span>模擬方法</h2>
+
+  <p class="lead">
+    直接給一個「滿意度 85 分」是沒有意義的——那只是猜測。
+    本模擬的做法是把滿意度拆解成使用者實際在意的事,再逐項檢查網站到底有沒有做。
+  </p>
+
+  <h3>1.1 三個步驟</h3>
+  <table>
+    <thead><tr><th style="width:10%">步驟</th><th style="width:26%">產出</th><th>做法</th></tr></thead>
+    <tbody>
+      <tr><td class="h">①</td><td><strong>需求覆蓋率</strong>(實測)</td>
+        <td>7 個驅動因子逐一到網站上檢查,依 Persona 權重加權出「網站有處理到的比例」</td></tr>
+      <tr><td class="h">②</td><td><strong>滿意度</strong>(推估)</td>
+        <td>覆蓋率 × 執行品質係數 0.88,上限 92。因為「有做」不等於「做得好」</td></tr>
+      <tr><td class="h">③</td><td><strong>推薦率 NPS</strong>(推估)</td>
+        <td>由「滿意度 − 進站前期待」的落差決定。落差 ≥15 為推薦者,&lt;0 為貶抑者</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card">
+    <h4>為什麼要拆成覆蓋率與滿意度兩層</h4>
+    <p style="margin:0">
+      第一版模型直接把覆蓋率當滿意度,結果跑出 <strong>CSAT 100 / NPS +100</strong>——
+      這種數字沒有人會相信,問題出在因子是二元的(有做/沒做),全滿就爆表。
+      因此把「實測得到的」與「推估出來的」明確分開,並加上折減。
+      係數 0.88 的錨點是報告載新北 2026 年第 1 季完成訪查者中 97% 表示認養後更幸福,
+      但那是<strong>已完成追蹤者</strong>的事後滿意度(存活者偏誤),用於新平台的事前體驗必須折減。
+    </p>
+  </div>
+
+  <h3>1.2 五個 Persona 與權重</h3>
+  <p>每位 Persona 對 7 個因子的在意程度不同,權重依訪談中該類型反覆表達的內容設定(合計 100)。</p>
+  <table>
+    <thead><tr><th style="width:22%">Persona</th><th class="num">占比</th><th class="num">進站前期待</th><th>最在意的因子(權重)</th></tr></thead>
+    <tbody>
+      <tr><td class="h">可培育新手</td><td class="num">28%</td><td class="num">78</td><td>流程不繁瑣 30、不被審判 22、有人幫 18</td></tr>
+      <tr><td class="h">隱私敏感專業者</td><td class="num">18%</td><td class="num">62</td><td>不被監視 34、不被審判 18、資訊完整 16</td></tr>
+      <tr><td class="h">共感陪伴型</td><td class="num">22%</td><td class="num">85</td><td>資訊完整 30、有人幫 22、負擔得起 14</td></tr>
+      <tr><td class="h">家庭決策者</td><td class="num">20%</td><td class="num">70</td><td>說得動家人房東 26、資訊完整 18、有人幫 14</td></tr>
+      <tr><td class="h">戒心回流者</td><td class="num">12%</td><td class="num">45</td><td>不被審判 34、不被監視 20、資訊完整 16</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:9.4pt;color:var(--ink-soft)">
+    進站前期待值也依訪談設定:共感型最高(85,最容易失望)、戒心回流者最低
+    (45,「認養人都說送養人是很機車的」)。<strong>推薦率由落差決定,不由絕對分數決定。</strong>
+  </p>
+</section>
+
+<!-- 02 驅動因子截圖 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">02</span>七個驅動因子與對應的網頁設計</h2>
+
+  <p class="lead">
+    以下每一組都是<strong>同一個網址、同一個視窗尺寸,只切換分組或階段</strong>的實際畫面。
+    左為未滿足(對照組 = 現況市場的體驗),右為滿足(本平台的設計)。
+  </p>
+
+  <div class="driver">
+    <h4><span class="w">新手 22 / 隱私 18 / 戒心 34</span>D1・不被審判</h4>
+    <blockquote class="ev" style="margin:6px 0 0">
+      「認養人其實我覺得,他們被檢核的過程裡面也很不舒服。」
+      <span class="src">訪談 1・大型協會負責人</span>
+    </blockquote>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag off">未滿足</span>
+      <img src="shots/d1-off.png" alt="對照組信任頁,認養標準之後直接跳到隱私說明,沒有任何中途自身處境的說明">
+      <figcaption>只列認養標準,中途自身的處境從未出現——使用者只感受到被要求。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag on">滿足</span>
+      <img src="shots/d1-on.png" alt="金絲雀組信任頁,多出我們這邊的實話四張卡片,包含你有拒絕的權利">
+      <figcaption>「我們這邊的實話」四張卡,含<strong>「你有拒絕的權利」</strong>與「我們沒有公權力,所以只能靠問」。</figcaption>
+    </figure>
+  </div>
+
+  <div class="driver">
+    <h4><span class="w">共感 30 / 家庭 18</span>D2・資訊完整可判斷<span style="color:var(--sage);font-weight:400"> ・兩組皆已滿足</span></h4>
+    <blockquote class="ev" style="margin:6px 0 0">
+      「資訊完整性、便利性與流程複雜性會直接影響認養意願。」
+      <span class="src">市場報告引政大 2021 研究</span>
+    </blockquote>
+  </div>
+  <figure>
+    <span class="tag both">基準即已滿足</span>
+    <img src="shots/d2-both.png" alt="雪見詳情頁的適合的生活與可能不適合並列,以及照護投入與每月預估支出">
+    <figcaption>
+      「適合的生活」與「<strong>可能不適合</strong>」並列,加上每月預估支出與未來可能支出。
+      這是網站從第一版就有的設計,不是本次優化新增——因此在模擬中兩組都是滿足。
+    </figcaption>
+  </figure>
+
+  <div class="driver">
+    <h4><span class="w">隱私 34 / 戒心 20</span>D3・不被監視</h4>
+    <blockquote class="ev" style="margin:6px 0 0">
+      「我覺得它有點像<strong>電子腳鐐</strong>⋯但我覺得我們沒有辦法去講抗拒這樣子的事情的人就是壞人,
+      他很有可能只是非常在意自己的隱私而已。」
+      <span class="src">訪談 2</span>
+    </blockquote>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag off">未滿足</span>
+      <img src="shots/d3-off.png" alt="對照組90天支持頁,標題之後直接進入時間軸">
+      <figcaption>標題後直接進入時間軸,對「會不會被監視」完全沒有回應。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag on">滿足</span>
+      <img src="shots/d3-on.png" alt="金絲雀組180天支持頁,標題後多出先說清楚這不是在盯著你的四點說明">
+      <figcaption>「先說清楚:這不是在盯著你」——<strong>系統提醒不是人催、只有中途看得到、節奏可自調、一句話就夠</strong>。</figcaption>
+    </figure>
+  </div>
+
+  <div class="driver">
+    <h4><span class="w">新手 30</span>D4・流程不繁瑣</h4>
+    <blockquote class="ev" style="margin:6px 0 0">
+      「我發現大家點進去表單,<strong>看到那一堆問題的時候,就不會有人填了</strong>。」
+      <span class="src">訪談 3・社團管理員。訪談 4 亦稱「問卷一出去人就不見了」。</span>
+    </blockquote>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag off">未滿足</span>
+      <img src="shots/d4-off.png" alt="對照組測驗第7題,進度條下方直接是題目卡片">
+      <figcaption>只有進度條。填到一半沒有任何收穫,棄填成本極低。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag on">滿足</span>
+      <img src="shots/d4-on.png" alt="金絲雀組測驗第7題,進度條下方多出綠色回饋區塊顯示有8位夥伴合得來">
+      <figcaption>第 6 題起顯示「有 <strong>8</strong> 位夥伴的作息和你合得來」,並附「答案都會留著」的出口。</figcaption>
+    </figure>
+  </div>
+
+  <div class="driver">
+    <h4><span class="w">共感 22 / 新手 18</span>D5・遇到問題有人幫<span style="color:var(--sage);font-weight:400"> ・兩組皆已滿足</span></h4>
+    <blockquote class="ev" style="margin:6px 0 0">
+      「你有任何的問題打電話給我們其實是沒有關係的⋯提供物資協助,甚至<strong>我們提供人力過去陪你</strong>。」
+      <span class="src">訪談 2</span>
+    </blockquote>
+  </div>
+  <figure>
+    <span class="tag both">基準即已滿足</span>
+    <img src="shots/d5-both.png" alt="危機求助頁的七個情境卡片與如果真的無法繼續照顧的說明">
+    <figcaption>
+      七個情境(搬家、出差、失業、突發醫療、家人反對、照顧者住院、真的無法繼續)與非責備文案
+      「遇到問題不代表你不適合」。同樣是第一版就有的設計。
+    </figcaption>
+  </figure>
+
+  <div class="driver">
+    <h4><span class="w">共感 14 / 家庭 10</span>D6・負擔得起<span style="color:var(--brand);font-weight:400"> ・唯一到 S4 才滿足的因子</span></h4>
+    <blockquote class="ev" style="margin:6px 0 0">
+      「影響認養最強的因素之一是<strong>行為控制知覺</strong>,也就是經濟能力與資訊是否清楚。」
+      <span class="src">市場報告引政大 2021 研究</span>
+    </blockquote>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag off">未滿足(S3)</span>
+      <img src="shots/d6-off.png" alt="第三階的奧利歐詳情頁,真實樣貌之後直接進入健康與醫療,沒有支持包">
+      <figcaption>看得到牠了,但照顧成本仍全部由認養人承擔。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag on">滿足(S4)</span>
+      <img src="shots/d6-on.png" alt="第四階的奧利歐詳情頁,多出已經等了209天所以我們多做了這些,含醫療補助兩週試養接送與諮詢四張卡">
+      <figcaption>「奧利歐已經等了 <strong>209 天</strong>,所以我們多做了這些」——醫療補助、兩週試養、接送、諮詢。</figcaption>
+    </figure>
+  </div>
+
+  <div class="driver">
+    <h4><span class="w">家庭 26</span>D7・說得動家人房東</h4>
+    <blockquote class="ev" style="margin:6px 0 0">
+      「<strong>同住家人一定要同意</strong>,因為曾經有碰過說小孩他想認養,可是後來父母不同意。」
+      <span class="src">訪談 4;訪談 3 亦問「他的房東有沒有同意讓他養貓」。</span>
+    </blockquote>
+  </div>
+  <div class="ba">
+    <figure>
+      <span class="tag off">未滿足</span>
+      <img src="shots/d7-off.png" alt="對照組流程頁,五步驟之後直接接到居家安全確認與改善協助">
+      <figcaption>五步驟之後沒有任何可轉傳給第三方的內容,使用者得自己去說服。</figcaption>
+    </figure>
+    <figure>
+      <span class="tag on">滿足</span>
+      <img src="shots/d7-on.png" alt="金絲雀組流程頁,多出卡住的通常不是你是還沒點頭的人,含給房東與給同住家人兩張說明卡">
+      <figcaption>「卡住的通常不是你,是還沒點頭的人」——給房東與給同住家人的<strong>可轉傳說明</strong>。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 03 結果 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">03</span>模擬結果</h2>
+
+  <h3>3.1 因子滿足情形(實測)</h3>
+  <table>
+    <thead><tr><th style="width:28%">驅動因子</th><th class="num">現況市場</th><th class="num">S1</th><th class="num">S2</th><th class="num">S3</th><th class="num">S4</th></tr></thead>
+    <tbody>
+      <tr><td class="h">D1 不被審判</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">D2 資訊完整可判斷</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">D3 不被監視</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">D4 流程不繁瑣</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr><td class="h">D5 遇到問題有人幫</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+      <tr style="background:var(--brand-tint)"><td class="h">D6 負擔得起</td><td class="num">✘</td><td class="num">✘</td><td class="num">✘</td><td class="num">✘</td><td class="num">✔</td></tr>
+      <tr><td class="h">D7 說得動家人房東</td><td class="num">✘</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td><td class="num">✔</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 覆蓋率、滿意度與推薦率</h3>
+  <table>
+    <thead><tr><th style="width:26%">階段</th><th class="num">需求覆蓋率<br><span style="font-weight:400">實測</span></th><th class="num">滿意度<br><span style="font-weight:400">推估</span></th><th class="num">推薦者</th><th class="num">貶抑者</th><th class="num">NPS</th></tr></thead>
+    <tbody>
+      <tr><td class="h">現況市場(對照組)</td><td class="num">33</td><td class="num">29</td><td class="num">0%</td><td class="num">100%</td><td class="num down"><strong>−100</strong></td></tr>
+      <tr style="background:var(--sage-tint)"><td class="h">S1 信任與摩擦</td><td class="num">91</td><td class="num">81</td><td class="num">30%</td><td class="num">22%</td><td class="num">+8</td></tr>
+      <tr><td class="h">S2 久候曝光</td><td class="num">91</td><td class="num">81</td><td class="num">30%</td><td class="num">22%</td><td class="num">+8</td></tr>
+      <tr><td class="h">S3 久候媒合</td><td class="num">91</td><td class="num">81</td><td class="num">30%</td><td class="num">22%</td><td class="num">+8</td></tr>
+      <tr style="background:var(--brand-tint)"><td class="h">S4 久候門檻</td><td class="num">100</td><td class="num">88</td><td class="num">50%</td><td class="num">0%</td><td class="num up"><strong>+50</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 三個發現</h3>
+  <div class="card">
+    <h4>① 最大的一躍在 S1,不是久候功能</h4>
+    <p style="margin:0">覆蓋率 33 → 91、滿意度 29 → 81。D1、D3、D4、D7 四個因子一次補齊。
+      <strong>信任與摩擦這一組才是本平台的主要差異化來源。</strong></p>
+  </div>
+  <div class="card">
+    <h4>② S2 與 S3 對認養人滿意度毫無貢獻</h4>
+    <p style="margin:0">覆蓋率停在 91 不動。久候曝光與久候排序是<strong>為動物做的</strong>,不是為認養人做的——
+      它們提升久候動物的機會(已於前一份策略階梯報告證實),但不會讓使用者更滿意。
+      <strong>兩者必須用不同指標評估,不能混在同一組 KPI。</strong></p>
+  </div>
+  <div class="card">
+    <h4>③ 把 NPS 從 +8 拉到 +50 的是 D6「負擔得起」</h4>
+    <p style="margin:0">S4 的支持包補上最後一個未滿足因子,貶抑者歸零。
+      與報告「行為控制知覺是影響認養意願最強因素之一」的判斷一致。</p>
+  </div>
+
+  <h3>3.4 期待落差:誰會推薦,誰不會</h3>
+  <table>
+    <thead><tr><th style="width:24%">Persona</th><th class="num">占比</th><th class="num">進站前期待</th><th class="num">滿意度</th><th class="num">落差</th><th>分類</th></tr></thead>
+    <tbody>
+      <tr><td class="h">可培育新手</td><td class="num">28%</td><td class="num">78</td><td class="num">88</td><td class="num">+10</td><td>被動者</td></tr>
+      <tr><td class="h">隱私敏感專業者</td><td class="num">18%</td><td class="num">62</td><td class="num">88</td><td class="num up">+26</td><td>推薦者</td></tr>
+      <tr><td class="h">共感陪伴型</td><td class="num">22%</td><td class="num">85</td><td class="num">88</td><td class="num">+3</td><td>被動者</td></tr>
+      <tr><td class="h">家庭決策者</td><td class="num">20%</td><td class="num">70</td><td class="num">88</td><td class="num up">+18</td><td>推薦者</td></tr>
+      <tr style="background:var(--sage-tint)"><td class="h">戒心回流者</td><td class="num">12%</td><td class="num">45</td><td class="num">88</td><td class="num up"><strong>+43</strong></td><td><strong>推薦者</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>反直覺的一點:</strong>被平台傷害過的「戒心回流者」落差最大(+43),是最強的推薦者;
+    期待最高的「共感陪伴型」即使滿意度相同,落差只有 +3,仍然只是被動者。
+    <strong>對期待高的人,做到 88 分換不來推薦。</strong>
+    這直接意味著:<strong>行銷不應該先把期待值拉高</strong>——那會直接吃掉推薦率。
+  </div>
+</section>
+
+<!-- 04 壓力測試 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">04</span>最大風險:承諾兌現不了</h2>
+
+  <p class="lead">
+    上面所有的滿意度都建立在一組承諾上:90/180 天支持、醫療補助、兩週試養、接送到府、行為諮詢。
+    但這些承諾需要人力,而人力正是這個產業最缺的東西。
+  </p>
+
+  <table>
+    <thead><tr><th style="width:34%">情境</th><th class="num">滿意度</th><th class="num">NPS</th><th class="num">相對基準</th></tr></thead>
+    <tbody>
+      <tr><td class="h">基準(全部兌現)</td><td class="num">88</td><td class="num">+50</td><td class="num">—</td></tr>
+      <tr style="background:var(--warn-tint)"><td class="h">求助回覆延遲到 3 天</td><td class="num">75</td><td class="num down"><strong>−20</strong></td><td class="num down">NPS −70</td></tr>
+      <tr><td class="h">醫療補助排隊或暫停</td><td class="num">81</td><td class="num">+8</td><td class="num down">NPS −42</td></tr>
+      <tr style="background:var(--warn-tint)"><td class="h">兩者同時發生</td><td class="num">67</td><td class="num down"><strong>−40</strong></td><td class="num down">NPS −90</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <p style="margin:0">
+      <strong>只要一項承諾沒兌現,NPS 從 +50 掉到 −20,落差 <span class="big down">70 分</span>。</strong>
+      因為平台的價值主張<strong>就是</strong>那些承諾;承諾落空時使用者失去的不只是一項功能,
+      而是「這個平台跟以前那些不一樣」這個判斷本身。
+    </p>
+  </div>
+
+  <h3>4.1 這不是假設性風險</h3>
+  <blockquote class="ev">
+    「照顧、就醫、接電話、清潔多半是同幾個人在做⋯<strong>我沒空</strong>。」
+    <span class="src">訪談 4,談自己無法持續盯著認養人的原因。</span>
+  </blockquote>
+  <blockquote class="ev">
+    「我送養 100 隻貓,每一隻貓你說一個禮拜要回報一次,或一個月要回報一次,<strong>我哪會記得</strong>。」
+    <span class="src">訪談 2。</span>
+  </blockquote>
+  <p>
+    市場報告的數字與此一致:全國動保四類人力合計僅 <strong>1,127 人</strong>,
+    對應 27,438 隻收容流量與 141,584 隻遊蕩犬推估量,屬「高壓低冗餘」系統。
+  </p>
+
+  <h3>4.2 因此的產品建議</h3>
+  <div class="card">
+    <h4>① 承諾與量能綁定,不要寫死在頁面上</h4>
+    <p style="margin:0">
+      醫療補助、試養期、接送應改為<strong>依中途當期量能動態顯示</strong>;沒有量能時就不顯示。
+      少一項功能的損失(NPS −42),遠小於顯示了卻做不到的損失。
+    </p>
+  </div>
+  <div class="card">
+    <h4>② 回應時間要公開且保守</h4>
+    <p style="margin:0">
+      目前寫「1–2 個工作天內回覆」。建議改為顯示該中途<strong>近 30 天的實際回覆中位數</strong>,
+      並允許中途標記「本週已滿」。<strong>誠實的慢,好過失信的快。</strong>
+    </p>
+  </div>
+  <div class="card">
+    <h4>③ 先做中途端減負,再做認養人端擴張</h4>
+    <p style="margin:0">
+      訪談 2 唯一主動說「所有的中途都會好很多」的功能是自動化的回報系統。
+      中途省下的時間,才是兌現承諾的原料。
+    </p>
+  </div>
+</section>
+
+<!-- 05 限制 -->
+<section class="chapter">
+  <h2 class="ch"><span class="num">05</span>限制與後續驗證</h2>
+
+  <h3>5.1 這份模擬不能拿來說什麼</h3>
+  <div class="callout warn">
+    <ul style="margin:0">
+      <li><strong>只有覆蓋率是實測的。</strong>滿意度與 NPS 是經係數與假設換算的推估值,
+        沒有任何真人回答過問卷。不可對外引用為「使用者滿意度調查結果」。</li>
+      <li><strong>Persona 權重與市場占比由我設定。</strong>依據是訪談中各類型反覆表達的在意程度,
+        但無量化調查支持——報告本身即指出領養者年齡與地區<strong>全國官方未取得</strong>。</li>
+      <li><strong>驅動因子是二元的。</strong>「有做/沒做」無法反映做得好壞,
+        這正是第一版模型跑出 100 分的原因,也是必須加折減係數的原因。</li>
+      <li><strong>NPS 分界(落差 ≥15 為推薦者)是我設的。</strong>真實的推薦門檻需要實測校準。</li>
+    </ul>
+  </div>
+
+  <h3>5.2 建議的驗證順序</h3>
+  <table>
+    <thead><tr><th style="width:10%">順序</th><th style="width:30%">要驗證什麼</th><th>方法與最小樣本</th></tr></thead>
+    <tbody>
+      <tr><td class="h">1</td><td>七個因子的<strong>權重</strong>是否正確</td><td>最大差異量表(MaxDiff),n≈120,可在單一中途的既有認養人名單上做</td></tr>
+      <tr><td class="h">2</td><td>進站前<strong>期待值</strong>的真實分布</td><td>落地頁前置單題(1–10),n≈300,成本近乎為零</td></tr>
+      <tr><td class="h">3</td><td>執行品質係數 0.88 是否合理</td><td>S1 金絲雀跑滿 4 週後對實際使用者發 CSAT,與覆蓋率回歸對照</td></tr>
+      <tr><td class="h">4</td><td>履約失敗的真實代價</td><td>不需實驗——直接記錄回覆時間,與該案後續 NPS 做相關分析</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 一句話總結</h3>
+  <div class="callout good">
+    <p style="margin:0">
+      模擬顯示這個網站能把使用者體驗從現況的 <strong>NPS −100</strong> 帶到 <strong>+50</strong>,
+      而且最大的貢獻來自「不被審判、不被監視、流程不繁瑣、說得動家人」這一組信任設計,
+      不是久候動物功能。但整個 +50 <strong>建立在承諾能兌現的前提上</strong>——
+      一項沒做到就掉到 −20,比不做還糟。
+      因此上線前最該做的不是再加功能,而是<strong>把承諾綁到真實量能上</strong>。
+    </p>
+  </div>
+
+  <div class="foot">
+    <p style="margin:0 0 6px"><strong>可重現性</strong></p>
+    <p style="margin:0">
+      模擬腳本 <code>ux-test/market-response.mjs</code>(<code>EXPORT=</code> 可輸出 JSON);
+      截圖腳本 <code>ux-test/capture-driver-shots.mjs</code>,對執行中的網站擷取,未經修圖。
+      每組對照皆為同一網址、同一視窗尺寸,僅切換分組或發布階段。
+      訪談與報告引文均為原文節錄。網站中所有信任數字、捐款流向與幸福回報時間軸皆標註為示意資料。
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
