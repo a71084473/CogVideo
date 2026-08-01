@@ -44,10 +44,13 @@ export default function StoryboardResult({ storyboard, onRegenerate, generating 
   }
 
   return (
-    <section id="result" className="border-b border-line">
+    <section id="result" aria-labelledby="result-heading" className="border-b border-line">
       <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
         <div className="mb-3 flex items-end justify-between">
-          <h2 className="font-serif text-2xl tracking-wide text-ink md:text-3xl">
+          <h2
+            id="result-heading"
+            className="font-serif text-2xl tracking-wide text-ink md:text-3xl"
+          >
             回憶的四幕
           </h2>
           <span className="text-xs tracking-widest2 text-faint">02 / GALLERY</span>
@@ -78,15 +81,18 @@ export default function StoryboardResult({ storyboard, onRegenerate, generating 
         {/* 操作列 */}
         <div className="mt-10 flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
           <button
+            type="button"
             onClick={onRegenerate}
             disabled={generating}
-            className="border border-ink px-8 py-3 text-sm tracking-widest2 text-ink transition-colors hover:bg-ink hover:text-paper disabled:cursor-not-allowed disabled:border-line disabled:text-faint"
+            aria-busy={generating}
+            className="border border-ink px-8 py-3 text-sm tracking-widest2 text-ink transition-colors hover:bg-ink hover:text-paper disabled:cursor-not-allowed disabled:border-field disabled:text-faint"
           >
             {generating ? '重新拆解中……' : '重新生成'}
           </button>
           <button
+            type="button"
             onClick={copyBoard}
-            className="border border-line px-8 py-3 text-sm tracking-widest2 text-ink transition-colors hover:border-ink"
+            className="border border-field px-8 py-3 text-sm tracking-widest2 text-ink transition-colors hover:border-ink"
           >
             {copied ? '已複製 ✓' : '複製分鏡表'}
           </button>
@@ -94,6 +100,11 @@ export default function StoryboardResult({ storyboard, onRegenerate, generating 
             複製後可貼給家人，或收進家族的回憶記錄裡。
           </p>
         </div>
+
+        {/* 複製結果的狀態播報（WCAG 4.1.3 Status Messages） */}
+        <p role="status" className="sr-only">
+          {copied ? '分鏡表已複製到剪貼簿' : ''}
+        </p>
       </div>
     </section>
   )

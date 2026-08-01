@@ -15,12 +15,25 @@ interface Props {
   className?: string
 }
 
+/** 場景的中文名稱，供輔助科技朗讀（取代原本朗讀英文代碼的做法） */
+const SCENE_LABELS: Record<SceneType, string> = {
+  'window-rain': '窗與雨',
+  'empty-room': '空房間與椅子',
+  'street-lamp': '夜街與路燈',
+  corridor: '長廊與盡頭的光',
+  'sea-horizon': '海平線',
+  'door-light': '微開的門與光',
+  'mountain-path': '山稜與小徑',
+  'city-skyline': '城市建築輪廓',
+}
+
 export default function SceneSketch({ scene, className = '' }: Props) {
   return (
     <svg
       viewBox="0 0 240 150"
       role="img"
-      aria-label={`場景草圖：${scene}`}
+      aria-label={`黑白線框場景草圖：${SCENE_LABELS[scene]}`}
+      focusable="false"
       className={`h-full w-full ${className}`}
       fill="none"
       strokeLinecap="round"

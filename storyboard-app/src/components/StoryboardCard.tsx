@@ -8,15 +8,21 @@ interface Props {
 
 /** 單一分鏡卡片：階段、線框場景、摘要、背景描述、情緒 */
 export default function StoryboardCard({ beat, index }: Props) {
+  const headingId = `beat-${beat.stage}-${index}`
+
   return (
     <article
+      aria-labelledby={headingId}
       className="flex animate-fadeUp flex-col border border-ink bg-paper"
       style={{ animationDelay: `${index * 0.12}s` }}
     >
-      {/* 階段標頭 */}
+      {/* 階段標頭：h3 銜接區塊的 h2，維持標題層級連續 */}
       <div className="flex items-baseline justify-between border-b border-line px-5 py-3">
-        <span className="font-serif text-2xl text-ink">{beat.stage}</span>
-        <span className="text-[10px] tracking-widest2 text-faint">
+        <h3 id={headingId} className="font-serif text-2xl text-ink">
+          {beat.stage}
+          <span className="sr-only">：第 {index + 1} 幕</span>
+        </h3>
+        <span aria-hidden className="text-xs tracking-widest2 text-faint">
           SC.{String(index + 1).padStart(2, '0')}
         </span>
       </div>
@@ -29,15 +35,17 @@ export default function StoryboardCard({ beat, index }: Props) {
       <div className="flex flex-1 flex-col gap-4 px-5 py-5">
         <p className="font-serif text-base leading-relaxed text-ink">{beat.summary}</p>
 
-        <div>
-          <h4 className="mb-1 text-[10px] tracking-widest2 text-faint">背景畫面</h4>
-          <p className="text-sm leading-relaxed text-neutral-600">{beat.sceneDescription}</p>
-        </div>
+        <dl className="flex flex-1 flex-col gap-4">
+          <div>
+            <dt className="mb-1 text-xs tracking-widest2 text-faint">背景畫面</dt>
+            <dd className="text-sm leading-relaxed text-neutral-600">{beat.sceneDescription}</dd>
+          </div>
 
-        <div className="mt-auto border-t border-line pt-3">
-          <h4 className="mb-1 text-[10px] tracking-widest2 text-faint">情緒氛圍</h4>
-          <p className="text-sm text-ink">{beat.mood}</p>
-        </div>
+          <div className="mt-auto border-t border-line pt-3">
+            <dt className="mb-1 text-xs tracking-widest2 text-faint">情緒氛圍</dt>
+            <dd className="text-sm text-ink">{beat.mood}</dd>
+          </div>
+        </dl>
       </div>
     </article>
   )

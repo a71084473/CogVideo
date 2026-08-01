@@ -37,9 +37,12 @@ export default function App() {
       }
       attemptRef.current += 1
       setStoryboard(next)
-      // 生成後把畫面帶到結果區
+      // 生成後把畫面帶到結果區（尊重「減少動態效果」偏好）
       window.setTimeout(() => {
-        document.getElementById('result')?.scrollIntoView({ behavior: 'smooth' })
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        document
+          .getElementById('result')
+          ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' })
       }, 80)
     } catch (e) {
       setError(e instanceof Error ? e.message : '生成失敗，請再試一次。')
@@ -50,25 +53,34 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
+      {/* 略過前言，直接跳到輸入區（WCAG 2.4.1 Bypass Blocks） */}
+      <a
+        href="#input"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:border focus:border-ink focus:bg-paper focus:px-4 focus:py-2 focus:text-sm focus:text-ink"
+      >
+        跳到「說一段您的回憶」
+      </a>
       <Hero />
-      <StoryInput
-        story={story}
-        onStoryChange={setStory}
-        onGenerate={generate}
-        generating={generating}
-        usingRealApi={Boolean(apiKey)}
-        error={error}
-        settings={<ApiKeySettings apiKey={apiKey} onApiKeyChange={saveApiKey} />}
-      />
-      {storyboard && (
-        <StoryboardResult
-          storyboard={storyboard}
-          onRegenerate={generate}
+      <main>
+        <StoryInput
+          story={story}
+          onStoryChange={setStory}
+          onGenerate={generate}
           generating={generating}
+          usingRealApi={Boolean(apiKey)}
+          error={error}
+          settings={<ApiKeySettings apiKey={apiKey} onApiKeyChange={saveApiKey} />}
         />
-      )}
+        {storyboard && (
+          <StoryboardResult
+            storyboard={storyboard}
+            onRegenerate={generate}
+            generating={generating}
+          />
+        )}
+      </main>
       <footer className="mx-auto max-w-5xl px-6 py-10">
-        <p className="text-[10px] tracking-widest2 text-faint">
+        <p className="text-xs tracking-widest2 text-faint">
           MEMORY · GALLERY — 把回憶留成藝術品
         </p>
       </footer>

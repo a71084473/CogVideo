@@ -22,7 +22,10 @@ export default function ApiKeySettings({ apiKey, onApiKeyChange }: Props) {
   return (
     <div className="mt-6 border-t border-line pt-4">
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls="api-key-panel"
         className="flex items-center gap-3 text-xs tracking-widest text-faint hover:text-ink"
       >
         <span
@@ -31,12 +34,19 @@ export default function ApiKeySettings({ apiKey, onApiKeyChange }: Props) {
             apiKey ? 'border-ink bg-ink' : 'border-faint'
           }`}
         />
-        {apiKey ? 'AI 已連線 · Claude 真實生成' : 'AI 未連線 · 目前使用 mock 資料'}
+        {apiKey ? 'AI 已連線 · Claude 真實生成' : 'AI 未連線 · 目前使用示範資料'}
         <span className="underline underline-offset-4">{open ? '收合' : '設定 API Key'}</span>
       </button>
 
       {open && (
-        <div className="mt-4 max-w-xl border border-line p-4">
+        <form
+          id="api-key-panel"
+          onSubmit={(e) => {
+            e.preventDefault()
+            save()
+          }}
+          className="mt-4 max-w-xl border border-line p-4"
+        >
           <label htmlFor="api-key" className="mb-2 block text-xs tracking-widest text-faint">
             ANTHROPIC API KEY
           </label>
@@ -44,24 +54,26 @@ export default function ApiKeySettings({ apiKey, onApiKeyChange }: Props) {
             <input
               id="api-key"
               type="password"
+              autoComplete="off"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="sk-ant-..."
-              className="flex-1 border border-line bg-transparent px-3 py-2 font-mono text-sm text-ink placeholder:text-faint focus:border-ink focus:outline-none"
+              aria-describedby="api-key-help"
+              className="flex-1 border border-field bg-transparent px-3 py-2 font-mono text-sm text-ink placeholder:text-faint focus:border-ink"
             />
             <button
-              onClick={save}
+              type="submit"
               className="border border-ink px-4 py-2 text-xs tracking-widest text-ink hover:bg-ink hover:text-paper"
             >
               儲存
             </button>
           </div>
-          <p className="mt-3 text-xs leading-relaxed text-faint">
+          <p id="api-key-help" className="mt-3 text-xs leading-relaxed text-faint">
             金鑰只會存在你瀏覽器的 localStorage，並直接從瀏覽器呼叫 Claude API，
             不經過任何伺服器。清空欄位並儲存即可移除。
             （正式產品建議改用後端代理保護金鑰。）
           </p>
-        </div>
+        </form>
       )}
     </div>
   )

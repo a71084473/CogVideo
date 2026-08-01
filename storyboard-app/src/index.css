@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 為年長使用者放大整體字級（rem 基準） */
+/* 為年長使用者放大整體字級。
+   使用百分比而非固定 px，讓瀏覽器的字級偏好設定仍能生效（WCAG 1.4.4 Resize Text）。 */
 html {
-  font-size: 17px;
+  font-size: 106.25%; /* 預設 16px 時 = 17px */
 }
 @media (min-width: 768px) {
   html {
-    font-size: 18px;
+    font-size: 112.5%; /* 預設 16px 時 = 18px */
   }
 }
 
@@ -22,4 +23,28 @@ body {
 ::selection {
   background: #1a1a1a;
   color: #fafaf8;
+}
+
+/* 全站一致的鍵盤焦點指示（WCAG 2.4.7 Focus Visible）。
+   ink 對 paper 為 16.6:1，遠高於 3:1 的非文字對比要求。 */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #1a1a1a;
+  outline-offset: 2px;
+}
+
+/* 尊重「減少動態效果」的系統偏好（WCAG 2.3.3 / 2.2.2） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

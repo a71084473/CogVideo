@@ -60,11 +60,26 @@ export default function StoryInput({
   const mmss = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
   const canGenerate = story.trim().length > 0 && !generating
 
+  /** 螢幕閱讀器用的狀態播報（WCAG 4.1.3 Status Messages）。
+   *  刻意不含每秒變動的計時器，避免不斷打斷使用者。 */
+  const statusMessage = generating
+    ? '正在生成分鏡，請稍候'
+    : recState === 'recording'
+      ? '錄音中，按下停止按鈕結束錄音'
+      : recState === 'transcribing'
+        ? '正在把聲音整理成文字'
+        : recState === 'done'
+          ? '語音轉換完成，可以編輯文字'
+          : ''
+
   return (
-    <section id="input" className="border-b border-line">
+    <section id="input" aria-labelledby="input-heading" className="border-b border-line">
       <div className="mx-auto max-w-5xl px-6 py-16 md:py-20">
         <div className="mb-3 flex items-end justify-between">
-          <h2 className="font-serif text-2xl tracking-wide text-ink md:text-3xl">
+          <h2
+            id="input-heading"
+            className="font-serif text-2xl tracking-wide text-ink md:text-3xl"
+          >
             說一段您的回憶
           </h2>
           <span className="text-xs tracking-widest2 text-faint">01 / MEMORY</span>
@@ -73,8 +88,14 @@ export default function StoryInput({
           不用想得太完整，想到什麼說什麼就好——一件老東西、一條街、一個下午。
         </p>
 
-        {/* 文字 / 聲音 切換 */}
-        <div className="mb-6 inline-flex border border-ink" role="tablist" aria-label="輸入模式">
+        {/* 狀態播報區：視覺隱藏，僅供輔助科技 */}
+        <p role="status" className="sr-only">
+          {statusMessage}
+        </p>
+
+        {/* 文字 / 聲音 切換：以 aria-pressed 切換按鈕表示，
+            避免 tab 角色缺少 tabpanel 與方向鍵操作的問題 */}
+        <div className="mb-6 inline-flex border border-ink" role="group" aria-label="輸入方式">
           {(
             [
               ['text', '文字輸入'],
@@ -83,8 +104,8 @@ export default function StoryInput({
           ).map(([m, label]) => (
             <button
               key={m}
-              role="tab"
-              aria-selected={mode === m}
+              type="button"
+              aria-pressed={mode === m}
               onClick={() => setMode(m)}
               className={`px-5 py-2 text-sm tracking-widest transition-colors ${
                 mode === m ? 'bg-ink text-paper' : 'bg-transparent text-ink hover:bg-neutral-100'
@@ -96,18 +117,25 @@ export default function StoryInput({
         </div>
 
         {mode === 'text' ? (
-          <textarea
-            value={story}
-            onChange={(e) => onStoryChange(e.target.value)}
-            placeholder="說一段你想被記住的故事……"
-            rows={7}
-            className="w-full resize-y border border-line bg-transparent p-5 font-serif text-lg leading-loose text-ink placeholder:text-faint focus:border-ink focus:outline-none"
-          />
+          <>
+            <label htmlFor="story-text" className="sr-only">
+              您的回憶（文字輸入）
+            </label>
+            <textarea
+              id="story-text"
+              value={story}
+              onChange={(e) => onStoryChange(e.target.value)}
+              placeholder="說一段你想被記住的故事……"
+              rows={7}
+              className="w-full resize-y border border-field bg-transparent p-5 font-serif text-lg leading-loose text-ink placeholder:text-faint focus:border-ink"
+            />
+          </>
         ) : (
-          <div className="flex flex-col items-center border border-line px-6 py-12">
+          <div className="flex flex-col items-center border border-field px-6 py-12">
             {recState === 'idle' && (
               <>
                 <button
+                  type="button"
                   onClick={startRecording}
                   aria-label="開始錄音"
                   className="flex h-20 w-20 items-center justify-center rounded-full border border-ink transition-colors hover:bg-ink hover:text-paper"
@@ -123,6 +151,7 @@ export default function StoryInput({
             {recState === 'recording' && (
               <>
                 <button
+                  type="button"
                   onClick={stopRecording}
                   aria-label="停止錄音"
                   className="relative flex h-20 w-20 items-center justify-center rounded-full border border-ink"
@@ -130,7 +159,10 @@ export default function StoryInput({
                   <span className="absolute inset-0 animate-breathe rounded-full border border-faint" />
                   <span className="h-6 w-6 bg-ink" aria-hidden />
                 </button>
-                <p className="mt-5 font-mono text-sm tabular-nums text-ink">{mmss}</p>
+                <p className="mt-5 font-mono text-sm tabular-nums text-ink">
+                  <span className="sr-only">已錄音 </span>
+                  {mmss}
+                </p>
                 <p className="mt-1 text-xs tracking-widest text-faint">錄音中 · 點擊方塊停止</p>
                 {/* 線框聲波 */}
                 <div className="mt-4 flex h-6 items-end gap-1" aria-hidden>
@@ -147,23 +179,28 @@ export default function StoryInput({
 
             {recState === 'transcribing' && (
               <>
-                <div className="h-20 w-20 animate-breathe rounded-full border border-dashed border-faint" />
+                <div
+                  aria-hidden
+                  className="h-20 w-20 animate-breathe rounded-full border border-dashed border-faint"
+                />
                 <p className="mt-5 text-sm tracking-widest text-faint">正在把聲音整理成文字……</p>
               </>
             )}
 
             {recState === 'done' && (
               <div className="w-full">
-                <p className="mb-3 text-xs tracking-widest text-faint">
+                <label htmlFor="story-voice" className="mb-3 block text-xs tracking-widest text-faint">
                   轉換完成 · 你可以直接編輯
-                </p>
+                </label>
                 <textarea
+                  id="story-voice"
                   value={story}
                   onChange={(e) => onStoryChange(e.target.value)}
                   rows={5}
-                  className="w-full resize-y border border-line bg-transparent p-5 font-serif text-lg leading-loose text-ink focus:border-ink focus:outline-none"
+                  className="w-full resize-y border border-field bg-transparent p-5 font-serif text-lg leading-loose text-ink focus:border-ink"
                 />
                 <button
+                  type="button"
                   onClick={resetRecording}
                   className="mt-3 text-xs tracking-widest text-faint underline underline-offset-4 hover:text-ink"
                 >
@@ -177,9 +214,11 @@ export default function StoryInput({
         {/* 生成按鈕 */}
         <div className="mt-8 flex flex-col items-start gap-3 md:flex-row md:items-center md:gap-6">
           <button
+            type="button"
             onClick={onGenerate}
             disabled={!canGenerate}
-            className="border border-ink bg-ink px-10 py-3 text-sm tracking-widest2 text-paper transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-faint"
+            aria-busy={generating}
+            className="border border-ink bg-ink px-10 py-3 text-sm tracking-widest2 text-paper transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:border-field disabled:bg-transparent disabled:text-faint"
           >
             {generating
               ? usingRealApi
@@ -208,7 +247,15 @@ export default function StoryInput({
 
 function MicIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.2}>
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="h-8 w-8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.2}
+    >
       <rect x={9} y={3} width={6} height={11} rx={3} />
       <path d="M5 11a7 7 0 0 0 14 0" />
       <line x1={12} y1={18} x2={12} y2={21} />
