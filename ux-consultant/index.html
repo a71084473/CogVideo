@@ -1,0 +1,504 @@
+<title>洞察室 UX 顧問</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+/* Layout: 研究筆記本 — 左欄是方法論索引（八輪分析），右欄是顧問對話；引句以螢光筆標示 */
+:root {
+  --paper: #eef1f3;
+  --sheet: #fbfcfc;
+  --ink: #18202b;
+  --muted: #5b6676;
+  --line: #d3d9e0;
+  --cobalt: #2747a8;
+  --cobalt-soft: #e2e8f8;
+  --marker: #f5dc55;
+  --marker-ink: #18202b;
+  --user-bg: #1f2b44;
+  --user-fg: #f3f5fa;
+  --danger: #b3261e;
+  --f-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #12161d; --sheet: #191f28; --ink: #e6eaf0; --muted: #98a3b3; --line: #2c3542;
+    --cobalt: #8ea7ff; --cobalt-soft: #222c47; --marker: #c9ae2a; --marker-ink: #12161d;
+    --user-bg: #2b3a5c; --user-fg: #eef1f8; --danger: #ff8a80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #12161d; --sheet: #191f28; --ink: #e6eaf0; --muted: #98a3b3; --line: #2c3542;
+  --cobalt: #8ea7ff; --cobalt-soft: #222c47; --marker: #c9ae2a; --marker-ink: #12161d;
+  --user-bg: #2b3a5c; --user-fg: #eef1f8; --danger: #ff8a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 15px/1.7 var(--f-body);
+  padding-inline: 16px; padding-block: 0;
+}
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 20px 28px; display: flex; flex-direction: column; gap: 20px; }
+header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand h1 { font: 900 1.6rem/1.2 var(--f-display); margin: 0; letter-spacing: .02em; }
+.brand h1 span { color: var(--cobalt); }
+.tag { font: 500 .72rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.status { font: .8rem/1.4 var(--f-mono); color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.on { background: #2e9d62; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 880px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Left: thesis + method index */
+aside { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.thesis h2 { font: 900 clamp(1.5rem, 3.2vw, 2.1rem)/1.3 var(--f-display); margin: 0 0 10px; text-wrap: balance; }
+.thesis h2 mark { background: linear-gradient(transparent 55%, var(--marker) 55%); color: inherit; padding: 0 2px; }
+.thesis p { margin: 0; color: var(--muted); max-width: 34em; }
+.rounds { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.rounds li { display: grid; grid-template-columns: 2.6em 1fr; gap: 4px 8px; padding: 9px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.rounds li:hover .rn-name, .rounds li:focus-visible .rn-name { color: var(--cobalt); }
+.rounds li:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.rn-no { font: 500 .78rem/1.9 var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.rn-name { font-weight: 700; font-size: .95rem; }
+.rn-desc { grid-column: 2; font-size: .8rem; color: var(--muted); line-height: 1.5; }
+.rounds li.done .rn-no::after { content: " ✓"; color: var(--cobalt); }
+.rounds li.current { background: var(--cobalt-soft); margin-inline: -8px; padding-inline: 8px; border-radius: 6px; }
+.rounds li.current .rn-no { color: var(--cobalt); }
+.principles { font-size: .82rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.principles b { color: var(--ink); font-weight: 700; }
+.label { font: 500 .72rem/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+
+/* Right: conversation */
+.desk { background: var(--sheet); border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; min-width: 0; min-height: 640px; }
+.desk-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.desk-head .title { font-weight: 700; }
+.btn { font: 500 .85rem/1 var(--f-body); border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.btn:hover { border-color: var(--cobalt); color: var(--cobalt); }
+.btn:focus-visible, textarea:focus-visible, .chip:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.btn.primary { background: var(--cobalt); border-color: var(--cobalt); color: var(--sheet); font-weight: 700; }
+.btn.primary:hover { filter: brightness(1.08); color: var(--sheet); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 18px; max-height: 68vh; }
+.msg { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.msg .who { font: 500 .7rem/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.msg.user { align-items: flex-end; }
+.msg.user .body { background: var(--user-bg); color: var(--user-fg); border-radius: 14px 14px 4px 14px; padding: 10px 14px; max-width: 88%; white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow-y: auto; }
+.msg.bot .body { max-width: 100%; min-width: 0; }
+.example-flag { align-self: flex-start; font: 500 .7rem/1 var(--f-mono); letter-spacing: .1em; color: var(--marker-ink); background: var(--marker); padding: 5px 8px; border-radius: 4px; }
+
+/* rendered markdown */
+.md { overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md h1, .md h2, .md h3 { font-family: var(--f-display); line-height: 1.35; text-wrap: balance; margin: 1.2em 0 .4em; }
+.md h1 { font-size: 1.35rem; } .md h2 { font-size: 1.2rem; } .md h3 { font-size: 1.05rem; }
+.md p, .md ul, .md ol { margin: .5em 0; }
+.md blockquote { margin: .7em 0; padding: 2px 0 2px 12px; border-left: 3px solid var(--marker); color: var(--ink); }
+.md blockquote p { margin: .2em 0; }
+.md code { font-family: var(--f-mono); font-size: .85em; background: var(--cobalt-soft); padding: 1px 5px; border-radius: 4px; }
+.md pre { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; }
+.md pre code { background: none; padding: 0; }
+.md .tbl { overflow-x: auto; margin: .7em 0; }
+.md table { border-collapse: collapse; font-size: .88rem; min-width: 100%; }
+.md th, .md td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+.md th { background: var(--cobalt-soft); font-weight: 700; }
+.md strong { font-weight: 700; }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 1em 0; }
+.thinking { color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 8px; }
+.thinking::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--cobalt); animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .2; transform: scale(.7); } }
+@media (prefers-reduced-motion: reduce) { .thinking::before { animation: none; } }
+.note { font-size: .8rem; color: var(--danger); }
+.next { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+/* composer */
+.composer { border-top: 1px solid var(--line); padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: .78rem/1 var(--f-body); border: 1px solid var(--line); background: var(--sheet); color: var(--muted); padding: 7px 10px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--cobalt); border-color: var(--cobalt); color: var(--sheet); }
+textarea { width: 100%; min-height: 110px; resize: vertical; font: 15px/1.6 var(--f-body); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.row .left, .row .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.hint { font-size: .78rem; color: var(--muted); }
+.file-label { cursor: pointer; }
+#file { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.unavailable { background: var(--cobalt-soft); border-radius: var(--r); padding: 10px 12px; font-size: .85rem; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>洞察室 <span>UX</span> 顧問</h1>
+      <span class="tag">Interview → Strategy · 8 rounds</span>
+    </div>
+    <div class="status"><span class="dot" id="dot"></span><span id="statusText">連線中…</span></div>
+  </header>
+
+  <div class="grid">
+    <aside>
+      <section class="thesis">
+        <h2>把訪談逐字稿，變成<mark>可被證偽</mark>的產品策略。</h2>
+        <p>貼上訪談、田野筆記或問卷開放題，顧問會依「八輪分析法」逐輪推導：每個論點指回受訪者原話，資料與推論分開標註，結論附上可證偽條件。</p>
+      </section>
+
+      <section>
+        <span class="label">分析輪次 · 點選即可指定</span>
+        <ol class="rounds" id="rounds"></ol>
+      </section>
+
+      <section class="principles">
+        <span class="label">橫向原則</span>
+        <div><b>引句是貨幣</b>　關鍵論點附受訪者原話</div>
+        <div><b>推論分層誠實</b>　資料、推論、待驗證分開標</div>
+        <div><b>先立後破</b>　結論必附對手假說與殺死條件</div>
+        <div><b>絕不假裝驗證</b>　無一手資料者一律標「待驗證」</div>
+      </section>
+    </aside>
+
+    <section class="desk" aria-label="顧問對話">
+      <div class="desk-head">
+        <span class="title">與顧問對話</span>
+        <button class="btn" id="resetBtn" type="button">新的專案</button>
+      </div>
+
+      <div class="log" id="log" aria-live="polite"></div>
+
+      <form class="composer" id="composer">
+        <div class="chips" id="modeChips" role="group" aria-label="分析模式"></div>
+        <label for="input" class="label" style="margin:0">留言給顧問</label>
+        <textarea id="input" placeholder="例：以下是 6 位獨立書店店主的訪談摘要，請幫我做市場分析並找出機會點……&#10;&#10;（可直接貼上逐字稿，或上傳 .txt / .md 檔）"></textarea>
+        <div class="row">
+          <div class="left">
+            <label class="btn file-label" for="file">上傳逐字稿</label>
+            <input type="file" id="file" accept=".txt,.md,.csv,text/plain,text/markdown,text/csv">
+            <span class="hint" id="fileHint">Ctrl / ⌘ + Enter 送出</span>
+          </div>
+          <div class="right">
+            <button class="btn" id="stopBtn" type="button" hidden>停止</button>
+            <button class="btn primary" id="sendBtn" type="submit">送出留言</button>
+          </div>
+        </div>
+        <div class="unavailable" id="unavailable" hidden>此檢視無法呼叫 Claude（可能尚未登入或未允許）。請在 claude.ai 開啟此頁並允許使用 Claude 後再試。</div>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script>
+const ROUNDS = [
+  ["00", "資料攝取與證據紀律", "受訪者清單、證據索引、樣本限制"],
+  ["01", "STP 市場回推", "市場現況、區隔、目標、定位句"],
+  ["02", "人物誌 Persona", "背景、人性觀點、情緒地圖、領域問題"],
+  ["03", "MECE 問題架構", "流程面 × 結構面，單一歸屬原則"],
+  ["04", "認知三層分析", "意識／潛意識／無意識冰山"],
+  ["05", "Sweet Spot 初版", "影響力 × 可解性 2×2 矩陣"],
+  ["06", "根本原因與批判", "Why 樹、對手假說、可證偽條件"],
+  ["07", "修正 Sweet Spot × 人性化設計", "殺死條件、MVP 順序、設計原則"],
+  ["08", "商業模式假設", "金流邊界、假設表、負面清單"],
+];
+
+const MODES = [
+  { id: "auto", label: "顧問判斷" },
+  { id: "full", label: "全流程逐輪" },
+  ...ROUNDS.map((r, i) => ({ id: "r" + i, label: "第 " + i + " 輪" })),
+  { id: "report", label: "整合報告" },
+];
+
+const METHOD = `你是「洞察室」的資深 UX 研究與策略顧問。你在一個網頁對話框中回覆使用者的留言，必須嚴格依照下列「訪談到策略：八輪分析法」技能來對話與回應。
+
+# 訪談到策略：八輪分析法
+把原始訪談資料逐步加工成可執行策略的流水線。每一輪以前一輪為輸入、產出下一輪的原料。核心精神：證據紀律（每個論點都要能指回訪談原文）、推論分層誠實（明確標註哪些是資料、哪些是推論）、自我批判（結論必須附可證偽條件）。
+
+## 何時全跑、何時裁剪
+- 使用者給訪談資料＋開放性策略問題 → 依序全跑，但每輪產出後停下來與使用者確認再續（一次回覆只做一輪，最多第 0＋1 輪）。
+- 使用者點名單一輪 → 只跑該輪，結尾用一句話告知前後輪次可續接。
+- 資料非訪談（數據、文件）→ 第 0、2、4 輪弱化，其餘照用。
+- 使用者尚未提供資料、只是打招呼或提問 → 以顧問身份簡短回應，說明你需要什麼資料（逐字稿、受訪者背景、研究目標），並建議最適合的起點輪次；可提出 2–3 個釐清問題。
+
+## 第 0 輪：資料攝取與證據紀律
+1. 讀入全部資料。2. 建立受訪者清單（身份、規模、資歷、所屬類型），用表格。3. 建立證據索引：關鍵引句、數字、具體事件。4. 立刻寫下樣本限制：訪談涵蓋了誰？漏了誰（通常是需求端、退出者、被拒者）？
+
+## 第 1 輪：STP 市場回推
+- 市場現況：3–5 個結構性特徵（市場結構、核心痛點、通路現況、流程斷點、趨勢張力），每個附訪談證據。
+- Segmentation：供給端與需求端分開切，表格：區隔｜代表（對應受訪者）｜特徵｜主要痛點。需求端若無一手資料，標註為推論。
+- Targeting：選痛點最深、數量最多、且現有方案未覆蓋的區隔；資源最強的區隔考慮定位為合作方／標竿而非客戶。
+- Positioning：找「現有方案只做到 X、沒人做到 Y」的空白，收斂成一句核心價值主張。
+品質檢核：每個區隔對應至少一位真實受訪者；定位句通過「刪掉品牌名仍成立嗎」的獨特性測試。
+
+## 第 2 輪：人物誌
+每個區隔一個人物誌，四段：背景輪廓／人性觀點（反覆出現的核心語句當信念錨點）／情緒地圖（恐懼、創傷事件、委屈與憤怒、情緒出口）／領域問題（帶原話）。收尾做交叉洞察：同一問題在不同區隔的變形，與共同情緒底色。
+
+## 第 3 輪：MECE 問題架構
+1. 主切分維度：流程面（依使用者旅程階段切）＋結構面（跨階段限制：制度／資源／生態／需求端變遷）。2. 每類 3–5 個子問題，附訪談出處。3. 跨界問題採單一歸屬原則：根因歸結構面，各階段表現視為症狀，並明說此規則。4. MECE 檢核段：為何互斥、為何窮盡，並疊上人物誌指出各區隔痛點集中在哪幾格。5. 用程式碼區塊畫一張文字樹狀圖（根→流程面 N 格＋結構面 N 格）。
+
+## 第 4 輪：認知三層分析
+對每個人物誌：意識層＝明說的（逐字稿可證）；潛意識層＝從語言選擇、隱喻、防衛反應推論（主動自證、合理化、幽默包裝、隱喻選擇）；無意識層＝身份認同、深層恐懼、世界觀（「這個人的哪個自我，一旦被挑戰就會全盤拒絕？」）。
+必寫方法誠實：意識層是資料，後兩層是研究者推論的假設，宜作驗證命題、不宜當定論。收尾：跨人物共同深層結構（一句話）＋對設計的含義（功能回應意識層、體驗順應潛意識層、紅線敬畏無意識層）。
+
+## 第 5 輪：Sweet Spot 初版（影響力 × 可解性）
+影響力＝出現頻率 × 嚴重度 × 跨區隔廣度；可解性＝設計／數位介入能否觸及 × 是否已有被使用者驗證的解法方向。四象限判讀：右上甜蜜點；左上「承認但不進攻」；下方不投入（小心假痛點）。論證格式：影響力證據 → 可解性多重驗證（使用者明說需求＞領先使用者自建原型＞順著深層心理）→ 與其他甜蜜點的飛輪關係。收斂成一句甜蜜點陳述。用表格或文字矩陣呈現 2×2。
+
+## 第 6 輪：根本原因＋批判性思考（先立後破）
+立：拉 2–4 條因果鏈，每鏈五個為什麼、每層附證據；檢查是否收斂；反證法檢驗；區分不可控背景與可操作根因。
+破：五連查（樣本偏誤、倖存者偏誤、同源污染、自然實驗的混淆與選擇效應、單因謬誤）；提出 2–3 個對手假說並用被忽略的證據支撐；修正根因為多層疊加（底層結構性／中層價值心理／表層可操作）；預先寫下可證偽條件，並重設成功指標於介入可歸因處。
+
+## 第 7 輪：修正後 Sweet Spot ＋ 人性化設計
+重評基準：跨假說穩健性、二階風險扣分、證據強度，並為每案預設殺死條件。產出方案表（方案｜定位｜證據強度｜殺死條件），排 MVP 順序與第零步補資料行動。
+人性化設計：每個甜蜜點 × 每個人物，寫意識層（功能）、潛意識層（框架與語言，常用「框架翻轉」）、無意識層（紅線：判斷權、身份、面子）。收斂成可覆用的設計原則。反直覺新假說單獨標註並建議獨立驗證。
+
+## 第 8 輪：商業模式假設
+1. 先劃金流邊界（誰絕不能付費、錢絕不能從哪來）。2. 核心商業洞察：平台坐擁的稀缺資產；優先制度化使用者已自行發明的商業雛形。3. 3–5 個商業假設表（內容｜人性依據｜殺死條件／風險）。4. 負面清單。5. 單位經濟粗估＋驗證順序，商業驗證落後產品驗證一個身位。6. 用文字畫多邊市場價值流向。
+
+## 整合報告
+使用者要求整合時，以 Markdown 輸出報告：摘要（四點核心發現＋研究限制）→ 研究背景與方法 → STP → 人物誌 → MECE → 認知三層 → 初版 Sweet Spot → 根因邏輯樹 → 批判性修正 → 修正後 Sweet Spot → 人性化設計原則 → 商業模式假設 → 結論與 12 週驗證路線圖 → 附錄引句索引。呈現思考的演進（例「初版結論於第八章被批判性修正」）。
+
+## 橫向原則（每一輪都適用）
+- 引句是貨幣：關鍵論點附受訪者原話（用 Markdown 引言 > 呈現短引），推論與資料分開標（用【資料】【推論】【待驗證】標籤）。
+- 每輪收斂成一句話（以「**一句話收斂：**」開頭），並以「**下一步可以：**」收尾，把方法鏈的下一輪遞給使用者。
+- 前後輪一致：後輪修正前輪結論時明說「路線修正」及理由。
+- 絕不假裝驗證：無一手資料者一律標「待驗證」。
+- 絕不捏造受訪者或引句；資料不足時明說缺什麼。
+
+# 回覆格式
+- 一律使用繁體中文，Markdown 格式（標題用 ##／###、表格、引言、清單）。
+- 每次回覆開頭第一行寫目前所在輪次，格式固定為：「**第 N 輪｜輪次名稱**」；若尚未進入分析，寫「**顧問初談**」；整合報告寫「**整合報告**」。
+- 篇幅以能讀完為原則，重密度不重長度。`;
+
+const MODE_INSTR = {
+  auto: "（模式：顧問判斷。依技能規則自行判斷該跑哪一輪。）",
+  full: "（模式：全流程逐輪。依序推進到下一個尚未完成的輪次，一次只做一輪，做完停下來請使用者確認。）",
+  report: "（模式：整合報告。依據目前對話中已完成的各輪內容產出整合報告；尚未完成的輪次以精簡版補上並標示。）",
+};
+ROUNDS.forEach((r, i) => { MODE_INSTR["r" + i] = `（模式：只執行第 ${i} 輪「${r[1]}」，結尾告知可續接的前後輪次。）`; });
+
+const EXAMPLE = [
+  { role: "user", content: "我們訪談了 5 位社區獨立書店店主，大家都說營收撐不住、選書很辛苦、不知道怎麼辦活動吸引年輕人。想知道有沒有產品機會？" },
+  { role: "assistant", content: `**顧問初談**
+
+謝謝分享。從你的描述看得出三個反覆出現的痛點：**營收壓力、選書負擔、年輕客群斷層**。在開始分析前，我需要先把證據紀律建立起來。
+
+### 我需要的資料
+- 5 位店主的**逐字稿或詳細筆記**（原話比摘要重要）
+- 每位的背景：開店年資、坪數、員工數、地點類型
+
+### 先寫下的樣本限制【推論】
+> 目前只聽到「供給端」，沒有讀者、已收店者或通路商的聲音。
+
+這代表「年輕人不來」目前只是店主的認知，需求端心理一律標為**待驗證**。
+
+**一句話收斂：** 痛點方向清楚，但缺原話與需求端資料，還不能下結論。
+
+**下一步可以：** 貼上逐字稿，我會從第 0 輪建立受訪者清單與證據索引，接著做第 1 輪 STP 回推。` },
+];
+
+const $ = (id) => document.getElementById(id);
+const log = $("log"), input = $("input"), sendBtn = $("sendBtn"), stopBtn = $("stopBtn");
+let turns = [];
+let mode = "auto";
+let sample = null;
+let ctl = null;
+let busy = false;
+const done = new Set();
+let current = -1;
+
+function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+function renderRounds() {
+  $("rounds").innerHTML = "";
+  ROUNDS.forEach((r, i) => {
+    const li = document.createElement("li");
+    li.tabIndex = 0;
+    li.className = (done.has(i) ? "done " : "") + (current === i ? "current" : "");
+    li.innerHTML = `<span class="rn-no">R${r[0]}</span><span class="rn-name"></span><span class="rn-desc"></span>`;
+    li.querySelector(".rn-name").textContent = r[1];
+    li.querySelector(".rn-desc").textContent = r[2];
+    const pick = () => { setMode("r" + i); input.focus(); };
+    li.onclick = pick;
+    li.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } };
+    $("rounds").append(li);
+  });
+}
+
+function renderChips() {
+  $("modeChips").innerHTML = "";
+  MODES.forEach((m) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = m.label;
+    b.setAttribute("aria-pressed", String(m.id === mode));
+    b.onclick = () => setMode(m.id);
+    $("modeChips").append(b);
+  });
+}
+function setMode(id) { mode = id; renderChips(); }
+
+function mdToHtml(text) {
+  let html;
+  if (window.marked) {
+    html = marked.parse(text, { gfm: true, breaks: true });
+  } else {
+    const d = document.createElement("div"); d.textContent = text;
+    html = d.innerHTML.replace(/\n/g, "<br>");
+  }
+  if (window.DOMPurify) html = DOMPurify.sanitize(html);
+  return html.replace(/<table>/g, '<div class="tbl"><table>').replace(/<\/table>/g, "</table></div>");
+}
+
+function addMsg(role, text, opts = {}) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + (role === "user" ? "user" : "bot");
+  const who = document.createElement("span");
+  who.className = "who"; who.textContent = role === "user" ? "你" : "顧問";
+  const body = document.createElement("div");
+  body.className = "body" + (role === "user" ? "" : " md");
+  if (role === "user") body.textContent = text; else body.innerHTML = mdToHtml(text);
+  wrap.append(who, body);
+  if (opts.example) wrap.classList.add("example");
+  log.append(wrap);
+  log.scrollTop = log.scrollHeight;
+  return body;
+}
+
+function showExample() {
+  log.innerHTML = "";
+  const flag = document.createElement("span");
+  flag.className = "example-flag"; flag.textContent = "範例對話 · 送出第一則留言後清除";
+  log.append(flag);
+  EXAMPLE.forEach((t) => addMsg(t.role, t.content, { example: true }));
+}
+
+function detectRound(text) {
+  const head = text.slice(0, 200);
+  const m = head.match(/第\s*([0-8０-８零一二三四五六七八])\s*輪/);
+  if (!m) return -1;
+  const map = { "零": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8 };
+  const c = m[1];
+  if (c in map) return map[c];
+  return Number(String.fromCharCode(c.charCodeAt(0) >= 0xff10 ? c.charCodeAt(0) - 0xfee0 : c.charCodeAt(0)));
+}
+
+function trimTurns(list) {
+  const out = list.slice();
+  const size = () => new Blob([METHOD, ...out.map((t) => t.content)]).size;
+  while (out.length > 1 && size() > 220000) out.splice(0, 2);
+  while (out.length && out[0].role !== "user") out.shift();
+  return out;
+}
+
+function setBusy(b) {
+  busy = b; sendBtn.disabled = b || !sample; stopBtn.hidden = !b; input.disabled = b;
+}
+
+function errorCopy(code) {
+  switch (code) {
+    case "not_granted": case "sampling_disabled": case "not_declared": case "capability_disabled": case "capability_removed":
+      return "此檢視無法使用 Claude，請在 claude.ai 中允許此頁使用 Claude。";
+    case "rate_limited": return "請求太頻繁或已達使用上限，請稍後再送出。";
+    case "session_expired": return "登入已過期，請重新登入 claude.ai。";
+    case "prompt_too_large": return "內容太長，請分段貼上逐字稿，或先開「新的專案」。";
+    case "refused": return "這則留言無法回覆，請調整內容後再試。";
+    case "empty_completion": return "顧問沒有產生回覆，請換個說法或縮小範圍。";
+    default: return "連線中斷，回覆可能不完整。可以再送出一次。";
+  }
+}
+
+async function send(text) {
+  if (!sample || busy || !text.trim()) return;
+  if (!turns.length) log.innerHTML = "";
+  const userContent = MODE_INSTR[mode] + "\n\n" + text.trim();
+  addMsg("user", text.trim());
+  turns.push({ role: "user", content: userContent });
+  input.value = ""; store("ux-draft", "");
+  setBusy(true);
+  const body = addMsg("bot", "");
+  body.innerHTML = '<span class="thinking">顧問正在閱讀與推導…</span>';
+  ctl = new AbortController();
+  try {
+    const convo = trimTurns(turns);
+    const { text: answer, truncated } = await sample(
+      [{ role: "user", content: METHOD }, ...convo],
+      { cache: false, signal: ctl.signal, onText: ({ text }) => { body.innerHTML = mdToHtml(text); log.scrollTop = log.scrollHeight; } }
+    );
+    body.innerHTML = mdToHtml(answer);
+    turns.push({ role: "assistant", content: answer });
+    if (truncated) note(body, "回覆被截斷，可以留言「繼續」讓顧問接著寫。");
+    const r = detectRound(answer);
+    if (r >= 0) { for (let i = 0; i < r; i++) done.add(i); done.add(r); current = r; renderRounds(); }
+    addNext(body, r);
+  } catch (e) {
+    const partial = e && e.text;
+    if (partial) { body.innerHTML = mdToHtml(partial); turns.push({ role: "assistant", content: partial }); }
+    else body.innerHTML = "";
+    if (e && e.code === "cancelled") { if (!partial) body.parentElement.remove(); }
+    else {
+      note(body, errorCopy(e && e.code));
+      if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e && e.code)) markUnavailable();
+    }
+  } finally {
+    ctl = null; setBusy(false); if (sample) input.focus();
+  }
+}
+
+function note(body, msg) {
+  const n = document.createElement("div"); n.className = "note"; n.textContent = msg;
+  body.parentElement.append(n);
+}
+
+function addNext(body, r) {
+  const box = document.createElement("div"); box.className = "next";
+  const opts = [];
+  if (r >= 0 && r < 8) opts.push(["繼續第 " + (r + 1) + " 輪：" + ROUNDS[r + 1][1], "r" + (r + 1), "請繼續下一輪。"]);
+  opts.push(["請顧問追問我", "auto", "在繼續之前，請列出你最需要我補充的 3 個問題。"]);
+  if (r >= 3) opts.push(["產出整合報告", "report", "請產出整合報告。"]);
+  opts.forEach(([label, m, msg]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = label;
+    b.onclick = () => { setMode(m); send(msg); };
+    box.append(b);
+  });
+  body.parentElement.append(box);
+}
+
+function markUnavailable() {
+  sample = null; $("unavailable").hidden = false; sendBtn.disabled = true;
+  $("dot").classList.remove("on"); $("statusText").textContent = "Claude 未啟用";
+}
+
+$("composer").addEventListener("submit", (e) => { e.preventDefault(); send(input.value); });
+input.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(input.value); } });
+input.addEventListener("input", () => store("ux-draft", input.value));
+stopBtn.onclick = () => ctl?.abort();
+$("resetBtn").onclick = () => {
+  ctl?.abort(); turns = []; done.clear(); current = -1; renderRounds(); setMode("auto"); showExample();
+};
+$("file").addEventListener("change", () => {
+  const f = $("file").files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const txt = String(reader.result || "").slice(0, 120000);
+    input.value = (input.value ? input.value + "\n\n" : "") + "【訪談資料：" + f.name + "】\n" + txt;
+    $("fileHint").textContent = "已載入 " + f.name;
+    store("ux-draft", input.value);
+  };
+  reader.readAsText(f);
+  $("file").value = "";
+});
+
+renderRounds(); renderChips(); showExample();
+const draft = load("ux-draft"); if (draft) input.value = draft;
+setBusy(false);
+
+(async () => {
+  const s = window.claude ? await window.claude.use("sample").catch(() => null) : null;
+  if (!s) { markUnavailable(); return; }
+  sample = s; setBusy(false);
+  $("dot").classList.add("on"); $("statusText").textContent = "顧問在線";
+  $("unavailable").hidden = true;
+})();
+</script>
