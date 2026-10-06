@@ -1,0 +1,608 @@
+<title>坐得住投資學院</title>
+<meta name="description" content="依據巴菲特 CNBC 訪談的重點與情緒判讀所設計的投資學習網站">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a cathedral nave — one centered reading column with a minute-mark gutter on the left, like a ledger of the interview's timeline. */
+:root {
+  --stone: #ECEFF0;      /* page ground: cool limestone */
+  --slab: #F7F9F9;       /* raised surfaces */
+  --ink: #16232A;
+  --muted: #586870;
+  --line: #CDD5D8;
+  --verdigris: #2C7A6B;  /* accent: oxidized copper roof */
+  --verdigris-soft: #D6E8E3;
+  --brass: #8F6C22;      /* neutral emotion / highlights */
+  --brass-soft: #EFE5CF;
+  --casino: #B3313A;     /* semantic: speculation / negative */
+  --casino-soft: #F4DADB;
+  --band: rgba(44,122,107,.09);
+  --f-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --s1: .5rem; --s2: .75rem; --s3: 1rem; --s4: 1.5rem; --s5: 2.5rem; --s6: 4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stone: #0F171B; --slab: #162127; --ink: #E3EBED; --muted: #93A4AB; --line: #2A3A42;
+    --verdigris: #63BBA6; --verdigris-soft: #17332D; --brass: #D4B062; --brass-soft: #332A17;
+    --casino: #E4737A; --casino-soft: #3A1E21; --band: rgba(99,187,166,.08);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --stone: #0F171B; --slab: #162127; --ink: #E3EBED; --muted: #93A4AB; --line: #2A3A42;
+  --verdigris: #63BBA6; --verdigris-soft: #17332D; --brass: #D4B062; --brass-soft: #332A17;
+  --casino: #E4737A; --casino-soft: #3A1E21; --band: rgba(99,187,166,.08);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--stone); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.75;
+  padding-inline: 16px; padding-block: 0 var(--s6);
+}
+.wrap { max-width: 860px; margin-inline: auto; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.3; margin: 0; }
+h2 { font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); font-weight: 900; }
+h3 { font-size: 1.125rem; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--verdigris); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, label:focus-within {
+  outline: 2px solid var(--verdigris); outline-offset: 2px;
+}
+.eyebrow { font-family: var(--f-data); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+.lede { color: var(--muted); max-width: 62ch; }
+
+/* nav */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--stone) 92%, transparent);
+  backdrop-filter: blur(6px); border-bottom: 1px solid var(--line);
+  margin-inline: -16px; padding: .6rem 16px;
+}
+.nav .wrap { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; justify-content: space-between; }
+.brand { font-family: var(--f-display); font-weight: 900; font-size: 1.05rem; color: var(--ink); text-decoration: none; }
+.nav ul { list-style: none; display: flex; gap: var(--s3); margin: 0; padding: 0; flex-wrap: wrap; font-size: .875rem; }
+.nav ul a { color: var(--muted); text-decoration: none; }
+.nav ul a:hover { color: var(--ink); }
+
+/* hero */
+.hero { padding-block: var(--s6) var(--s5); display: grid; gap: var(--s4); }
+.hero h1 { font-size: clamp(2rem, 1.3rem + 3.4vw, 3.6rem); font-weight: 900; letter-spacing: .01em; }
+.hero h1 .casino { color: var(--casino); }
+.hero h1 .cathedral { color: var(--verdigris); }
+.hero .attrib { font-family: var(--f-data); font-size: .8rem; color: var(--muted); }
+.hero-facts { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); font-size: .9rem; color: var(--muted); }
+.hero-facts b { color: var(--ink); font-family: var(--f-data); font-weight: 500; }
+
+section { padding-block: var(--s5); border-top: 1px solid var(--line); display: grid; gap: var(--s4); }
+.sec-head { display: grid; gap: var(--s1); }
+
+/* key points ledger */
+.ledger { list-style: none; margin: 0; padding: 0; display: grid; }
+.ledger li { display: grid; grid-template-columns: 4.5rem 1fr; gap: var(--s3); padding-block: var(--s3); border-bottom: 1px dashed var(--line); }
+.ledger li:last-child { border-bottom: 0; }
+.ledger .ts { font-family: var(--f-data); font-size: .85rem; padding-top: .15rem; }
+.ledger .ts a { text-decoration: none; }
+.ledger .body { min-width: 0; display: grid; gap: .35rem; }
+.ledger ul { margin: 0; padding-left: 1.1rem; color: var(--ink); }
+.ledger .take { font-size: .9rem; color: var(--verdigris); }
+.ledger .take::before { content: "投資啟示　"; font-family: var(--f-data); font-size: .72rem; letter-spacing: .08em; color: var(--muted); }
+
+/* emotion chart */
+.chart-box { background: var(--slab); border: 1px solid var(--line); border-radius: 6px; padding: var(--s3); display: grid; gap: var(--s3); }
+.chart-scroll { overflow-x: auto; }
+.chart-scroll svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s3); font-size: .8rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .35rem; vertical-align: -1px; background: var(--c); }
+.emo-detail { display: grid; grid-template-columns: auto 1fr; gap: .25rem var(--s3); align-items: baseline; border-top: 1px solid var(--line); padding-top: var(--s3); }
+.emo-detail .k { font-family: var(--f-data); font-size: .75rem; color: var(--muted); }
+.emo-detail .q { font-family: var(--f-data); font-size: .85rem; min-width: 0; overflow-wrap: anywhere; }
+.dot { cursor: pointer; }
+.dot:focus { outline: none; }
+.dot:focus-visible circle.ring, .dot.on circle.ring { stroke: var(--ink); stroke-width: 2; }
+
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); counter-reset: f; }
+.findings li { display: grid; grid-template-columns: 2rem 1fr; gap: var(--s2); counter-increment: f; }
+.findings li::before { content: counter(f); font-family: var(--f-display); font-weight: 900; font-size: 1.4rem; color: var(--brass); line-height: 1.3; }
+.findings li > div { min-width: 0; display: grid; gap: .2rem; }
+.findings p { color: var(--muted); }
+
+/* mapping table */
+.table-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .92rem; }
+th, td { text-align: left; vertical-align: top; padding: .65rem .75rem; border-bottom: 1px solid var(--line); }
+th { font-family: var(--f-data); font-weight: 500; font-size: .72rem; letter-spacing: .1em; color: var(--muted); }
+td:last-child { color: var(--verdigris); font-weight: 500; }
+
+/* modules */
+.modules { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s3); }
+.module { background: var(--slab); border: 1px solid var(--line); border-radius: 6px; padding: var(--s3); display: grid; gap: var(--s1); align-content: start; }
+.module .n { font-family: var(--f-data); font-size: .75rem; color: var(--muted); display: flex; justify-content: space-between; gap: var(--s2); }
+.module p { font-size: .9rem; color: var(--muted); }
+.module blockquote { margin: 0; font-size: .85rem; border-left: 2px solid var(--brass); padding-left: .6rem; color: var(--ink); }
+.module label { font-size: .85rem; display: flex; gap: .4rem; align-items: center; cursor: pointer; color: var(--muted); }
+.module.done { border-color: var(--verdigris); }
+.module.done .n span:last-child { color: var(--verdigris); }
+.progress { display: flex; align-items: center; gap: var(--s2); font-size: .85rem; color: var(--muted); }
+.bar { flex: 1; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; max-width: 280px; }
+.bar i { display: block; height: 100%; background: var(--verdigris); width: 0; transition: width .3s; }
+
+/* practice */
+.tool { background: var(--slab); border: 1px solid var(--line); border-radius: 6px; padding: var(--s4); display: grid; gap: var(--s3); }
+.tool-head { display: grid; gap: .25rem; }
+.tool-head p { color: var(--muted); font-size: .92rem; }
+.choices { display: flex; flex-wrap: wrap; gap: var(--s1); }
+.choice {
+  font: inherit; font-size: .9rem; border: 1px solid var(--line); background: var(--stone); color: var(--ink);
+  border-radius: 999px; padding: .35rem .9rem; cursor: pointer;
+}
+.choice:hover { border-color: var(--verdigris); }
+.choice[aria-pressed="true"] { background: var(--verdigris); border-color: var(--verdigris); color: var(--slab); }
+.feedback { border-radius: 4px; padding: var(--s3); background: var(--stone); display: grid; gap: .4rem; }
+.feedback.good { background: var(--verdigris-soft); }
+.feedback.bad { background: var(--casino-soft); }
+.feedback.mid { background: var(--brass-soft); }
+.feedback .verdict { font-weight: 700; }
+.feedback .quote { font-size: .88rem; color: var(--muted); }
+.sublabel { font-family: var(--f-data); font-size: .72rem; letter-spacing: .1em; color: var(--muted); }
+
+.quiz { list-style: none; margin: 0; padding: 0; display: grid; }
+.quiz li { display: grid; grid-template-columns: 1fr auto; gap: .4rem var(--s3); padding-block: .7rem; border-bottom: 1px dashed var(--line); align-items: center; }
+.quiz li:last-child { border-bottom: 0; }
+.quiz .stmt { min-width: 0; }
+.quiz .btns { display: flex; gap: .35rem; }
+.quiz .why { grid-column: 1 / -1; font-size: .85rem; color: var(--muted); }
+.quiz .why b.ok { color: var(--verdigris); }
+.quiz .why b.no { color: var(--casino); }
+.choice.cas[aria-pressed="true"] { background: var(--casino); border-color: var(--casino); }
+.score { font-family: var(--f-data); font-size: .9rem; }
+
+.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--s3); }
+.field { display: grid; gap: .25rem; font-size: .85rem; color: var(--muted); }
+.field input, .field select {
+  font: inherit; font-family: var(--f-data); font-size: .95rem; color: var(--ink); background: var(--stone);
+  border: 1px solid var(--line); border-radius: 4px; padding: .45rem .6rem; width: 100%;
+}
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--s3); }
+.result { border-top: 2px solid var(--c, var(--line)); padding-top: .5rem; display: grid; gap: .1rem; }
+.result .v { font-family: var(--f-data); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.result .l { font-size: .82rem; color: var(--muted); }
+
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.checks label { display: flex; gap: .6rem; align-items: flex-start; cursor: pointer; }
+.checks input { margin-top: .45rem; accent-color: var(--verdigris); }
+.example-tag { font-family: var(--f-data); font-size: .7rem; color: var(--brass); border: 1px solid var(--brass); border-radius: 3px; padding: 0 .35rem; margin-left: .4rem; }
+
+footer { border-top: 1px solid var(--line); padding-top: var(--s4); font-size: .82rem; color: var(--muted); display: grid; gap: .5rem; }
+
+@media (max-width: 520px) {
+  .ledger li { grid-template-columns: 1fr; gap: .2rem; }
+  .quiz li { grid-template-columns: 1fr; }
+  .tool { padding: var(--s3); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<nav class="nav" aria-label="主要">
+  <div class="wrap">
+    <a class="brand" href="#top">坐得住投資學院</a>
+    <ul>
+      <li><a href="#key">訪談重點</a></li>
+      <li><a href="#emotion">情緒地圖</a></li>
+      <li><a href="#design">設計依據</a></li>
+      <li><a href="#path">學習路徑</a></li>
+      <li><a href="#practice">互動練習</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="wrap" id="top">
+  <header class="hero">
+    <span class="eyebrow">巴菲特卸任 CEO 後首次訪談・學習計畫</span>
+    <h1>美國經濟是一座<span class="cathedral">大教堂</span>，<br>旁邊附了一間<span class="casino">賭場</span>。</h1>
+    <p class="attrib">— Warren Buffett，訪談 32:12（意譯）</p>
+    <p class="lede">我們把這場 70 分鐘的訪談拆成重點、標出巴菲特每段話的情緒起伏，再依此設計一套學習路徑。這套課要練的是一件事：在市場起伏時坐得住，只走進大教堂，不走進賭場。</p>
+    <div class="hero-facts">
+      <span>現金與國庫券 <b>$350B+</b></span>
+      <span>大跌逾 50% <b>3 次</b></span>
+      <span>Coca-Cola 持有 <b>35–40 年</b></span>
+      <span>出售蘋果獲利 <b>$100B+</b></span>
+    </div>
+  </header>
+
+  <!-- KEY POINTS -->
+  <section id="key" aria-labelledby="key-h">
+    <div class="sec-head">
+      <span class="eyebrow">01 訪談重點</span>
+      <h2 id="key-h">十一段對話，按時間排列</h2>
+      <p class="lede">點時間戳可跳到影片該段落。重點依逐字稿整理，引言為意譯。</p>
+    </div>
+    <ol class="ledger" id="ledger"></ol>
+  </section>
+
+  <!-- EMOTION -->
+  <section id="emotion" aria-labelledby="emo-h">
+    <div class="sec-head">
+      <span class="eyebrow">02 情緒地圖</span>
+      <h2 id="emo-h">談市場時最冷靜，談人性時最激動</h2>
+      <p class="lede">以下判讀只根據逐字稿的用詞、重複、自嘲與轉移話題推論，沒有分析聲音與表情。強度 1–5 是研究者的判斷。點圓點看證據。</p>
+    </div>
+    <div class="chart-box">
+      <div class="legend">
+        <span style="--c: var(--verdigris)">正向（溫情、自豪、幽默）</span>
+        <span style="--c: var(--brass)">中性（冷靜、謹慎、自嘲）</span>
+        <span style="--c: var(--casino)">負向（憂慮、憤慨、不安）</span>
+      </div>
+      <div class="chart-scroll"><svg id="emo-chart" viewBox="0 0 720 280" role="img" aria-label="訪談情緒強度時間軸"></svg></div>
+      <div class="emo-detail" id="emo-detail" aria-live="polite"></div>
+    </div>
+    <h3>判讀發現</h3>
+    <ol class="findings">
+      <li><div><h3>冷靜是練出來的紀律</h3><p>11–31 分鐘談市場、現金、聯準會，情緒強度大多落在 1–3。高峰都在非市場話題：對 Glide 的承諾、政府經營賭博、核武、Epstein。巴菲特不是天性冷漠，而是面對市場時刻意保持平靜。</p></div></li>
+      <li><div><h3>「我不知道」後面接「所以要準備好」</h3><p>市場走勢、私募信貸、中東、AI，他都直說不知道，接著說要保有現金、為任何情況做好準備。承認無知之後立刻轉向準備，這是可以教的態度。</p></div></li>
+      <li><div><h3>拒絕後悔</h3><p>記者兩次想引導「賣蘋果後悔嗎」，他都把話題轉回「我無法預測下週股價」。巴菲特評估的是決策過程，不是事後的結果。</p></div></li>
+      <li><div><h3>對制度生氣，對人同理</h3><p>批評政府經營賭博時，他特別說「我不是對那些人生氣」，因為人天生會被賭博吸引。教新手時也應該同理，不責怪。</p></div></li>
+      <li><div><h3>用幽默說嚴肅的事</h3><p>談恐慌時說自己會站在戲院後面叫大家冷靜，「因為我跑不快」。輕鬆的比喻讓艱澀的風險概念更容易聽進去。</p></div></li>
+      <li><div><h3>連巴菲特也會少問一句</h3><p>談蓋茲基金會時口語重複明顯變多，反覆說「等等看」，並承認自己「沒問深入的問題」。即使是最謹慎的投資人，面對信任的人也會鬆懈查核。</p></div></li>
+    </ol>
+  </section>
+
+  <!-- DESIGN -->
+  <section id="design" aria-labelledby="design-h">
+    <div class="sec-head">
+      <span class="eyebrow">03 設計依據</span>
+      <h2 id="design-h">從受訪者的情緒，推到學習者的痛點</h2>
+      <p class="lede">巴菲特身上強烈或刻意壓下的情緒，通常就是一般投資人最難處理的地方。每一列都對應到本站的一個模組或練習。</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>情緒觀察</th><th>學習者的痛點</th><th>本站設計</th></tr></thead>
+        <tbody>
+          <tr><td>談市場時刻意冷靜</td><td>一跌就慌、一漲就追</td><td>恐慌劇場模擬器</td></tr>
+          <tr><td>頻繁說「我不知道」</td><td>以為投資就是要會預測</td><td>能力圈檢核</td></tr>
+          <tr><td>拒絕後悔框架</td><td>賣飛、套牢後自責</td><td>模組 07 決策日誌</td></tr>
+          <tr><td>對賭博的道德憤慨，但同理個人</td><td>分不清投資與投機，又怕被說笨</td><td>大教堂還是賭場？小測驗</td></tr>
+          <tr><td>對 2% 通膨目標的不滿</td><td>以為放定存最安全</td><td>通膨侵蝕計算器</td></tr>
+          <tr><td>蓋茲基金會段落的不安與自省</td><td>盲目相信名人、明牌、熟人</td><td>模組 08 治理與信任</td></tr>
+          <tr><td>用幽默說嚴肅的事</td><td>理財內容太艱澀或太恐嚇</td><td>全站平實語氣，每課附一句訪談原話</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PATH -->
+  <section id="path" aria-labelledby="path-h">
+    <div class="sec-head">
+      <span class="eyebrow">04 學習路徑</span>
+      <h2 id="path-h">八個模組，從心態到查核</h2>
+      <p class="lede">建議依序學習：前三個模組建立企業主思維，中間三個處理情緒，最後兩個練習自我檢討與查核。完成後可勾選，進度只存在你的瀏覽器裡。</p>
+      <div class="progress"><span id="prog-label">已完成 0 / 8</span><div class="bar"><i id="prog-bar"></i></div></div>
+    </div>
+    <ol class="modules" id="modules"></ol>
+  </section>
+
+  <!-- PRACTICE -->
+  <section id="practice" aria-labelledby="prac-h">
+    <div class="sec-head">
+      <span class="eyebrow">05 互動練習</span>
+      <h2 id="prac-h">先在這裡慌過，真的遇到時就不慌</h2>
+    </div>
+
+    <div class="tool" id="panic">
+      <div class="tool-head">
+        <h3>恐慌劇場</h3>
+        <p>「戲院裡有人喊失火，大家都衝向門口。」選一個下跌情境，再選你的第一個反應。</p>
+      </div>
+      <div class="sublabel">情境</div>
+      <div class="choices" id="scenarios"></div>
+      <div class="sublabel">你會怎麼做</div>
+      <div class="choices" id="actions"></div>
+      <div class="feedback" id="panic-fb" aria-live="polite"></div>
+    </div>
+
+    <div class="tool" id="quiz-tool">
+      <div class="tool-head">
+        <h3>大教堂還是賭場？</h3>
+        <p>「如果只是買一籃子股票坐著 50 年，他們會過得很好。」判斷每個行為屬於哪一邊。</p>
+      </div>
+      <ol class="quiz" id="quiz"></ol>
+      <div class="score" id="quiz-score">得分 0 / 8</div>
+    </div>
+
+    <div class="tool" id="infl">
+      <div class="tool-head">
+        <h3>通膨侵蝕計算器</h3>
+        <p>「一旦說可以容忍 2%，長期複利下來相當驚人。」試算你的錢在通膨與稅後還剩多少購買力。</p>
+      </div>
+      <div class="calc">
+        <label class="field" for="in-amt">本金（元）<input id="in-amt" type="number" min="0" step="10000" value="1000000"></label>
+        <label class="field" for="in-yrs">年數<input id="in-yrs" type="number" min="1" max="60" value="30"></label>
+        <label class="field" for="in-inf">年通膨率 %<input id="in-inf" type="number" min="0" max="20" step="0.1" value="2"></label>
+        <label class="field" for="in-ret">名目年報酬 %（例：定存）<input id="in-ret" type="number" min="0" max="30" step="0.1" value="1.6"></label>
+        <label class="field" for="in-tax">利息稅率 %<input id="in-tax" type="number" min="0" max="60" step="1" value="10"></label>
+      </div>
+      <div class="results">
+        <div class="result" style="--c: var(--casino)"><span class="v" id="r-cash">—</span><span class="l">現金放著不動，換算成今天的購買力</span></div>
+        <div class="result" style="--c: var(--brass)"><span class="v" id="r-dep">—</span><span class="l">依上方報酬率與稅率，換算成今天的購買力</span></div>
+        <div class="result" style="--c: var(--verdigris)"><span class="v" id="r-real">—</span><span class="l">稅後實質年報酬率</span></div>
+      </div>
+    </div>
+
+    <div class="tool" id="circle">
+      <div class="tool-head">
+        <h3>能力圈檢核</h3>
+        <p>「我不認為我知道股市會怎麼走，但我對一家企業值多少錢有合理的概念。」買進前，誠實回答這五題。<span class="example-tag">已預先填入範例</span></p>
+      </div>
+      <ul class="checks" id="checks"></ul>
+      <div class="feedback" id="circle-fb" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>資料來源：<a href="https://www.youtube.com/watch?v=Yfz442Nuf7k" target="_blank" rel="noopener">CNBC 巴菲特訪談（YouTube）</a>。重點與引言依自動字幕整理並意譯，可能與原話有出入。</p>
+    <p>本網站僅供投資教育使用，不構成任何投資建議。投資有風險，請自行評估。</p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var VID = "https://www.youtube.com/watch?v=Yfz442Nuf7k&t=";
+  function ts(sec) { var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0"); }
+  function el(tag, attrs, html) { var e = document.createElement(tag); for (var k in attrs || {}) e.setAttribute(k, attrs[k]); if (html != null) e.innerHTML = html; return e; }
+  var store = {
+    get: function (k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  /* ---------- key points ---------- */
+  var KEY = [
+    [42, "慈善午餐拍賣復出", ["與 Stephen、Ayesha Curry 合辦慈善午餐拍賣，所得捐給 Glide 與 Eat Learn Play。", "巴菲特另外捐出與拍賣所得同額的款項。", "為了對已故 Cecil Williams 的承諾：「讓它就這樣消失會要了我的命。」"], "長期承諾與信任，是價值投資者的底色。"],
+    [532, "卸任 CEO 後的日常", ["每天仍進辦公室，但自認「幾乎沒完成什麼」。", "稱讚接班人 Greg Abel「一天跑的地方比我巔峰時一週還多」。", "坦言「其實可以更早交棒」。"], "知道自己的極限，才能在對的時間停手。"],
+    [674, "3,500 億美元的現金", ["現金與國庫券超過 3,500 億美元，一週就買進 170 億美元國庫券。", "不持有貨幣基金與商業本票，只持有國庫券這種最接近法定貨幣的資產。", "投資銀行來電推案，「我五秒就說不」。"], "現金是等待好價格的選擇權。"],
+    [825, "市場修正？「這不算什麼」", ["道瓊、那斯達克進入修正區，是四年來最差的一季。", "接掌 Berkshire 以來大跌超過 50% 有三次，1987 年還有單日跌 21%。", "便宜 5–6% 不足以讓人興奮，「我們不是為了賺 5–6% 才進場」。"], "用歷史的尺度看波動。"],
+    [905, "買的是企業，不是代號", ["三分之二以上的資金在企業本身，全資或部分持股原則相同。", "以 97 億美元買下 OxyChem，預期持有 50 年，「買的時候沒想過轉賣」。", "大跌時會出手，但理由是企業夠便宜，不是猜市場。"], "買股票就是買企業的一部分。"],
+    [999, "長期持有與蘋果", ["American Express 持有約 30 年，Coca-Cola 約 35–40 年。", "蘋果「賣早了」但賺超過 1,000 億美元；被問是否後悔：「我沒有預測下週股價的能力」。", "蘋果仍是最大持股，但不希望它大到等於其他持股總和；鐵路更可預測，但資本報酬率遠不如蘋果。"], "評估決策過程，並控制集中度。"],
+    [1276, "能力圈與實地調查", ["不碰 AI 與科技趨勢：「我不擅長，而且太晚入場了」。", "把蘋果看成消費品公司：消費者愛它，華府不會毀掉選民都喜歡的東西。", "到 Nebraska Furniture Mart 問顧客；沙拉油醜聞時去銀行確認 AmEx 旅行支票仍有溢價。"], "只投資自己懂的，用顧客行為驗證護城河。"],
+    [1413, "聯準會、通膨與銀行", ["若在 Fed，最在意美元的準備貨幣地位。", "肯定 Powell 2020 年 3 月果斷出手：「骨牌一旦開始倒，倒得比任何人想得都快。」", "希望通膨目標是 0%：2% 複利會侵蝕存款，還要對那 2% 繳稅。", "最在意銀行體系穩定；恐慌時流動性會瞬間消失。"], "通膨是無聲的稅，系統性風險來得比想像快。"],
+    [1864, "大教堂與賭場", ["「美國經濟是大教堂，但旁邊附了一間賭場。」", "買一籃子股票坐 50 年會過得很好；與莊家對賭不會贏。", "批評政府經營、推廣賭博是「把人民當冤大頭」，但「我不是對那些人生氣」。"], "分清投資與投機。"],
+    [2185, "中東與核武風險", ["油價上漲讓 Chevron、Occidental 持股上漲，但不預測接下來的發展。", "核擴散是他心中最重大的問題，從 Einstein–Szilard 信談起。", "最危險的是「被逼到牆角、手放在開關上的人」。"], "承認無法預測的尾端風險。"],
+    [2639, "蓋茲基金會與 Epstein 檔案", ["驚訝於 Epstein「找到每個人的弱點」，慶幸自己從未接近他。", "承認身為受託人「沒問深入的問題」、「不知道發生了什麼事」。", "是否繼續每年 6 月捐款：「等等看，今天不需要決定」；也不與 Gates 交談，以免被傳喚作證。"], "信任也需要查核；不急著做不可逆的決定。"],
+    [3612, "捐贈誓言與美國資本主義", ["約 250 位富豪簽署 Giving Pledge，「沒有人因此捐得更少」。", "美國是世界奇蹟，但貧富差距太大，兩黨對立更甚以往。", "曾是共和黨員，後轉民主黨，現在是獨立選民。"], "資本主義有效，但仍需修正。"]
+  ];
+  var ledger = document.getElementById("ledger");
+  KEY.forEach(function (k) {
+    var li = el("li");
+    li.appendChild(el("div", { "class": "ts" }, '<a href="' + VID + k[0] + 's" target="_blank" rel="noopener">' + ts(k[0]) + "</a>"));
+    var b = el("div", { "class": "body" });
+    b.appendChild(el("h3", null, k[1]));
+    b.appendChild(el("ul", null, k[2].map(function (x) { return "<li>" + x + "</li>"; }).join("")));
+    b.appendChild(el("p", { "class": "take" }, k[3]));
+    li.appendChild(b);
+    ledger.appendChild(li);
+  });
+
+  /* ---------- emotion chart ---------- */
+  // [seconds, intensity 1-5, valence p|n|x, emotion, topic, evidence]
+  var EMO = [
+    [92, 4, "p", "溫情、懷念", "Cecil Williams 與 Glide", "this guy is real… he never gave up on anybody"],
+    [248, 2, "n", "坦然、疲憊", "為何停辦", "I ran out of gas"],
+    [436, 5, "p", "使命感、不捨", "為何復出", "it would have killed me to have to just die off"],
+    [532, 3, "n", "自嘲、謙遜", "卸任後的生活", "I don't accomplish hardly anything… kind of embarrassing how good he is"],
+    [849, 1, "n", "冷靜、淡定", "市場修正", "this is nothing"],
+    [927, 2, "p", "果斷、幽默", "推案電話", "it takes me five seconds to say no"],
+    [1033, 2, "n", "平和、拒絕後悔", "蘋果賣早", "no no no, I don't have any ability to predict"],
+    [1276, 2, "n", "坦承侷限", "AI 與科技", "I wouldn't be any good at it… I'm so late to the game"],
+    [1503, 3, "n", "敬佩、警覺", "2020 年 Fed 出手", "once the dominoes start toppling they just start toppling"],
+    [1651, 4, "x", "憂慮", "銀行與恐慌", "everybody panics… when people are scared they're scared"],
+    [1750, 2, "p", "自嘲幽默", "戲院比喻", "that's because I can't run fast"],
+    [1812, 3, "n", "謹慎", "私募信貸", "I don't think I know… I want to be prepared for anything"],
+    [2019, 3, "x", "嘲諷、困惑", "大教堂與賭場", "how can you have people who have perfectly decent IQs rushing to do dumb things"],
+    [2100, 5, "x", "道德憤慨", "政府經營賭博", "I don't like things that make a sucker out of people… I think it's kind of cynical"],
+    [2240, 5, "x", "沉重、深憂", "核武擴散", "there is no way that the planet has an expectancy of 500 years"],
+    [2670, 4, "x", "震驚", "Epstein 的手法", "it's astounded me how human people are"],
+    [2727, 4, "p", "慶幸", "未曾接觸 Epstein", "thank heavens I never came near the guy"],
+    [3067, 4, "x", "不安、防衛", "基金會受託責任", "I Learned that I didn't know what was going on（本段口語重複明顯增加）"],
+    [3170, 3, "n", "謹慎、保留", "是否續捐", "I could get called as a witness… I'll wait and see"],
+    [3698, 3, "p", "自豪＋自嘲", "Giving Pledge", "no I'm too lazy… I feel good about the Giving Pledge"],
+    [3913, 4, "x", "矛盾、念舊", "與 Gates 的友誼", "he's been terribly thoughtful with me… until it gets cleared up"],
+    [4095, 3, "n", "樂觀中帶憂心", "美國與兩黨", "capitalism's worked but it still needs…"]
+  ];
+  var VAL = { p: "var(--verdigris)", n: "var(--brass)", x: "var(--casino)" };
+  var svg = document.getElementById("emo-chart"), NS = "http://www.w3.org/2000/svg";
+  var L = 44, R = 704, T = 22, B = 240, MAXS = 4200;
+  function X(s) { return L + (R - L) * s / MAXS; }
+  function Y(v) { return B - (B - T) * (v - 1) / 4; }
+  function s(tag, a) { var e = document.createElementNS(NS, tag); for (var k in a) e.setAttribute(k, a[k]); return e; }
+  // market-talk band
+  svg.appendChild(s("rect", { x: X(674), y: T - 8, width: X(1864) - X(674), height: B - T + 8, fill: "var(--band)" }));
+  var bl = s("text", { x: (X(674) + X(1864)) / 2, y: T + 4, "text-anchor": "middle", fill: "var(--verdigris)", "font-size": 11, "font-family": "var(--f-body)" });
+  bl.textContent = "談市場、現金、聯準會"; svg.appendChild(bl);
+  for (var v = 1; v <= 5; v++) {
+    svg.appendChild(s("line", { x1: L, x2: R, y1: Y(v), y2: Y(v), stroke: "var(--line)", "stroke-width": 1 }));
+    var t = s("text", { x: L - 10, y: Y(v) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11, "font-family": "var(--f-data)" });
+    t.textContent = v; svg.appendChild(t);
+  }
+  [0, 600, 1200, 1800, 2400, 3000, 3600, 4200].forEach(function (sec) {
+    var t = s("text", { x: X(sec), y: B + 20, "text-anchor": "middle", fill: "var(--muted)", "font-size": 11, "font-family": "var(--f-data)" });
+    t.textContent = sec / 60; svg.appendChild(t);
+  });
+  var ax = s("text", { x: R, y: B + 36, "text-anchor": "end", fill: "var(--muted)", "font-size": 11, "font-family": "var(--f-body)" });
+  ax.textContent = "影片時間（分）"; svg.appendChild(ax);
+  var ay = s("text", { x: 4, y: T - 8, fill: "var(--muted)", "font-size": 11, "font-family": "var(--f-body)" });
+  ay.textContent = "強度"; svg.appendChild(ay);
+  svg.appendChild(s("polyline", { points: EMO.map(function (e) { return X(e[0]) + "," + Y(e[1]); }).join(" "), fill: "none", stroke: "var(--muted)", "stroke-width": 1.2, "stroke-opacity": .5 }));
+  var detail = document.getElementById("emo-detail"), dots = [];
+  function show(i) {
+    var e = EMO[i];
+    dots.forEach(function (d, j) { d.classList.toggle("on", j === i); });
+    detail.innerHTML = '<span class="k">時間</span><span class="mono"><a href="' + VID + e[0] + 's" target="_blank" rel="noopener">' + ts(e[0]) + "</a>・" + e[4] + '</span>' +
+      '<span class="k">情緒</span><span><b style="color:' + VAL[e[2]] + '">' + e[3] + "</b>　強度 " + e[1] + " / 5</span>" +
+      '<span class="k">證據</span><span class="q">“' + e[5] + '”</span>';
+  }
+  EMO.forEach(function (e, i) {
+    var g = s("g", { "class": "dot", tabindex: 0, role: "button", "aria-label": ts(e[0]) + " " + e[4] + " " + e[3] });
+    g.appendChild(s("circle", { "class": "ring", cx: X(e[0]), cy: Y(e[1]), r: 9, fill: "var(--slab)", stroke: "none" }));
+    g.appendChild(s("circle", { cx: X(e[0]), cy: Y(e[1]), r: 6, fill: VAL[e[2]] }));
+    g.addEventListener("click", function () { show(i); });
+    g.addEventListener("mouseenter", function () { show(i); });
+    g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); show(i); } });
+    svg.appendChild(g); dots.push(g);
+  });
+  show(13);
+
+  /* ---------- modules ---------- */
+  var MODS = [
+    ["像企業主一樣思考", "股票是企業的一部分。比較鐵路與蘋果：誰更可預測、誰的資本報酬率更高。", "我們擁有企業，有時全部、有時部分，原則相同。", "4 課・40 分鐘"],
+    ["劃出你的能力圈", "練習用一句話說明一家公司怎麼賺錢，並用顧客行為驗證護城河，例如 AmEx 的溢價。", "我不擅長這個，而且太晚入場了。", "5 課・50 分鐘"],
+    ["現金是選擇權", "為什麼保留現金與短天期公債；如何設定「夠便宜才買」的價格，並學會說不。", "它們沒有提供任何吸引人的價格。", "3 課・30 分鐘"],
+    ["恐慌心理學", "流動性為什麼會瞬間消失；1987、2008、2020 三次危機的骨牌效應。", "人害怕的時候，就是會害怕。", "4 課・45 分鐘"],
+    ["大教堂與賭場", "期望值、莊家優勢、當沖與運彩；為什麼長期持有一籃子企業的期望值是正的。", "與莊家對賭行不通，就這麼簡單。", "4 課・40 分鐘"],
+    ["通膨與實質報酬", "2% 的複利效果、稅後實質報酬，以及「安全」資產的隱形成本。", "只拿不到 2% 的報酬，等於在倒退。", "3 課・30 分鐘"],
+    ["決策日誌與後悔管理", "記錄買進理由與預期，事後檢討過程而非結果，避免被後見之明綁架。", "我沒有預測下週或下個月股價的能力。", "3 課・35 分鐘"],
+    ["治理與信任", "盡職調查清單、辨識詐騙話術與名人光環；不急著做不可逆的決定。", "我沒有問深入的問題。", "4 課・45 分鐘"]
+  ];
+  var done = store.get("sit-tight-done") || [];
+  var modList = document.getElementById("modules");
+  function renderProgress() {
+    var n = done.filter(Boolean).length;
+    document.getElementById("prog-label").textContent = "已完成 " + n + " / " + MODS.length;
+    document.getElementById("prog-bar").style.width = (n / MODS.length * 100) + "%";
+  }
+  MODS.forEach(function (m, i) {
+    var li = el("li", { "class": "module" + (done[i] ? " done" : "") });
+    li.innerHTML = '<div class="n"><span>模組 ' + String(i + 1).padStart(2, "0") + '</span><span>' + m[3] + '</span></div>' +
+      "<h3>" + m[0] + "</h3><p>" + m[1] + "</p><blockquote>" + m[2] + "</blockquote>" +
+      '<label for="mod-' + i + '"><input type="checkbox" id="mod-' + i + '"' + (done[i] ? " checked" : "") + "> 標記完成</label>";
+    li.querySelector("input").addEventListener("change", function (ev) {
+      done[i] = ev.target.checked; li.classList.toggle("done", ev.target.checked);
+      store.set("sit-tight-done", done); renderProgress();
+    });
+    modList.appendChild(li);
+  });
+  renderProgress();
+
+  /* ---------- panic theater ---------- */
+  var SCEN = [
+    ["-6% 修正", "道瓊與那斯達克進入修正區，新聞說是四年來最差的一季。"],
+    ["-21% 單日", "像 1987 年那個星期一，市場一天跌掉五分之一，造市商撐不住，電話沒人接。"],
+    ["-50% 熊市", "像 2008 年，銀行互不信任，你的持股市值腰斬。"]
+  ];
+  var ACT = ["全部賣掉，先保命", "什麼都不做，不看盤", "檢查持有企業，有現金就分批買", "借錢加碼抄底"];
+  // FB[scenario][action] = [tone, verdict, explanation]
+  var FB = [
+    [["bad", "反應過度", "便宜 5–6% 根本不值得興奮，也不值得恐慌。賣掉之後，你還得再猜一次何時買回。"],
+     ["good", "這就是坐得住", "巴菲特的說法是「這根本不算什麼」。持有的企業沒變，就不需要動。"],
+     ["mid", "方向對，但別太急", "企業沒變很好，但跌 6% 通常還不夠便宜。先確認價格真的有吸引力再買。"],
+     ["bad", "這是賭場行為", "用借來的錢押短期反彈，賭的是時機，不是企業價值。"]],
+    [["bad", "你成了衝向門口的人", "恐慌時流動性消失，賣在最差的價格。巴菲特選擇站在後面叫大家冷靜。"],
+     ["mid", "沒做錯，但錯過機會", "沒有被恐慌帶走值得肯定。如果手上有現金，這正是那 3,500 億美元等待的時刻。"],
+     ["good", "準備好的人才能出手", "因為平常就保有現金，才能在別人被迫賣出時買進好企業。"],
+     ["bad", "可能被斷頭", "流動性消失時，融資部位會被強制平倉。巴菲特連一天的無擔保部位都不想有。"]],
+    [["bad", "鎖住了虧損", "Berkshire 大跌超過 50% 有三次，每次都撐過來了。賣在谷底，就失去參與回升的機會。"],
+     ["mid", "撐住了，下次多準備一點現金", "能不動已經勝過大多數人。下一次，記得在平時就留一些現金。"],
+     ["good", "這是千載難逢的時刻", "「如果有大跌，我們會出手」，前提是企業本身吸引人，而且你本來就有現金。"],
+     ["bad", "最危險的選擇", "熊市可能跌得比你想得更深、更久。骨牌倒得比任何人想得都快。"]]
+  ];
+  var sc = 0, ac = 2;
+  var scBox = document.getElementById("scenarios"), acBox = document.getElementById("actions"), pfb = document.getElementById("panic-fb");
+  function renderPanic() {
+    [].forEach.call(scBox.children, function (b, i) { b.setAttribute("aria-pressed", i === sc); });
+    [].forEach.call(acBox.children, function (b, i) { b.setAttribute("aria-pressed", i === ac); });
+    var f = FB[sc][ac];
+    pfb.className = "feedback " + f[0];
+    pfb.innerHTML = '<span class="quote">' + SCEN[sc][1] + '</span><span class="verdict">' + f[1] + "</span><span>" + f[2] + "</span>";
+  }
+  SCEN.forEach(function (x, i) { var b = el("button", { "class": "choice", type: "button" }, x[0]); b.onclick = function () { sc = i; renderPanic(); }; scBox.appendChild(b); });
+  ACT.forEach(function (x, i) { var b = el("button", { "class": "choice", type: "button" }, x); b.onclick = function () { ac = i; renderPanic(); }; acBox.appendChild(b); });
+  renderPanic();
+
+  /* ---------- cathedral or casino ---------- */
+  var QZ = [
+    ["買進一籃子優質企業，打算持有 20 年以上", "c", "長期持有一籃子企業，期望值站在你這邊。"],
+    ["看網紅報明牌，隔天當沖", "k", "真的知道哪裡有金礦的人，不會上電視告訴大家。"],
+    ["因為「大家都說會漲」所以買進", "k", "巴菲特從不因為別人認為市場會漲就買。"],
+    ["市場跌 6% 就恐慌全部賣出", "k", "這是被情緒驅動的進出，等於在跟市場對賭。"],
+    ["先研究企業怎麼賺錢，價格合理才買", "c", "買股票就是買企業，價格是你付的，價值是你得到的。"],
+    ["借錢押注單一熱門股", "k", "槓桿加集中，任何一次骨牌都可能讓你出局。"],
+    ["平時保留現金或短天期公債，以備危機", "c", "為任何情況做好準備，危機時才有能力出手。"],
+    ["把樂透和運彩當成退休計畫", "k", "與莊家對賭行不通。"]
+  ];
+  var answers = {};
+  var qz = document.getElementById("quiz");
+  function renderScore() {
+    var n = 0; for (var k in answers) if (answers[k] === QZ[k][1]) n++;
+    document.getElementById("quiz-score").textContent = "得分 " + n + " / " + QZ.length + (Object.keys(answers).length === QZ.length ? (n === QZ.length ? "　全對，你分得清楚兩棟建築了。" : "　看看標示「不對」的題目說明。") : "");
+  }
+  QZ.forEach(function (q, i) {
+    var li = el("li");
+    li.appendChild(el("span", { "class": "stmt" }, q[0]));
+    var btns = el("span", { "class": "btns" });
+    var why = el("span", { "class": "why", hidden: "" });
+    [["c", "大教堂", ""], ["k", "賭場", " cas"]].forEach(function (o) {
+      var b = el("button", { "class": "choice" + o[2], type: "button", "aria-pressed": "false" }, o[1]);
+      b.onclick = function () {
+        answers[i] = o[0];
+        [].forEach.call(btns.children, function (x) { x.setAttribute("aria-pressed", x === b); });
+        var ok = o[0] === q[1];
+        why.hidden = false;
+        why.innerHTML = '<b class="' + (ok ? "ok" : "no") + '">' + (ok ? "答對" : "不對") + "</b>　" + q[2];
+        renderScore();
+      };
+      btns.appendChild(b);
+    });
+    li.appendChild(btns); li.appendChild(why);
+    qz.appendChild(li);
+  });
+  // example state: first item answered so the tool shows how feedback looks
+  qz.querySelector("li .choice").click();
+
+  /* ---------- inflation calculator ---------- */
+  var fmt = new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 0 });
+  function num(id) { var v = parseFloat(document.getElementById(id).value); return isFinite(v) ? v : 0; }
+  function calc() {
+    var P = Math.max(0, num("in-amt")), n = Math.min(60, Math.max(0, num("in-yrs"))), i = num("in-inf") / 100, r = num("in-ret") / 100, tx = num("in-tax") / 100;
+    var rn = r * (1 - tx);
+    var cash = P / Math.pow(1 + i, n);
+    var dep = P * Math.pow(1 + rn, n) / Math.pow(1 + i, n);
+    var real = ((1 + rn) / (1 + i) - 1) * 100;
+    document.getElementById("r-cash").textContent = fmt.format(cash) + " 元";
+    document.getElementById("r-dep").textContent = fmt.format(dep) + " 元";
+    var re = document.getElementById("r-real");
+    re.textContent = (real >= 0 ? "+" : "") + real.toFixed(2) + "%";
+    re.style.color = real < 0 ? "var(--casino)" : "var(--verdigris)";
+  }
+  ["in-amt", "in-yrs", "in-inf", "in-ret", "in-tax"].forEach(function (id) { document.getElementById(id).addEventListener("input", calc); });
+  calc();
+
+  /* ---------- circle of competence ---------- */
+  var CK = [
+    "我能用一句話說明這家公司怎麼賺錢",
+    "我知道顧客為什麼選它而不選對手，甚至願意多付錢",
+    "我實際用過它的產品，或問過它的顧客",
+    "就算股市關閉五年，我也願意繼續持有",
+    "我買它不是因為覺得下週會漲"
+  ];
+  var ckPre = [true, true, true, false, true];
+  var ckBox = document.getElementById("checks"), cfb = document.getElementById("circle-fb");
+  function renderCircle() {
+    var n = [].filter.call(ckBox.querySelectorAll("input"), function (x) { return x.checked; }).length;
+    var tone, msg;
+    if (n === 5) { tone = "good"; msg = "<span class=\"verdict\">5 / 5：在你的能力圈內</span><span>接下來只剩一個問題：價格夠不夠便宜？</span>"; }
+    else if (n >= 3) { tone = "mid"; msg = "<span class=\"verdict\">" + n + " / 5：在能力圈邊緣</span><span>還沒打勾的題目，就是你該補做的功課。先別買。</span>"; }
+    else { tone = "bad"; msg = "<span class=\"verdict\">" + n + " / 5：在能力圈之外</span><span>說「我不知道」沒有關係，巴菲特也這樣說。這次就說不吧。</span>"; }
+    cfb.className = "feedback " + tone; cfb.innerHTML = msg;
+  }
+  CK.forEach(function (c, i) {
+    var li = el("li");
+    li.innerHTML = '<label for="ck-' + i + '"><input type="checkbox" id="ck-' + i + '"' + (ckPre[i] ? " checked" : "") + "><span>" + c + "</span></label>";
+    li.querySelector("input").addEventListener("change", renderCircle);
+    ckBox.appendChild(li);
+  });
+  renderCircle();
+})();
+</script>
