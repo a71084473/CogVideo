@@ -1,0 +1,686 @@
+<title>策略核查台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 左側為對話式核查工作區（主），右側為 SKILL 規則與流程進度欄；窄螢幕時規則欄收到下方 */
+:root{
+  --paper:#F2F5F4; --surface:#FFFFFF; --sunk:#E8EEEC; --ink:#16201E; --muted:#5B6865; --line:#D3DCD9;
+  --accent:#1F5F55; --accent-ink:#FFFFFF; --accent-soft:#DDEBE7;
+  --judge-bg:#FBF3E3; --judge-line:#B7791F;
+  --ok:#2E7D4F; --warn:#A86A12; --bad:#B23A3A; --unk:#5E6478;
+  --ok-bg:#E3F2E8; --warn-bg:#FBEFD9; --bad-bg:#F8E1E1; --unk-bg:#E8E9EF;
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-body:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E1514; --surface:#162120; --sunk:#1C2A28; --ink:#E3EAE7; --muted:#95A4A0; --line:#2A3836;
+  --accent:#73C4B2; --accent-ink:#0E1514; --accent-soft:#1E3632;
+  --judge-bg:#2A2416; --judge-line:#E0A84A;
+  --ok:#62C690; --warn:#E3AC52; --bad:#EC7676; --unk:#A8ADC0;
+  --ok-bg:#183326; --warn-bg:#33291A; --bad-bg:#3A1F1F; --unk-bg:#252836;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1514; --surface:#162120; --sunk:#1C2A28; --ink:#E3EAE7; --muted:#95A4A0; --line:#2A3836;
+  --accent:#73C4B2; --accent-ink:#0E1514; --accent-soft:#1E3632;
+  --judge-bg:#2A2416; --judge-line:#E0A84A;
+  --ok:#62C690; --warn:#E3AC52; --bad:#EC7676; --unk:#A8ADC0;
+  --ok-bg:#183326; --warn-bg:#33291A; --bad-bg:#3A1F1F; --unk-bg:#252836;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65}
+button,textarea,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.top-in{max-width:1240px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.04em}
+.brand small{font-family:var(--f-mono);font-size:11px;font-weight:400;color:var(--muted);letter-spacing:.06em;margin-left:10px}
+.status{margin-left:auto;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--unk)}
+.dot.on{background:var(--ok)} .dot.off{background:var(--bad)}
+
+.wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:18px 28px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+
+/* chat */
+.chat{background:var(--surface);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-width:0}
+.chat-head{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+.chat-head h1{font-family:var(--f-display);font-size:24px;line-height:1.3;margin:0 0 4px;text-wrap:balance}
+.chat-head p{margin:0;color:var(--muted);font-size:14px;max-width:62ch}
+.log{padding:18px 20px;display:flex;flex-direction:column;gap:18px;min-height:360px}
+.msg{display:flex;flex-direction:column;gap:6px;min-width:0}
+.msg .who{font-size:11.5px;letter-spacing:.08em;color:var(--muted);font-family:var(--f-mono)}
+.msg.user{align-items:flex-end}
+.msg.user .bubble{background:var(--accent);color:var(--accent-ink);border-radius:14px 14px 4px 14px;max-width:80%}
+.bubble{padding:10px 14px;border-radius:14px 14px 14px 4px;background:var(--sunk);max-width:100%;min-width:0;overflow-wrap:anywhere}
+.bubble p{margin:.3em 0} .bubble ul,.bubble ol{margin:.3em 0;padding-left:1.3em}
+.bubble table{border-collapse:collapse;font-size:13.5px} .bubble th,.bubble td{border:1px solid var(--line);padding:4px 8px}
+.bubble code{font-family:var(--f-mono);font-size:.9em}
+.bubble h1,.bubble h2,.bubble h3{font-family:var(--f-display);font-size:16px;margin:.6em 0 .2em}
+.filechip{display:inline-flex;align-items:center;gap:8px;font-size:13px;padding:6px 10px;border-radius:8px;background:color-mix(in srgb,var(--accent-ink) 18%,transparent)}
+.thinking{color:var(--muted);font-size:14px;display:flex;align-items:center;gap:10px}
+.spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+/* report */
+.report{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;min-width:0}
+.report.example{border-style:dashed}
+.ex-tag{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;background:var(--unk-bg);color:var(--unk);padding:2px 8px;border-radius:4px}
+.rhead{padding:16px 18px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.rhead-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.decision{font-family:var(--f-display);font-weight:700;font-size:15px;padding:4px 12px;border-radius:999px;border:1.5px solid currentColor}
+.d-go{color:var(--ok);background:var(--ok-bg)} .d-cond{color:var(--warn);background:var(--warn-bg)}
+.d-no{color:var(--bad);background:var(--bad-bg)} .d-verify{color:var(--unk);background:var(--unk-bg)}
+.oneline{font-family:var(--f-display);font-size:18px;line-height:1.45;margin:0;text-wrap:balance}
+.sum-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:620px){.sum-grid{grid-template-columns:minmax(0,1fr)}}
+.sum-grid h4{margin:0 0 4px;font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.sum-grid ol{margin:0;padding-left:1.2em;font-size:14px}
+.laws{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--sunk)}
+@media (max-width:620px){.laws{grid-template-columns:minmax(0,1fr)}}
+.law{display:flex;flex-direction:column;gap:4px;min-width:0}
+.law b{font-size:13.5px;display:flex;align-items:center;gap:8px}
+.law span{font-size:12.5px;color:var(--muted);line-height:1.5}
+.chip{font-family:var(--f-mono);font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;white-space:nowrap;letter-spacing:.02em}
+.c-ok{background:var(--ok-bg);color:var(--ok)} .c-warn{background:var(--warn-bg);color:var(--warn)}
+.c-bad{background:var(--bad-bg);color:var(--bad)} .c-unk{background:var(--unk-bg);color:var(--unk)}
+details.sec{border-bottom:1px solid var(--line)}
+details.sec:last-child{border-bottom:0}
+details.sec>summary{cursor:pointer;list-style:none;padding:12px 18px;display:flex;align-items:baseline;gap:10px;font-weight:700;font-size:14.5px}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::before{content:"▸";color:var(--muted);font-size:12px;transition:transform .15s}
+details.sec[open]>summary::before{transform:rotate(90deg)}
+details.sec>summary .kind{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-weight:400;letter-spacing:.06em}
+details.sec>summary .n{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:400}
+.secbody{padding:0 18px 16px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table.t{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+table.t th{text-align:left;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:.04em;background:var(--sunk);padding:7px 10px;border-bottom:1px solid var(--line)}
+table.t td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t tr:last-child td{border-bottom:0}
+.id{font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.prio1{font-family:var(--f-mono);font-size:11px;color:var(--bad);white-space:nowrap}
+.judg{display:flex;flex-direction:column;gap:10px}
+.j{background:var(--judge-bg);border-left:3px solid var(--judge-line);border-radius:0 8px 8px 0;padding:10px 14px;font-size:14px}
+.j .jt{font-weight:500}
+.j dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;margin:6px 0 0;font-size:13px}
+.j dt{color:var(--muted)} .j dd{margin:0}
+.note{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.scen{display:flex;flex-direction:column;gap:8px}
+.sc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.sc b{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.plain{margin:0;padding-left:1.2em;font-size:14px}
+
+/* composer */
+.composer{border-top:1px solid var(--line);padding:14px 16px;display:flex;flex-direction:column;gap:10px;position:relative}
+.composer.drag::after{content:"放開以上傳文件";position:absolute;inset:6px;border:2px dashed var(--accent);border-radius:10px;background:color-mix(in srgb,var(--surface) 88%,transparent);display:grid;place-items:center;font-weight:700;color:var(--accent)}
+.attached{display:flex;gap:8px;flex-wrap:wrap}
+.att{display:inline-flex;align-items:center;gap:8px;font-size:13px;background:var(--accent-soft);padding:5px 6px 5px 10px;border-radius:8px;max-width:100%}
+.att span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.att button{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:0 4px;font-size:16px;line-height:1}
+.row{display:flex;gap:8px;align-items:flex-end}
+textarea#msg{flex:1;min-width:0;resize:none;min-height:46px;max-height:200px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);line-height:1.5}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;height:46px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.hint{font-size:12px;color:var(--muted);margin:0}
+.err{color:var(--bad);font-size:13.5px}
+
+/* rules rail */
+.rail{display:flex;flex-direction:column;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
+@media (max-width:900px){.rail{position:static}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font-family:var(--f-display);font-size:16px;margin:0 0 10px}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.laws-list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.laws-list li{font-size:13.5px;line-height:1.55}
+.laws-list b{display:block;font-size:14px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:8px 0;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;left:10px;top:30px;bottom:-4px;width:1px;background:var(--line)}
+.mark{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;color:var(--muted);background:var(--surface);z-index:1}
+.step.run .mark{border-color:var(--accent);color:var(--accent)}
+.step.run .mark::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
+.step.run .mark span{display:none}
+.step.done .mark{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.step.run .mark::before{animation:none}}
+.step b{font-size:13.5px;display:block}
+.step span.d{font-size:12.5px;color:var(--muted);line-height:1.5}
+.verdicts{display:flex;flex-wrap:wrap;gap:6px}
+.limit{font-size:12.5px;color:var(--muted);line-height:1.6}
+.linkbtn{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+pre.skill{white-space:pre-wrap;font-family:var(--f-mono);font-size:11.5px;line-height:1.6;max-height:340px;overflow:auto;background:var(--sunk);padding:10px;border-radius:8px;margin:10px 0 0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+
+<header class="top"><div class="top-in">
+  <div class="brand">策略核查台<small>STRATEGY AUDIT · DECISION</small></div>
+  <div class="status" id="status"><span class="dot" id="dot"></span><span id="statusText">正在連接 Claude…</span></div>
+</div></header>
+
+<main class="wrap">
+  <section class="chat" aria-label="核查對話">
+    <div class="chat-head">
+      <h1>上傳報告，交給獨立顧問壓力測試</h1>
+      <p>支援 PDF、Word（.docx）、Markdown、TXT。文件會依「策略核查與決策報告」技能的規則逐步驗證：拆解主張、分離事實與判斷、逐條裁決，最後給出決策與下一步指令表。</p>
+    </div>
+    <div class="log" id="log" aria-live="polite"></div>
+    <form class="composer" id="composer" autocomplete="off">
+      <div class="attached" id="attached" hidden></div>
+      <div class="row">
+        <input type="file" id="file" class="sr" accept=".pdf,.docx,.md,.markdown,.txt,.csv,.json,.html,.htm">
+        <button type="button" class="btn" id="attachBtn" title="上傳文件">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>
+          上傳
+        </button>
+        <label for="msg" class="sr">留言</label>
+        <textarea id="msg" rows="1" placeholder="留言，例如：重點檢查市場規模與競品假設…"></textarea>
+        <button type="submit" class="btn primary" id="sendBtn">送出</button>
+        <button type="button" class="btn" id="stopBtn" hidden>停止</button>
+      </div>
+      <p class="hint" id="hint">Enter 送出，Shift + Enter 換行。可直接把檔案拖曳到這裡。</p>
+    </form>
+  </section>
+
+  <aside class="rail">
+    <div class="card">
+      <div class="eyebrow">驗證規則</div>
+      <h2>三條鐵律</h2>
+      <ul class="laws-list">
+        <li><b>事實與判斷分離</b>每句話歸為「有外部來源的事實」或「顧問的推論」，分區呈現，不混寫。</li>
+        <li><b>來源紀律</b>每個事實標明出處與時間；查不到就標「未能佐證」，不用合理數字填空。</li>
+        <li><b>可否決性</b>每個判斷附上「什麼證據會推翻它」。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="eyebrow">核查流程</div>
+      <h2>進度</h2>
+      <ol class="steps" id="steps">
+        <li class="step" data-s="0"><div class="mark"><span>0</span></div><div><b>接手與拆解</b><span class="d">抽出主張清單、標類型、排查核優先序</span></div></li>
+        <li class="step" data-s="1"><div class="mark"><span>1</span></div><div><b>外部證據盤點</b><span class="d">市場、競爭、法規、需求、單位經濟、時機</span></div></li>
+        <li class="step" data-s="2"><div class="mark"><span>2</span></div><div><b>事實與判斷分離</b><span class="d">事實庫四欄、判斷庫四欄，判斷溯源</span></div></li>
+        <li class="step" data-s="3"><div class="mark"><span>3</span></div><div><b>對原報告裁決</b><span class="d">證實／證偽／修正／未能佐證</span></div></li>
+        <li class="step" data-s="4"><div class="mark"><span>4</span></div><div><b>決策與指令表</b><span class="d">若…則…情境、不確定性排序、下一步</span></div></li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="eyebrow">裁決圖例</div>
+      <div class="verdicts">
+        <span class="chip c-ok">證實</span><span class="chip c-bad">證偽</span><span class="chip c-warn">修正</span><span class="chip c-unk">未能佐證</span>
+      </div>
+      <p class="limit" style="margin:10px 0 0">本介面無法即時上網搜尋。外部數字只採用文件自身引用的來源，或標為「待外部查證」的顧問背景知識，可信度一律降級。法律與財務結論僅供決策參考，非專業意見。</p>
+      <p style="margin:10px 0 0"><button type="button" class="linkbtn" id="skillToggle" aria-expanded="false">查看完整 SKILL 規則</button></p>
+      <pre class="skill" id="skillText" hidden></pre>
+    </div>
+  </aside>
+</main>
+
+<script type="text/plain" id="skill-md">---
+name: strategy-audit-and-decision
+description: 以資深商業策略顧問的視角，核查一份既有的研究／策略報告（例如訪談推導出的內部假設報告），對其目標市場做外部盡職調查式的深度 research，彙整市場規模、競爭格局、法規、單位經濟等外部證據，最後產出一份「事實與判斷嚴格分開」的決策報告與下一步指令表。當使用者已有一份研究報告、商業計畫、市場分析、產品策略或投資備忘錄，並要求「幫我核查／驗證／壓力測試／找外部資料佐證／給投資或 go-no-go 建議／下一步該做什麼」時，一定要使用本技能。也適用於使用者說「用顧問角度看這份報告」「這個市場真的成立嗎」「幫我做競品與市場調查後給決策建議」。本技能是 interview-to-strategy 的下游環節——前者產出內部假設，本技能負責外部驗證與投資級判斷。
+---
+
+# 策略核查與決策報告
+
+接手一份既有報告，扮演被董事會請來的獨立顧問：不重做對方的分析，而是**壓力測試它、用外部證據查核它、把事實與判斷切乾淨、給出可執行的下一步**。三條鐵律貫穿全程：
+
+- **事實與判斷分離**：報告的每一句話都要能被歸類為「事實（有外部來源可查）」或「判斷（顧問的推論與建議）」，且在版面上分區呈現，絕不混寫。
+- **來源紀律**：每個事實標明出處與時間；查不到的就標「未能佐證」，絕不用聽起來合理的數字填空。
+- **可否決性**：每個判斷附「什麼證據會推翻它」，讓決策者能自行加權。
+
+## 何時用、產出什麼
+
+觸發情境是「已有一份報告＋要外部驗證或決策建議」。最終交付是一份決策報告（Word），核心是三張表：**事實庫**、**判斷庫**、**下一步指令表**。若使用者只要其中一段（如「只做競品調查」），執行對應步驟，並在結尾告知完整流程還能補上哪些。
+
+## 步驟 0：接手與拆解報告
+
+1. 讀入既有報告（docx/pdf/md，先讀 file-reading 技能）。
+2. 拆出報告的**主張清單**：把報告裡所有可被檢驗的陳述抽出來，逐條標記類型——
+   - 【事實宣稱】可用外部資料查核的（市場規模、競品存在、法規、價格、趨勢）。
+   - 【內部假設】源自其一手資料、尚待外部佐證的（尤其接收 interview-to-strategy 標為「待驗證」的項目）。
+   - 【判斷／建議】主觀推論與方案選擇。
+3. 標出報告**自己承認的限制與殺死條件**（好報告會有；沒有的話這本身是一個發現）。
+4. 排出**查核優先序**：哪些主張若為假會讓整個策略崩塌（關鍵前提），優先查；周邊細節次之。這一步決定 research 的火力分配。
+
+## 步驟 1：外部深度 Research（盡職調查）
+
+依查核優先序，對目標市場系統性蒐證。每個子題至少交叉兩個獨立來源，偏好原始出處（政府統計、法規原文、公司財報與官網、產業協會、學術與法人研究）而非二手彙整。搜尋策略：用當前年份、原始來源優先、每個競品／數字分開查而非一次合併查。
+
+必查的六個外部面向（依專案裁剪，非全都適用）：
+
+1. **市場規模與成長**：由下而上（單位數 × 客單價 × 頻率）與由上而下（產業報告 TAM）雙軌估算並互相校驗；標明估算法與假設，區分 TAM / SAM / SOM。
+2. **競爭格局**：找出直接、間接、替代方案三層競品；每家記錄定位、規模、商業模式、已知募資或營收；特別找**報告聲稱的「市場空白」是否真的空白**——空白往往不是沒人做，是有人做過失敗了，要找出失敗原因。
+3. **法規與政策**：查目標領域的現行法規、主管機關、近期修法動向、合規門檻；標出對商業模式的硬約束。
+4. **需求端外部驗證**：用公開資料（搜尋趨勢、社群討論量、既有平台使用數據、類似市場的滲透率）為報告的內部需求假設找旁證或反證。
+5. **單位經濟與可行性標竿**：找同類商業模式的公開 benchmark（獲客成本、留存率、客單價、毛利結構）為報告的財務假設定錨。
+6. **趨勢與時機**：這個機會是新出現的、還是長期存在沒人成功的？有無時機性催化劑（技術、法規、行為變遷）？
+
+Research 過程中隨手記錄**與報告矛盾的證據**——這些是決策報告最有價值的部分。若題目夠大（跨多市場、多競品、需數十個來源），主動建議使用者啟用深度研究（Research）功能，但仍先就手上能查到的給出實質判斷，不要只丟一句「建議深入研究」。
+
+## 步驟 2：事實與判斷分離（本 skill 的核心動作）
+
+把步驟 1 的產出強制切成兩庫，這是決策報告可信度的來源：
+
+**事實庫（Facts）**——只放有外部來源支撐的陳述。每筆四欄：
+`事實陳述 ｜ 來源（含機構與年份）｜ 可信度（高/中/低，依來源權威性與時效）｜ 對報告主張的影響（佐證/反駁/修正哪一條）`
+數字一律標明是「查得的實數」還是「顧問的估算」，估算要附算式。
+
+**判斷庫（Judgments）**——顧問的推論與建議。每筆四欄：
+`判斷 ｜ 依據哪些事實 ｜ 信心水準（並說明為何不是更高）｜ 否決條件（什麼會推翻它）`
+
+分離的紀律：事實庫裡不准出現「因此應該」「這是好機會」這類判斷語；判斷庫裡每一句都要能追溯到事實庫的編號。若一個陳述兩邊都想放，代表它其實是「被當成事實的判斷」——這是要抓出來的認知風險，歸判斷庫並標註。
+
+## 步驟 3：對原報告的裁決
+
+逐條回應步驟 0 的主張清單，用四種裁決之一：
+
+- **證實**：外部證據支持，可作為決策基礎。
+- **證偽**：外部證據反駁，策略需修正或放棄。
+- **修正**：方向對但程度／範圍要調整（附調整後的數字或範圍）。
+- **未能佐證**：查不到足夠證據，維持不確定，列為必須自行驗證的項目。
+
+特別檢查原報告的**關鍵前提**（步驟 0 排序最高者）是否守得住——一個崩塌的關鍵前提，比十個周邊瑕疵更該放在決策報告開頭。
+
+## 步驟 4：決策綜合與指令表
+
+1. **決策建議**：給明確的方向（如 Go / 有條件 Go / 不 Go / 需先驗證再定），並用「若…則…」結構呈現條件式決策，讓決策者看見不同情境下的不同選擇，而非只給一個賭注。
+2. **關鍵不確定性排序**：列出還沒解決、且最影響決策的未知數，依「影響 × 未解程度」排序。
+3. **下一步指令表**：可執行的行動清單，每筆五欄：
+   `# ｜ 行動（動詞開頭、具體）｜ 目的（驗證哪個不確定性 / 消除哪個風險）｜ 負責角色 ｜ 完成判準（怎樣算做完、看什麼指標）`
+   指令要能直接派工——「訪談 8 位認養人驗證流失主因」而非「深入了解使用者」。排序上把「最便宜就能消除最大不確定性」的行動放最前（廉價的殺死實驗優先）。
+
+## 決策報告結構（整合輸出時，讀 docx 技能後產出 Word）
+
+固定章節，事實與判斷分區是版面上的硬要求：
+
+封面 → 摘要（一頁：決策建議一句話＋三個支撐它的關鍵事實＋三個最大風險）→ 一、委任範圍與方法（查核了什麼、資料來源等級說明）→ 二、對原報告的裁決總表（主張×裁決）→ 三、事實庫（外部證據，分市場/競爭/法規/需求/單位經濟/趨勢六節，全程標源）→ 四、判斷庫（顧問分析，每條溯源至事實庫）→ 五、關鍵不確定性 → 六、決策建議（若…則…情境式）→ 七、下一步指令表 → 附錄：來源清單（每筆含連結、機構、日期、可信度評級）。
+
+版面規範：事實章節與判斷章節用不同的視覺標示（如事實用中性表格、判斷用左框引言或不同底色），讓讀者一眼分辨自己在讀「查到的」還是「顧問想的」。中文用 Microsoft JhengHei。所有外部數字在文中標上角註編號，對應附錄來源清單。
+
+## 顧問姿態（貫穿全程的語氣與立場）
+
+- **獨立性**：你不是來背書的。若原報告的核心主張站不住，直接說，並解釋為何——決策者付錢買的是壞消息，不是安慰。
+- **不確定性誠實**：查不到就說查不到，不用權威語氣掩蓋資料空缺；區分「證據顯示為假」與「沒有證據」。
+- **決策導向**：每一段分析都要能回答「所以我該怎麼決定」；純粹的資訊堆砌不是顧問的產出。
+- **成本意識**：建議的下一步永遠先問「有沒有更便宜的方法先證偽？」，避免叫客戶花大錢驗證一個五百塊實驗就能否決的假設。
+- **反確認偏誤**：主動找反對自己與反對原報告的證據；一份只有支持證據的決策報告是失職的。
+
+## 橫向原則
+
+- **來源即權力**：無來源的數字不進事實庫；二手引用要追到原始出處，追不到就降級可信度。
+- **時效性**：市場、競品、法規、價格都會變——查核時用當前年份，標明每個事實的時間點。
+- **與上游 skill 的接口**：若輸入是 interview-to-strategy 的報告，優先把它標為「待驗證」的項目排進步驟 1 的查核優先序，形成「內部假設 → 外部驗證 → 決策」的完整鏈。
+- **不越俎代庖**：法律與財務的最終判斷標明「非專業意見、建議諮詢執業人士」，顧問給的是決策框架與證據，不是簽核。</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script>
+(() => {
+const SKILL = document.getElementById("skill-md").textContent.trim();
+const $ = (id) => document.getElementById(id);
+const log = $("log"), msg = $("msg"), fileInput = $("file"), attachedEl = $("attached");
+const sendBtn = $("sendBtn"), stopBtn = $("stopBtn"), composer = $("composer");
+$("skillText").textContent = SKILL;
+$("skillToggle").onclick = (e) => {
+  const pre = $("skillText"); pre.hidden = !pre.hidden;
+  e.target.setAttribute("aria-expanded", String(!pre.hidden));
+  e.target.textContent = pre.hidden ? "查看完整 SKILL 規則" : "收合 SKILL 規則";
+};
+
+/* ---------- state ---------- */
+let sample = null;          // Claude capability
+let pending = null;         // {name, text} file waiting to be sent
+let doc = null;             // last audited document {name, text}
+let audit = null;           // last audit object
+let turns = [];             // follow-up chat turns
+let ctl = null;
+const MAX_CHARS = 120000;
+
+/* ---------- helpers ---------- */
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const md = (s) => (window.marked && window.DOMPurify) ? DOMPurify.sanitize(marked.parse(String(s ?? ""))) : esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+const arr = (x) => Array.isArray(x) ? x : [];
+function addMsg(role, html) {
+  const m = document.createElement("div");
+  m.className = "msg " + role;
+  m.innerHTML = `<div class="who">${role === "user" ? "你" : "顧問"}</div><div class="bubble">${html}</div>`;
+  log.appendChild(m);
+  m.scrollIntoView({block:"end", behavior:"smooth"});
+  return m.querySelector(".bubble");
+}
+function setSteps(active, doneAll) {
+  document.querySelectorAll(".step").forEach(li => {
+    const s = +li.dataset.s;
+    li.classList.toggle("done", doneAll || s < active);
+    li.classList.toggle("run", !doneAll && s === active);
+  });
+}
+function busy(on) {
+  sendBtn.hidden = on; stopBtn.hidden = !on;
+  $("attachBtn").disabled = on;
+}
+function autosize() { msg.style.height = "auto"; msg.style.height = Math.min(msg.scrollHeight, 200) + "px"; }
+msg.addEventListener("input", autosize);
+msg.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); composer.requestSubmit(); }
+});
+
+/* ---------- file extraction ---------- */
+const loaded = {};
+function loadScript(src) {
+  if (!loaded[src]) loaded[src] = new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = src; s.onload = res;
+    s.onerror = () => rej(new Error("無法載入解析元件，請改上傳 TXT 或 Markdown。")); document.head.appendChild(s);
+  });
+  return loaded[src];
+}
+async function extract(file) {
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".pdf")) {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js");
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
+    const pdf = await window.pdfjsLib.getDocument({data: new Uint8Array(await file.arrayBuffer())}).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const c = await (await pdf.getPage(i)).getTextContent();
+      pages.push(c.items.map(it => it.str + (it.hasEOL ? "\n" : "")).join(""));
+    }
+    return pages.join("\n\n");
+  }
+  if (name.endsWith(".docx")) {
+    await loadScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js");
+    const r = await window.mammoth.extractRawText({arrayBuffer: await file.arrayBuffer()});
+    return r.value;
+  }
+  if (/\.(md|markdown|txt|csv|json|html?)$/.test(name)) return await file.text();
+  throw new Error("不支援這種檔案格式。請上傳 PDF、DOCX、MD 或 TXT。");
+}
+async function attach(file) {
+  if (!file) return;
+  attachedEl.hidden = false;
+  attachedEl.innerHTML = `<span class="att"><span>正在讀取 ${esc(file.name)}…</span></span>`;
+  try {
+    const text = (await extract(file)).trim();
+    if (text.length < 40) throw new Error("讀不到足夠的文字。若是掃描版 PDF，請先轉成文字檔。");
+    pending = {name: file.name, text};
+    attachedEl.innerHTML = `<span class="att"><span>📄 ${esc(file.name)} · ${text.length.toLocaleString()} 字</span><button type="button" aria-label="移除檔案" id="rmAtt">×</button></span>`;
+    $("rmAtt").onclick = () => { pending = null; attachedEl.hidden = true; attachedEl.innerHTML = ""; };
+    if (!msg.value.trim()) msg.placeholder = "可補充委任範圍，例如：我們準備決定是否投入 A 輪…（可留空直接送出）";
+  } catch (e) {
+    pending = null;
+    attachedEl.innerHTML = `<span class="err">${esc(e.message || "讀取失敗")}</span>`;
+  } finally { fileInput.value = ""; }
+}
+$("attachBtn").onclick = () => fileInput.click();
+fileInput.onchange = () => attach(fileInput.files[0]);
+["dragenter","dragover"].forEach(t => composer.addEventListener(t, e => { e.preventDefault(); composer.classList.add("drag"); }));
+["dragleave","drop"].forEach(t => composer.addEventListener(t, e => { e.preventDefault(); composer.classList.remove("drag"); }));
+composer.addEventListener("drop", e => attach(e.dataTransfer.files[0]));
+
+/* ---------- prompts ---------- */
+const SCHEMA = `{
+  "doc_profile": {"title": "報告名稱或主題", "type": "研究報告|商業計畫|市場分析|產品策略|投資備忘錄|其他", "upstream_interview_to_strategy": true},
+  "claims": [{"id": "C1", "text": "可檢驗的主張（引原文或精簡改寫）", "type": "事實宣稱|內部假設|判斷／建議", "priority": 1, "why_priority": "為何是關鍵前提或周邊"}],
+  "limitations": {"has_kill_conditions": false, "items": ["報告自承的限制或殺死條件"], "finding": "若沒有自承限制，這本身是什麼發現"},
+  "facts": [{"id": "F1", "area": "市場|競爭|法規|需求|單位經濟|趨勢", "statement": "事實陳述（不得含判斷語）", "source": "機構＋年份；文件內引用請註明；若為顧問背景知識請寫『顧問背景知識，待外部查證』", "credibility": "高|中|低", "kind": "查得實數|顧問估算", "formula": "若為估算附算式，否則空字串", "impact": "佐證/反駁/修正 哪條 C#"}],
+  "judgments": [{"id": "J1", "judgment": "判斷", "based_on": ["F1"], "confidence": "高|中|低", "why_not_higher": "為何信心不是更高", "falsifier": "什麼證據會推翻它", "disguised_fact": false}],
+  "compliance": [{"rule": "事實與判斷分離", "status": "pass|partial|fail", "evidence": "原報告在這條上的表現與例證"}, {"rule": "來源紀律", "status": "...", "evidence": "..."}, {"rule": "可否決性", "status": "...", "evidence": "..."}],
+  "verdicts": [{"claim_id": "C1", "verdict": "證實|證偽|修正|未能佐證", "reason": "依據哪些 F#／為何", "adjusted": "若為修正，附調整後的數字或範圍，否則空字串"}],
+  "critical_premise": "關鍵前提是否守得住的一段結論",
+  "uncertainties": [{"item": "未知數", "impact": "高|中|低", "unresolved": "高|中|低", "why": "為何影響決策"}],
+  "scenarios": [{"if": "若…", "then": "則…"}],
+  "decision": {"call": "Go|有條件 Go|不 Go|需先驗證再定", "one_line": "一句話決策建議", "key_facts": ["支撐的關鍵事實(含 F#)", "", ""], "top_risks": ["最大風險", "", ""]},
+  "actions": [{"action": "動詞開頭、具體可派工", "purpose": "驗證哪個不確定性/消除哪個風險", "owner": "負責角色", "done_criteria": "完成判準與指標", "cost": "低|中|高"}]
+}`;
+
+function auditPrompt(d, note) {
+  const body = d.text.length > MAX_CHARS ? d.text.slice(0, MAX_CHARS) + "\n\n[……文件過長，以下已截斷]" : d.text;
+  return `你是被董事會請來的獨立資深商業策略顧問。請嚴格依照下方 SKILL 規則，核查使用者上傳的報告。
+
+<SKILL>
+${SKILL}
+</SKILL>
+
+執行限制（重要）：
+- 你此刻無法上網。步驟 1 的「外部證據」只能來自：(a) 報告本身引用且可辨識的來源；(b) 你的背景知識，必須在 source 標「顧問背景知識，待外部查證」，可信度最高為「中」，並寫出大約年份。絕不捏造機構、報告名或精確數字；不確定就列為未能佐證，並在 actions 裡安排查證。
+- 事實庫裡不准出現「因此應該」「這是好機會」等判斷語。判斷庫每條必須用 based_on 指向 F#。若某陳述是「被當成事實的判斷」，放判斷庫並設 disguised_fact=true。
+- claims 依查核優先序排列，priority 1 = 若為假會讓策略崩塌的關鍵前提，2 = 重要，3 = 周邊。每份報告至少抽 6 條主張（文件很短時可少）。
+- verdicts 必須逐條覆蓋 claims。
+- actions 依「最便宜就能消除最大不確定性」排序，廉價的殺死實驗放最前；具體到可以直接派工。
+- 顧問姿態：獨立、不背書；主動找反證；區分「證據顯示為假」與「沒有證據」。
+- 全部以繁體中文撰寫。
+
+${note ? `委任方補充說明：\n${note}\n` : ""}
+報告檔名：${d.name}
+<REPORT>
+${body}
+</REPORT>
+
+只輸出一個 JSON 物件，不要任何前言、說明或程式碼圍欄，鍵的順序照以下結構（這個順序就是核查流程）：
+${SCHEMA}`;
+}
+
+function contextTurn() {
+  return `你是依下列 SKILL 規則工作的獨立策略顧問。以下是你已完成的核查。回答使用者的追問時，維持事實與判斷分離（用「【事實】」「【判斷】」標示），每個判斷附否決條件，查不到就說未能佐證。你無法上網。用繁體中文、Markdown 回答，簡潔、決策導向。
+
+<SKILL>
+${SKILL}
+</SKILL>
+${doc ? `\n報告檔名：${doc.name}\n<REPORT>\n${doc.text.slice(0, 60000)}\n</REPORT>` : "\n（使用者尚未上傳報告。若問題需要報告內容，請請對方上傳。）"}
+${audit ? `\n<AUDIT_JSON>\n${JSON.stringify(audit)}\n</AUDIT_JSON>` : ""}`;
+}
+
+/* ---------- parse streaming progress ---------- */
+function stepFromText(t) {
+  if (/"actions"\s*:/.test(t) || /"decision"\s*:/.test(t) || /"uncertainties"\s*:/.test(t)) return 4;
+  if (/"verdicts"\s*:/.test(t)) return 3;
+  if (/"judgments"\s*:/.test(t) || /"compliance"\s*:/.test(t)) return 2;
+  if (/"facts"\s*:/.test(t)) return 1;
+  return 0;
+}
+function parseJSON(t) {
+  let s = t.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a < 0 || b < a) throw new Error("no json");
+  return JSON.parse(s.slice(a, b + 1));
+}
+
+/* ---------- render audit ---------- */
+const VERDICT = {"證實":"c-ok","證偽":"c-bad","修正":"c-warn","未能佐證":"c-unk"};
+const DEC = (c="") => /不\s*Go/i.test(c) ? "d-no" : /有條件/.test(c) ? "d-cond" : /^Go$/i.test(c.trim()) ? "d-go" : "d-verify";
+const LAW = {pass:["c-ok","符合"], partial:["c-warn","部分符合"], fail:["c-bad","不符合"]};
+const LV = (v) => ({"高":"c-ok","中":"c-warn","低":"c-bad"}[v] || "c-unk");
+
+function renderAudit(a, opts = {}) {
+  const claims = arr(a.claims), facts = arr(a.facts), judg = arr(a.judgments), ver = arr(a.verdicts);
+  const vmap = Object.fromEntries(ver.map(v => [v.claim_id, v]));
+  const d = a.decision || {};
+  const counts = {};
+  ver.forEach(v => counts[v.verdict] = (counts[v.verdict] || 0) + 1);
+  const sec = (title, kind, n, inner, open) =>
+    `<details class="sec"${open ? " open" : ""}><summary>${title}<span class="kind">${kind}</span><span class="n">${n}</span></summary><div class="secbody">${inner}</div></details>`;
+
+  const head = `<div class="rhead">
+    <div class="rhead-top">
+      ${opts.example ? '<span class="ex-tag">範例 · 虛構報告</span>' : ""}
+      <span class="decision ${DEC(d.call)}">${esc(d.call || "需先驗證再定")}</span>
+      <span class="id">${esc(a.doc_profile?.title || "")}${a.doc_profile?.type ? " · " + esc(a.doc_profile.type) : ""}</span>
+    </div>
+    <p class="oneline">${esc(d.one_line || "")}</p>
+    <div class="sum-grid">
+      <div><h4>支撐決策的關鍵事實</h4><ol>${arr(d.key_facts).filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("")}</ol></div>
+      <div><h4>最大風險</h4><ol>${arr(d.top_risks).filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("")}</ol></div>
+    </div>
+    <div class="verdicts">${Object.entries(counts).map(([k,n]) => `<span class="chip ${VERDICT[k]||"c-unk"}">${esc(k)} ${n}</span>`).join("")}</div>
+  </div>`;
+
+  const laws = `<div class="laws">${arr(a.compliance).map(c => {
+    const [cls, lbl] = LAW[c.status] || ["c-unk","未評"];
+    return `<div class="law"><b>${esc(c.rule)} <span class="chip ${cls}">${lbl}</span></b><span>${esc(c.evidence)}</span></div>`;
+  }).join("")}</div>`;
+
+  const claimRows = claims.map(c => {
+    const v = vmap[c.id] || {};
+    return `<tr><td class="id">${esc(c.id)}${c.priority == 1 ? '<div class="prio1">關鍵前提</div>' : ""}</td>
+      <td>${esc(c.text)}<div class="note" style="margin:4px 0 0">${esc(c.type)}</div></td>
+      <td><span class="chip ${VERDICT[v.verdict] || "c-unk"}">${esc(v.verdict || "—")}</span></td>
+      <td>${esc(v.reason || "")}${v.adjusted ? `<div><b>調整：</b>${esc(v.adjusted)}</div>` : ""}</td></tr>`;
+  }).join("");
+  const claimsHTML = `${a.critical_premise ? `<p class="note"><b>關鍵前提：</b>${esc(a.critical_premise)}</p>` : ""}
+    <div class="tbl"><table class="t"><thead><tr><th>#</th><th>主張</th><th>裁決</th><th>依據</th></tr></thead><tbody>${claimRows}</tbody></table></div>
+    ${a.limitations ? `<p class="note" style="margin-top:10px"><b>報告自承的限制與殺死條件：</b>${a.limitations.has_kill_conditions ? "" : "未寫明殺死條件。"}${esc(arr(a.limitations.items).join("；"))} ${esc(a.limitations.finding || "")}</p>` : ""}`;
+
+  const factRows = facts.map(f => `<tr><td class="id">${esc(f.id)}</td><td>${esc(f.statement)}${f.formula ? `<div class="note" style="margin:4px 0 0">算式：${esc(f.formula)}</div>` : ""}</td>
+    <td>${esc(f.source)}<div class="note" style="margin:4px 0 0">${esc(f.area || "")} · ${esc(f.kind || "")}</div></td>
+    <td><span class="chip ${LV(f.credibility)}">${esc(f.credibility || "—")}</span></td><td>${esc(f.impact)}</td></tr>`).join("");
+  const factsHTML = `<p class="note">只收有來源支撐的陳述。標「待外部查證」者是顧問背景知識，需實際查核後才可作為決策基礎。</p>
+    <div class="tbl"><table class="t"><thead><tr><th>#</th><th>事實陳述</th><th>來源</th><th>可信度</th><th>對主張的影響</th></tr></thead><tbody>${factRows}</tbody></table></div>`;
+
+  const judgHTML = `<p class="note">顧問的推論，每條可追溯至事實庫編號。</p><div class="judg">${judg.map(j => `<div class="j">
+    <div class="jt"><span class="id">${esc(j.id)}</span> ${esc(j.judgment)} ${j.disguised_fact ? '<span class="chip c-warn">被當成事實的判斷</span>' : ""}</div>
+    <dl><dt>依據</dt><dd>${esc(arr(j.based_on).join("、"))}</dd>
+    <dt>信心</dt><dd><span class="chip ${LV(j.confidence)}">${esc(j.confidence)}</span> ${esc(j.why_not_higher)}</dd>
+    <dt>否決條件</dt><dd>${esc(j.falsifier)}</dd></dl></div>`).join("")}</div>`;
+
+  const unc = arr(a.uncertainties);
+  const uncHTML = `<div class="tbl"><table class="t"><thead><tr><th>不確定性</th><th>影響</th><th>未解程度</th><th>為何重要</th></tr></thead><tbody>${unc.map(u =>
+    `<tr><td>${esc(u.item)}</td><td><span class="chip ${LV(u.impact) === "c-ok" ? "c-bad" : LV(u.impact) === "c-bad" ? "c-ok" : "c-warn"}">${esc(u.impact)}</span></td><td>${esc(u.unresolved)}</td><td>${esc(u.why)}</td></tr>`).join("")}</tbody></table></div>`;
+
+  const scenHTML = `<div class="scen">${arr(a.scenarios).map(s => `<div class="sc"><b>若</b><span>${esc(s.if)}</span><b>則</b><span>${esc(s.then)}</span></div>`).join("")}</div>`;
+
+  const act = arr(a.actions);
+  const actHTML = `<div class="tbl"><table class="t"><thead><tr><th>#</th><th>行動</th><th>目的</th><th>負責角色</th><th>完成判準</th></tr></thead><tbody>${act.map((x,i) =>
+    `<tr><td class="id">${i+1}${x.cost ? `<div class="note" style="margin:2px 0 0">成本${esc(x.cost)}</div>` : ""}</td><td>${esc(x.action)}</td><td>${esc(x.purpose)}</td><td>${esc(x.owner)}</td><td>${esc(x.done_criteria)}</td></tr>`).join("")}</tbody></table></div>`;
+
+  return `<div class="report${opts.example ? " example" : ""}">${head}${laws}
+    ${sec("對原報告的裁決", "CLAIMS × VERDICT", claims.length + " 條", claimsHTML, true)}
+    ${sec("事實庫", "FACTS", facts.length + " 筆", factsHTML, !opts.example)}
+    ${sec("判斷庫", "JUDGMENTS", judg.length + " 筆", judgHTML, !opts.example)}
+    ${sec("關鍵不確定性", "UNCERTAINTY", unc.length + " 項", uncHTML, false)}
+    ${sec("決策情境", "IF → THEN", arr(a.scenarios).length + " 種", scenHTML, false)}
+    ${sec("下一步指令表", "NEXT ACTIONS", act.length + " 項", actHTML, true)}
+  </div>`;
+}
+
+/* ---------- send ---------- */
+const ERR = {
+  not_granted: "你沒有允許這個頁面使用 Claude，因此無法核查。重新開啟頁面即可再次選擇。",
+  rate_limited: "請求太頻繁，請稍候一分鐘再試。",
+  cancelled: "已停止。",
+};
+const errText = (e) => ERR[e?.code] || ("核查沒有完成：" + (e?.message || "未知錯誤") + "。可以再送出一次。");
+
+composer.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const note = msg.value.trim();
+  if (!pending && !note) return;
+  if (!sample) { addMsg("assistant", `<span class="err">目前無法連接 Claude。請在 claude.ai 中開啟此頁面並允許使用 Claude。</span>`); return; }
+  const file = pending;
+  addMsg("user", (file ? `<div class="filechip">📄 ${esc(file.name)}</div>` : "") + (note ? `<div>${esc(note).replace(/\n/g,"<br>")}</div>` : ""));
+  msg.value = ""; autosize(); pending = null; attachedEl.hidden = true; attachedEl.innerHTML = "";
+  msg.placeholder = "追問這份核查，例如：哪個殺死實驗最便宜？";
+  busy(true);
+  ctl = new AbortController();
+  if (file) await runAudit(file, note); else await runChat(note);
+  busy(false);
+});
+stopBtn.onclick = () => ctl?.abort();
+
+async function runAudit(file, note) {
+  const out = addMsg("assistant", `<div class="thinking"><span class="spin"></span><span id="ph">步驟 0：正在拆解報告主張…</span></div>`);
+  const labels = ["步驟 0：正在拆解報告主張…","步驟 1：盤點外部證據…","步驟 2：分離事實與判斷…","步驟 3：逐條裁決原報告…","步驟 4：綜合決策與指令表…"];
+  setSteps(0);
+  let last = 0;
+  try {
+    const {text} = await sample(auditPrompt(file, note), {
+      modelTier: "complex", signal: ctl.signal, cache: false,
+      onText: ({text}) => { const s = stepFromText(text); if (s !== last) { last = s; setSteps(s); const ph = out.querySelector("#ph"); if (ph) ph.textContent = labels[s]; } },
+    });
+    const a = parseJSON(text);
+    doc = file; audit = a; turns = [];
+    setSteps(5, true);
+    out.parentElement.querySelector(".who").textContent = "顧問 · 核查報告";
+    out.style.background = "transparent"; out.style.padding = "0";
+    out.innerHTML = renderAudit(a) + `<p class="hint" style="margin-top:8px">可以繼續留言追問，例如「把指令表前三項寫成派工訊息」。</p>`;
+  } catch (e) {
+    setSteps(-1);
+    out.innerHTML = `<span class="err">${esc(e?.code ? errText(e) : "Claude 回傳的格式無法解析，請再送出一次。")}</span>`;
+  }
+}
+
+async function runChat(note) {
+  const out = addMsg("assistant", `<div class="thinking"><span class="spin"></span>思考中…</div>`);
+  turns.push({role: "user", content: note});
+  const input = [{role: "user", content: contextTurn()}, {role: "assistant", content: "已了解，我會依 SKILL 規則回答。"}, ...turns.slice(-12)];
+  try {
+    const {text} = await sample(input, {cache: false, signal: ctl.signal, onText: ({text}) => { out.innerHTML = md(text); }});
+    out.innerHTML = md(text);
+    turns.push({role: "assistant", content: text});
+  } catch (e) {
+    turns.pop();
+    out.innerHTML = (e?.text ? md(e.text) : "") + `<p class="err">${esc(errText(e))}</p>`;
+  }
+}
+
+/* ---------- example (illustrative only) ---------- */
+const EXAMPLE = {
+  doc_profile: {title: "「毛孩接住了」寵物認養後陪伴訂閱", type: "產品策略"},
+  claims: [
+    {id:"C1", text:"六成認養人在前 90 天考慮退養，主因是行為問題", type:"內部假設", priority:1},
+    {id:"C2", text:"台灣每年公立收容所認養量超過一萬隻", type:"事實宣稱", priority:1},
+    {id:"C3", text:"市場上沒有專做認養後陪伴的服務", type:"事實宣稱", priority:2},
+    {id:"C4", text:"認養人願意每月付 299 元訂閱", type:"內部假設", priority:1},
+    {id:"C5", text:"應先與收容所合作取得名單", type:"判斷／建議", priority:3},
+  ],
+  facts: [
+    {id:"F1", area:"市場", statement:"農業部動物保護資訊網公布各年度公立收容所認養數", source:"農業部動保資訊網；顧問背景知識，待外部查證", credibility:"中", kind:"查得實數", impact:"佐證 C2 量級，需取最新年度數字"},
+    {id:"F2", area:"競爭", statement:"已有訓犬師線上課程與寵物保險附加諮詢服務", source:"顧問背景知識，待外部查證", credibility:"低", kind:"查得實數", impact:"修正 C3：替代方案存在"},
+  ],
+  judgments: [
+    {id:"J1", judgment:"「市場空白」較可能是替代方案分散，而非無人供給", based_on:["F2"], confidence:"中", why_not_higher:"尚未盤點失敗案例", falsifier:"盤點後確認無任何付費替代方案"},
+  ],
+  compliance: [
+    {rule:"事實與判斷分離", status:"partial", evidence:"C3 以事實語氣寫出，實為推論"},
+    {rule:"來源紀律", status:"fail", evidence:"C2 數字無出處與年份"},
+    {rule:"可否決性", status:"pass", evidence:"附有殺死條件：首月轉換 < 3% 即停"},
+  ],
+  verdicts: [
+    {claim_id:"C1", verdict:"未能佐證", reason:"僅 14 位受訪者，無外部退養率資料"},
+    {claim_id:"C2", verdict:"修正", reason:"F1 顯示量級合理但需指定年度", adjusted:"以最新年度官方數字取代"},
+    {claim_id:"C3", verdict:"證偽", reason:"F2：替代方案存在"},
+    {claim_id:"C4", verdict:"未能佐證", reason:"無付費意願證據"},
+    {claim_id:"C5", verdict:"未能佐證", reason:"取決於 C1、C4"},
+  ],
+  critical_premise: "C1 與 C4 兩個關鍵前提都尚未有外部證據，策略目前建立在 14 份訪談上。",
+  uncertainties: [{item:"認養人實際付費意願", impact:"高", unresolved:"高", why:"決定商業模式是否成立"}],
+  scenarios: [
+    {if:"預售頁兩週轉換率 ≥ 5%", then:"有條件 Go，小規模試營運一個縣市"},
+    {if:"轉換率 < 3%", then:"不 Go，改談收容所 B2B 方案"},
+  ],
+  decision: {call:"需先驗證再定", one_line:"方向值得驗證，但兩個關鍵前提都缺外部證據，先花一萬元做預售測試再談投入。", key_facts:["F1 認養量級足以支撐試點","F2 已有分散的替代方案","C1 樣本僅 14 人"], top_risks:["付費意願不足","替代方案以免費取勝","收容所合作周期長"]},
+  actions: [
+    {action:"上線預售登陸頁並投放 1 萬元廣告兩週", purpose:"驗證 C4 付費意願", owner:"成長負責人", done_criteria:"取得 ≥ 300 次造訪與轉換率數字", cost:"低"},
+    {action:"訪談 8 位已退養的飼主驗證流失主因", purpose:"驗證 C1", owner:"研究員", done_criteria:"主因分布與訪談稿", cost:"低"},
+  ],
+};
+
+addMsg("assistant", md(`你好，我是你的獨立策略顧問。**上傳一份研究報告、商業計畫或投資備忘錄**，我會依 SKILL 規則替它做壓力測試，並在右側顯示核查進度。\n\n下面是一份核查結果的樣子（範例，內容為虛構）：`));
+const ex = addMsg("assistant", renderAudit(EXAMPLE, {example: true}));
+ex.style.background = "transparent"; ex.style.padding = "0";
+log.scrollTop = 0; window.scrollTo(0, 0);
+
+/* ---------- connect ---------- */
+(async () => {
+  try { sample = window.claude ? await window.claude.use("sample") : null; } catch { sample = null; }
+  $("dot").className = "dot " + (sample ? "on" : "off");
+  $("statusText").textContent = sample ? "Claude 已連接" : "未連接 Claude（請在 claude.ai 開啟）";
+})();
+})();
+</script>
