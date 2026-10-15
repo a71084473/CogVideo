@@ -6,12 +6,46 @@ import { forwardRef, useEffect, useRef, useState } from 'react'
  *  mode="autoplay" -> loops while on screen, pauses when off screen
  *  mode="static"   -> poster only, the file is never downloaded (reduced motion)
  */
+// Public paths are written as "/file.mp4"; resolve them against Vite's base
+const asset = (p) => (p && p.startsWith('/') ? import.meta.env.BASE_URL + p.slice(1) : p)
+
+/**
+ * Scrub videos are fetched whole into a blob URL: blobs are always seekable,
+ * even when the host doesn't answer HTTP range requests. Falls back to the
+ * plain URL if fetching fails.
+ */
+function useScrubSource(src, enabled) {
+  const [url, setUrl] = useState(null)
+  useEffect(() => {
+    if (!enabled || !src) return
+    let objectUrl = null
+    let cancelled = false
+    fetch(src)
+      .then((r) => (r.ok ? r.blob() : Promise.reject(r.status)))
+      .then((b) => {
+        if (cancelled) return
+        objectUrl = URL.createObjectURL(b)
+        setUrl(objectUrl)
+      })
+      .catch(() => !cancelled && setUrl(src))
+    return () => {
+      cancelled = true
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+      setUrl(null)
+    }
+  }, [src, enabled])
+  return url
+}
+
 const LazyVideo = forwardRef(function LazyVideo(
   { src, poster, mode = 'autoplay', eager = false, className = '', playbackRate = 1, ...rest },
   forwardedRef,
 ) {
   const ref = useRef(null)
   const [load, setLoad] = useState(eager && mode !== 'static')
+  const resolved = asset(src)
+  const scrubSrc = useScrubSource(resolved, mode === 'scrub' && load)
+  const finalSrc = !load ? undefined : mode === 'scrub' ? scrubSrc ?? undefined : resolved
 
   const setRefs = (el) => {
     ref.current = el
@@ -56,8 +90,12 @@ const LazyVideo = forwardRef(function LazyVideo(
     <video
       ref={setRefs}
       className={className}
-      poster={poster}
-      src={load ? src : undefined}
+      poster={asset(poster)}
+      src={finalSrc}
+      onError={(e) => {
+        // blob: media blocked or broken -> retry with the direct URL
+        if (finalSrc?.startsWith('blob:')) e.currentTarget.src = resolved
+      }}
       muted
       playsInline
       loop={mode === 'autoplay'}
