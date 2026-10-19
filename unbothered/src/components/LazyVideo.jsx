@@ -56,7 +56,7 @@ export const LazyVideo = forwardRef(function LazyVideo({ name, mode, eager = fal
     <video
       ref={video}
       className={className}
-      poster={`/${name}.jpg`}
+      poster={`${import.meta.env.BASE_URL}${name}.jpg`}
       muted
       playsInline
       loop={autoplay}
@@ -70,8 +70,8 @@ export const LazyVideo = forwardRef(function LazyVideo({ name, mode, eager = fal
     >
       {load && (
         <>
-          <source src={`/${name}.mp4`} type="video/mp4" />
-          <source src={`/${name}.webm`} type="video/webm" />
+          <source src={`${import.meta.env.BASE_URL}${name}.mp4`} type="video/mp4" />
+          <source src={`${import.meta.env.BASE_URL}${name}.webm`} type="video/webm" />
         </>
       )}
     </video>
