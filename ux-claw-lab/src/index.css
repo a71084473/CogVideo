@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --cream: #fff9f0;
+  --ink: #35465c;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #2b2346;
+  color: var(--ink);
+  font-family: 'Noto Sans TC', system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+.font-display {
+  font-family: 'Baloo 2', 'Noto Sans TC', system-ui, sans-serif;
+}
+
+.glass {
+  background: rgba(255, 249, 240, 0.72);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 10px 30px -12px rgba(53, 70, 92, 0.45);
+}
+
+.glass-dark {
+  background: rgba(53, 70, 92, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.toy-btn {
+  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.14), 0 6px 14px -6px rgba(53, 70, 92, 0.55);
+  border: 2px solid #35465c;
+}
+.toy-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.14), 0 3px 8px -4px rgba(53, 70, 92, 0.55);
+}
+
+.arcade-bg {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.18) 0 2px, transparent 3px) 0 0 / 60px 60px,
+    radial-gradient(circle at 70% 40%, rgba(255, 255, 255, 0.12) 0 1.5px, transparent 2.5px) 0 0 / 90px 90px,
+    linear-gradient(180deg, #7a63c9 0%, #a77fd6 38%, #f2a9c9 72%, #ffd9c7 100%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+:focus-visible {
+  outline: 3px solid #35465c;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.floaty {
+  animation: floaty 3.2s ease-in-out infinite;
+}
+@keyframes blinky {
+  0%, 92%, 100% { opacity: 1; }
+  95% { opacity: 0.3; }
+}
+.neon {
+  animation: blinky 4s infinite;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.9), 0 0 18px rgba(255, 169, 197, 0.9);
+}
