@@ -26,6 +26,16 @@ npm run build      # 產出 dist/（純靜態，可部署到任何靜態主機�
 
 需求：Node.js 18+。
 
+### 線上部署（GitHub Pages）
+
+`.github/workflows/deploy-ux-claw-lab.yml` 會在 `ux-claw-lab/` 有變更並推送到 `main` 或 `claude/eloquent-edison-brk9c4` 時，自動測試、打包並部署到
+**https://a71084473.github.io/CogVideo/**。也可以在 GitHub 的 Actions 分頁手動執行。
+
+第一次使用前需要在 GitHub 做一次設定：
+
+1. Settings → Pages → Build and deployment → Source 選 **GitHub Actions**。
+2. 若要從非 `main` 分支部署：Settings → Environments → `github-pages` → Deployment branches，加入該分支（或先合併到 `main`）。
+
 ### 怎麼玩
 
 | 操作 | 手機 | 桌機 |
