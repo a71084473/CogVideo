@@ -6,7 +6,7 @@ type Variant = { headline: 0 | 1; cta: 0 | 1; color: 0 | 1; image: 0 | 1 };
 const OPTS = {
   headline: ['UX 工作坊報名中', '下班 2 小時，學會使用者訪談'],
   cta: ['送出', '免費保留我的位子'],
-  color: ['#FF8FB1', '#7ED3A8'],
+  color: ['#DE8A86', '#7ED3A8'],
   image: ['🎨', '👩‍💻'],
 };
 const LABEL: Record<keyof Variant, string> = { headline: '標題', cta: '按鈕文案', color: '按鈕顏色', image: '主視覺' };
@@ -98,7 +98,7 @@ export function ABTestChallenge({ onSubmit, locked }: ChallengeProps) {
                 <td>B</td>
                 <td>80</td>
                 <td>10</td>
-                <td className="text-[#e2457a]">12.5%</td>
+                <td className="text-[#A9454A]">12.5%</td>
               </tr>
             </tbody>
           </table>
@@ -119,7 +119,7 @@ export function ABTestChallenge({ onSubmit, locked }: ChallengeProps) {
                 setDecision(k);
               }}
               className={`mb-1.5 min-h-[44px] w-full rounded-xl border-2 border-ink px-3 py-2 text-left text-[14px] ${
-                locked ? (k === 'wait' ? 'bg-mint' : decision === k ? 'bg-[#FFC9C9]' : 'bg-white') : decision === k ? 'bg-butter' : 'bg-white'
+                locked ? (k === 'wait' ? 'bg-mint' : decision === k ? 'bg-[#F5C2B8]' : 'bg-white') : decision === k ? 'bg-butter' : 'bg-white'
               }`}
             >
               {label}

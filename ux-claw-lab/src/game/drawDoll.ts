@@ -70,44 +70,63 @@ function bodyPath(ctx: CanvasRenderingContext2D, shape: BodyShape, r: number, h:
 }
 
 function faceTop(shape: BodyShape, h: number) {
-  if (shape === 'bun') return -h * 0.42;
-  if (shape === 'drop') return -h * 0.42;
-  return -h * 0.56;
+  if (shape === 'bun') return -h * 0.5;
+  if (shape === 'drop') return -h * 0.5;
+  return -h * 0.62;
 }
 
+const INK = '#3E2A1F';
+
+/**
+ * Flat "snack ball" style: solid fill, thick brown outline, a soft shade
+ * crescent, stubby feet, tiny dot eyes, and a little snack bag to hold.
+ */
 export function drawDoll(ctx: CanvasRenderingContext2D, def: DollDef, o: DollDrawOpts) {
   const r = o.r;
   const sq = o.squash ?? 0;
   const breathe = Math.sin((o.bounce ?? 0) * Math.PI * 2) * 0.025;
   const h = r * 1.9;
+  const lw = Math.max(1.6, r * 0.11);
   ctx.save();
   ctx.translate(o.x, o.y);
   ctx.rotate(o.tilt ?? 0);
   ctx.scale(1 + sq * 0.25 - breathe, 1 - sq * 0.3 + breathe);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
 
-  const fill = o.silhouette ? '#cfc6e6' : def.color;
+  const fill = o.silhouette ? '#E6D3BE' : def.color;
   const level = o.level ?? 1;
 
   // legendary aura
   if (!o.silhouette && def.rarity === 'legendary') {
     const g = ctx.createRadialGradient(0, -h / 2, r * 0.5, 0, -h / 2, r * 1.8);
-    g.addColorStop(0, 'rgba(255,240,170,0.55)');
-    g.addColorStop(1, 'rgba(255,240,170,0)');
+    g.addColorStop(0, 'rgba(255,214,90,0.6)');
+    g.addColorStop(1, 'rgba(255,214,90,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(0, -h / 2, r * 1.8, 0, Math.PI * 2);
     ctx.fill();
   }
 
+  // stubby feet
+  ctx.fillStyle = darken(fill, 0.08);
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = lw * 0.85;
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(s * r * 0.38, r * 0.02, r * 0.17, r * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
   // cat ears (behind body)
   if (def.body === 'cat') {
     ctx.fillStyle = fill;
-    ctx.strokeStyle = '#35465C';
-    ctx.lineWidth = Math.max(1.2, r * 0.08);
+    ctx.lineWidth = lw;
     for (const s of [-1, 1]) {
       ctx.beginPath();
       ctx.moveTo(s * r * 0.85, -h * 0.62);
-      ctx.lineTo(s * r * 0.75, -h * 1.08);
+      ctx.lineTo(s * r * 0.75, -h * 1.06);
       ctx.lineTo(s * r * 0.2, -h * 0.88);
       ctx.closePath();
       ctx.fill();
@@ -115,31 +134,31 @@ export function drawDoll(ctx: CanvasRenderingContext2D, def: DollDef, o: DollDra
     }
   }
 
-  // body with soft 3D shading
+  // flat body + shade crescent
   bodyPath(ctx, def.body, r, h);
-  const grad = ctx.createLinearGradient(-r, -h, r, 0);
-  grad.addColorStop(0, o.silhouette ? '#ddd6ef' : lighten(fill, 0.35));
-  grad.addColorStop(0.55, fill);
-  grad.addColorStop(1, o.silhouette ? '#b9afd6' : darken(fill, 0.12));
-  ctx.fillStyle = grad;
+  ctx.fillStyle = fill;
   ctx.fill();
-  ctx.lineWidth = Math.max(1.4, r * 0.09);
-  ctx.strokeStyle = '#35465C';
-  ctx.stroke();
-
-  // glossy highlight
   ctx.save();
   bodyPath(ctx, def.body, r, h);
   ctx.clip();
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillStyle = 'rgba(62,42,31,0.13)';
   ctx.beginPath();
-  ctx.ellipse(-r * 0.45, -h * 0.72, r * 0.22, r * 0.12, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(r * 0.35, -h * 0.25, r * 1.1, h * 0.55, -0.3, 0, Math.PI * 2);
+  ctx.ellipse(r * 0.05, -h * 0.55, r * 1.05, h * 0.6, -0.3, 0, Math.PI * 2, true);
+  ctx.fill('evenodd');
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(-r * 0.5, -h * 0.74, r * 0.13, r * 0.08, -0.7, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
+  bodyPath(ctx, def.body, r, h);
+  ctx.lineWidth = lw;
+  ctx.strokeStyle = INK;
+  ctx.stroke();
 
   if (o.silhouette) {
-    ctx.fillStyle = '#8f84b5';
-    ctx.font = `900 ${r * 0.9}px "Baloo 2", sans-serif`;
+    ctx.fillStyle = '#A58B70';
+    ctx.font = `900 ${r * 0.9}px "Baloo 2", Huninn, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('?', 0, -h * 0.5);
@@ -147,108 +166,133 @@ export function drawDoll(ctx: CanvasRenderingContext2D, def: DollDef, o: DollDra
     return;
   }
 
-  // belly badge
-  ctx.fillStyle = 'rgba(255,249,240,0.92)';
-  ctx.beginPath();
-  ctx.ellipse(0, -h * 0.2, r * 0.36, r * 0.3, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.font = `${r * 0.38}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(def.mark, 0, -h * 0.19);
-
-  // face
+  // face: tiny dots, close together (deadpan cute)
   const fy = faceTop(def.body, h);
-  const ex = r * 0.36;
+  const ex = r * 0.24;
   const face = o.face ?? 'happy';
-  ctx.fillStyle = '#35465C';
-  ctx.strokeStyle = '#35465C';
-  ctx.lineCap = 'round';
-  ctx.lineWidth = Math.max(1.4, r * 0.09);
-  for (const s of [-1, 1]) {
-    const cx = s * ex;
+  const eye = r * 0.085;
+  ctx.fillStyle = '#2A1A12';
+  ctx.strokeStyle = '#2A1A12';
+  ctx.lineWidth = Math.max(1.3, r * 0.075);
+  for (const sd of [-1, 1]) {
+    const cx = sd * ex;
     if (o.blink || face === 'sleepy') {
       ctx.beginPath();
-      ctx.arc(cx, fy, r * 0.12, Math.PI * 0.15, Math.PI * 0.85);
+      ctx.moveTo(cx - eye * 1.2, fy);
+      ctx.lineTo(cx + eye * 1.2, fy);
       ctx.stroke();
-    } else if (face === 'meh') {
+    } else if (face === 'wow') {
       ctx.beginPath();
-      ctx.arc(cx, fy, r * 0.15, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = darken(def.color, 0.05);
-      ctx.fillRect(cx - r * 0.2, fy - r * 0.2, r * 0.4, r * 0.17);
-      ctx.fillStyle = '#35465C';
-      ctx.beginPath();
-      ctx.moveTo(cx - r * 0.19, fy - r * 0.03);
-      ctx.lineTo(cx + r * 0.19, fy - r * 0.03);
-      ctx.stroke();
-    } else {
-      const er = face === 'wow' ? r * 0.17 : r * 0.14;
-      ctx.beginPath();
-      ctx.arc(cx, fy, er, 0, Math.PI * 2);
+      ctx.arc(cx, fy, eye * 1.45, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = '#fff';
       ctx.beginPath();
-      ctx.arc(cx - er * 0.35, fy - er * 0.4, er * 0.38, 0, Math.PI * 2);
+      ctx.arc(cx - eye * 0.4, fy - eye * 0.5, eye * 0.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#35465C';
+      ctx.fillStyle = '#2A1A12';
+    } else {
+      ctx.beginPath();
+      ctx.ellipse(cx, fy, eye, eye * 1.25, 0, 0, Math.PI * 2);
+      ctx.fill();
+      if (face === 'meh' || face === 'sad') {
+        // flat, slightly tilted brows = 不太快樂
+        ctx.beginPath();
+        const tilt = face === 'sad' ? sd * r * 0.06 : 0;
+        ctx.moveTo(cx - eye * 1.6, fy - eye * 2.3 - tilt);
+        ctx.lineTo(cx + eye * 1.6, fy - eye * 2.3 + tilt);
+        ctx.stroke();
+      }
     }
   }
   // mouth
   ctx.beginPath();
+  const my = fy + r * 0.2;
   if (face === 'wow') {
-    ctx.ellipse(0, fy + r * 0.3, r * 0.1, r * 0.13, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, my + r * 0.03, r * 0.06, r * 0.08, 0, 0, Math.PI * 2);
     ctx.fill();
-  } else if (face === 'sad') {
-    ctx.arc(0, fy + r * 0.38, r * 0.12, Math.PI * 1.15, Math.PI * 1.85);
-    ctx.stroke();
-  } else if (face === 'meh') {
-    ctx.moveTo(-r * 0.1, fy + r * 0.28);
-    ctx.lineTo(r * 0.1, fy + r * 0.26);
+  } else if (face === 'sad' || face === 'meh') {
+    ctx.moveTo(-r * 0.07, my);
+    ctx.lineTo(r * 0.07, my);
     ctx.stroke();
   } else {
-    ctx.moveTo(-r * 0.12, fy + r * 0.2);
-    ctx.quadraticCurveTo(-r * 0.06, fy + r * 0.32, 0, fy + r * 0.22);
-    ctx.quadraticCurveTo(r * 0.06, fy + r * 0.32, r * 0.12, fy + r * 0.2);
+    ctx.moveTo(-r * 0.09, my - r * 0.02);
+    ctx.quadraticCurveTo(-r * 0.045, my + r * 0.06, 0, my);
+    ctx.quadraticCurveTo(r * 0.045, my + r * 0.06, r * 0.09, my - r * 0.02);
     ctx.stroke();
   }
-  // blush
-  ctx.fillStyle = 'rgba(255,120,150,0.4)';
-  for (const s of [-1, 1]) {
+  // soft blush
+  ctx.fillStyle = 'rgba(214,96,90,0.28)';
+  for (const sd of [-1, 1]) {
     ctx.beginPath();
-    ctx.ellipse(s * r * 0.62, fy + r * 0.2, r * 0.15, r * 0.09, 0, 0, Math.PI * 2);
+    ctx.ellipse(sd * r * 0.55, fy + r * 0.17, r * 0.13, r * 0.07, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
   // Lv2: scarf
   if (level >= 2) {
     ctx.fillStyle = def.accent;
-    ctx.strokeStyle = '#35465C';
-    ctx.lineWidth = Math.max(1, r * 0.06);
-    const sy = fy + r * 0.5;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = Math.max(1, r * 0.07);
+    const sy = fy + r * 0.42;
     ctx.beginPath();
-    ctx.roundRect(-r * 0.78, sy, r * 1.56, r * 0.2, r * 0.1);
+    ctx.roundRect(-r * 0.8, sy, r * 1.6, r * 0.2, r * 0.1);
     ctx.fill();
     ctx.stroke();
     ctx.beginPath();
-    ctx.roundRect(r * 0.3, sy + r * 0.1, r * 0.2, r * 0.4, r * 0.08);
+    ctx.roundRect(-r * 0.55, sy + r * 0.1, r * 0.2, r * 0.38, r * 0.08);
     ctx.fill();
     ctx.stroke();
   }
+
+  // the little snack bag it hugs, printed with its UX mark
+  const bx = r * 0.32;
+  const by = -h * 0.32;
+  const bw = r * 0.62;
+  const bh = r * 0.7;
+  ctx.save();
+  ctx.translate(bx, by);
+  ctx.rotate(0.12);
+  ctx.fillStyle = '#FFFDF7';
+  ctx.strokeStyle = INK;
+  ctx.lineWidth = Math.max(1, r * 0.07);
+  ctx.beginPath();
+  ctx.moveTo(-bw / 2, -bh / 2);
+  ctx.lineTo(bw / 2, -bh / 2);
+  ctx.lineTo(bw / 2 + r * 0.04, bh / 2);
+  ctx.lineTo(-bw / 2 - r * 0.04, bh / 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // zig-zag top seal
+  ctx.beginPath();
+  for (let i = 0; i <= 6; i++) ctx.lineTo(-bw / 2 + (i * bw) / 6, -bh / 2 - (i % 2 ? r * 0.06 : 0));
+  ctx.stroke();
+  ctx.font = `${r * 0.36}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(def.mark, 0, r * 0.04);
+  // tiny hand
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.ellipse(-bw / 2, r * 0.05, r * 0.1, r * 0.08, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
   // Lv3: tiny crown
   if (level >= 3) {
     const cy = def.body === 'drop' ? -h * 0.9 : def.body === 'bun' ? -h * 0.78 : -h * 0.98;
-    ctx.fillStyle = '#FFD45E';
-    ctx.strokeStyle = '#35465C';
-    ctx.lineWidth = Math.max(1, r * 0.06);
+    ctx.fillStyle = '#FFC233';
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = Math.max(1, r * 0.07);
     ctx.beginPath();
-    const cw = r * 0.5;
+    const cw = r * 0.45;
     ctx.moveTo(-cw, cy);
-    ctx.lineTo(-cw, cy - r * 0.32);
-    ctx.lineTo(-cw * 0.45, cy - r * 0.14);
-    ctx.lineTo(0, cy - r * 0.42);
-    ctx.lineTo(cw * 0.45, cy - r * 0.14);
-    ctx.lineTo(cw, cy - r * 0.32);
+    ctx.lineTo(-cw, cy - r * 0.3);
+    ctx.lineTo(-cw * 0.45, cy - r * 0.13);
+    ctx.lineTo(0, cy - r * 0.4);
+    ctx.lineTo(cw * 0.45, cy - r * 0.13);
+    ctx.lineTo(cw, cy - r * 0.3);
     ctx.lineTo(cw, cy);
     ctx.closePath();
     ctx.fill();

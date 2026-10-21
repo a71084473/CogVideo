@@ -5,12 +5,12 @@ export function Phone({ children, label }: { children: ReactNode; label?: string
   return (
     <div className="relative mx-auto w-full max-w-[170px] rounded-[22px] border-[3px] border-ink bg-white p-1.5 shadow-soft" aria-label={label}>
       <div className="mx-auto mb-1 h-1.5 w-10 rounded-full bg-ink/80" />
-      <div className="h-[250px] overflow-hidden rounded-[14px] bg-[#FAFAFF] p-2 text-[9px] leading-tight text-ink">{children}</div>
+      <div className="h-[250px] overflow-hidden rounded-[14px] bg-[#FFFBF3] p-2 text-[9px] leading-tight text-ink">{children}</div>
     </div>
   );
 }
 
-const Bar = ({ w = '100%', c = '#e7e4ef', h = 7 }: { w?: string; c?: string; h?: number }) => <div className="rounded" style={{ width: w, height: h, background: c }} />;
+const Bar = ({ w = '100%', c = '#F0E6D6', h = 7 }: { w?: string; c?: string; h?: number }) => <div className="rounded" style={{ width: w, height: h, background: c }} />;
 
 export const MOCKS: Record<string, () => JSX.Element> = {
   'checkout-busy': () => (
@@ -42,8 +42,8 @@ export const MOCKS: Record<string, () => JSX.Element> = {
   'checkout-clean': () => (
     <Phone label="結帳畫面 B">
       <div className="mb-1 text-[11px] font-bold">結帳 · 步驟 2/3</div>
-      <div className="mb-1 h-1 rounded bg-[#e7e4ef]">
-        <div className="h-full w-2/3 rounded bg-[#FF8FB1]" />
+      <div className="mb-1 h-1 rounded bg-[#F0E6D6]">
+        <div className="h-full w-2/3 rounded bg-[#DE8A86]" />
       </div>
       <div className="mb-2 rounded-lg bg-white p-1.5 shadow-sm">
         <div className="flex justify-between font-bold">
@@ -60,7 +60,7 @@ export const MOCKS: Record<string, () => JSX.Element> = {
           {f}
         </div>
       ))}
-      <div className="mt-6 rounded-lg bg-[#FF8FB1] py-2 text-center text-[11px] font-bold text-ink">確認付款 $590</div>
+      <div className="mt-6 rounded-lg bg-[#DE8A86] py-2 text-center text-[11px] font-bold text-ink">確認付款 $590</div>
     </Phone>
   ),
   'menu-many': () => (
@@ -80,7 +80,7 @@ export const MOCKS: Record<string, () => JSX.Element> = {
     <Phone label="點餐畫面 B">
       <div className="mb-1 text-[11px] font-bold">⭐ 人氣前 5 名</div>
       {['☕ 經典拿鐵', '🧊 冷萃咖啡', '🍵 抹茶拿鐵', '🥛 燕麥美式', '🍫 海鹽可可'].map((m, i) => (
-        <div key={m} className={`mb-1 flex items-center justify-between rounded-lg px-1.5 py-1.5 ${i === 0 ? 'bg-[#FFE49A]' : 'bg-white'}`}>
+        <div key={m} className={`mb-1 flex items-center justify-between rounded-lg px-1.5 py-1.5 ${i === 0 ? 'bg-[#FFCE55]' : 'bg-white'}`}>
           <span className="text-[10px] font-bold">{m}</span>
           {i === 0 && <span className="text-[8px]">店長推薦</span>}
         </div>

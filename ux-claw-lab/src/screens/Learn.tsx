@@ -34,7 +34,7 @@ export function Learn() {
   const endLearn = useGame((s) => s.endLearn);
 
   return (
-    <div className="relative flex h-full flex-col bg-gradient-to-b from-[#c8b6f5] via-[#ffd6e6] to-cream">
+    <div className="relative flex h-full flex-col potato-bg">
       <TopBar title={stage === 'card' ? 'UX 知識卡' : stage === 'challenge' ? '情境挑戰' : '學習成果'} onBack={endLearn} />
       <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-8">
         <AnimatePresence mode="wait">
@@ -140,7 +140,7 @@ function KnowledgeCard({
           {def.spot.options.map((o, i) => {
             const chosen = pick === i;
             const show = pick !== null;
-            const tone = show ? (o.correct ? 'bg-mint' : chosen ? 'bg-[#FFC9C9]' : 'bg-white opacity-70') : 'bg-white';
+            const tone = show ? (o.correct ? 'bg-mint' : chosen ? 'bg-[#F5C2B8]' : 'bg-white opacity-70') : 'bg-white';
             return (
               <motion.button
                 key={o.label}
@@ -173,7 +173,7 @@ function KnowledgeCard({
 
       {pick !== null && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-2">
-          <ToyButton big color="#FFA9C5" className="w-full" onClick={onNext}>
+          <ToyButton big color="#E9A29B" className="w-full" onClick={onNext}>
             進入情境挑戰 🎮
           </ToyButton>
           {onSkip && (
@@ -270,7 +270,7 @@ function Result({ def, startLevel, spot, ch, brand }: { def: DollDef; startLevel
     <div className="flex flex-col items-center gap-3 pt-2 text-center">
       <div className="relative">
         {up && (
-          <motion.div className="font-display absolute -top-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#FF6F9C] px-3 py-1 text-sm font-extrabold text-white" initial={{ y: 10, scale: 0 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}>
+          <motion.div className="font-display absolute -top-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#C75B5F] px-3 py-1 text-sm font-extrabold text-white" initial={{ y: 10, scale: 0 }} animate={{ y: 0, scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}>
             LEVEL UP！
           </motion.div>
         )}
@@ -300,7 +300,7 @@ function Result({ def, startLevel, spot, ch, brand }: { def: DollDef; startLevel
           <p className="mt-1 text-[14px] font-bold">要順便領一張「{BRAND.coupon}」嗎？</p>
           <div className="mt-2 flex gap-2">
             <ToyButton
-              color="#FFE49A"
+              color="#FFCE55"
               className="flex-1"
               onClick={() => {
                 claimCoupon({ brand, title: BRAND.coupon, code: `MELLOW-${Math.random().toString(36).slice(2, 7).toUpperCase()}` });
@@ -310,7 +310,7 @@ function Result({ def, startLevel, spot, ch, brand }: { def: DollDef; startLevel
             >
               領取 ☕
             </ToyButton>
-            <ToyButton color="#FFF9F0" className="flex-1" onClick={() => setCouponDone('no')}>
+            <ToyButton color="#FFF4E0" className="flex-1" onClick={() => setCouponDone('no')}>
               不用了
             </ToyButton>
           </div>
@@ -319,14 +319,14 @@ function Result({ def, startLevel, spot, ch, brand }: { def: DollDef; startLevel
       {couponDone === 'yes' && <p className="text-[13px] font-bold">☕ 已放進「小房間 → 優惠券」</p>}
 
       <div className="flex w-full gap-2">
-        <ToyButton color="#A9D9F8" className="flex-1" onClick={() => void shareDollCard(def, level)}>
+        <ToyButton color="#F3D3A8" className="flex-1" onClick={() => void shareDollCard(def, level)}>
           分享卡片 📤
         </ToyButton>
-        <ToyButton color="#B7E8D0" className="flex-1" onClick={() => go('collection')}>
+        <ToyButton color="#BFDDA0" className="flex-1" onClick={() => go('collection')}>
           看圖鑑 📖
         </ToyButton>
       </div>
-      <ToyButton big color="#FFA9C5" className="w-full" onClick={endLearn}>
+      <ToyButton big color="#E9A29B" className="w-full" onClick={endLearn}>
         回到夾娃娃機 🕹️
       </ToyButton>
     </div>

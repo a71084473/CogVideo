@@ -8,7 +8,7 @@ import { useGame } from '../store/useGame';
 export function ToyButton({
   children,
   onClick,
-  color = '#FFA9C5',
+  color = '#E9A29B',
   className = '',
   disabled,
   label,
@@ -62,7 +62,7 @@ export function TopBar({ title, onBack, right }: { title?: string; onBack?: () =
           ‹
         </button>
       ) : null}
-      {title ? <h1 className="font-display flex-1 truncate text-xl font-extrabold text-white drop-shadow">{title}</h1> : <div className="flex-1" />}
+      {title ? <h1 className="font-display flex-1 truncate text-xl font-extrabold text-white title-outline">{title}</h1> : <div className="flex-1" />}
       {right}
       <Coins n={coins} />
       <button aria-label="設定" onClick={() => { sfx.tap(); go('settings'); }} className="glass grid h-11 w-11 place-items-center rounded-full text-lg">
@@ -189,7 +189,7 @@ export function SharePreview() {
         <motion.div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-ink/70 p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close} role="dialog" aria-label="分享卡片">
           <img src={url} alt={`${name} 收藏卡`} className="max-h-[70%] rounded-3xl border-[3px] border-ink" onClick={(e) => e.stopPropagation()} />
           <p className="text-center text-[14px] font-bold text-white">長按（手機）或右鍵（電腦）另存圖片，就能分享到社群 📤</p>
-          <ToyButton color="#FFE49A" onClick={close}>
+          <ToyButton color="#FFCE55" onClick={close}>
             關閉
           </ToyButton>
         </motion.div>

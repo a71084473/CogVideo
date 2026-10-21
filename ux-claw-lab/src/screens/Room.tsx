@@ -16,7 +16,7 @@ export const DECOR = [
   { id: 'neon', emoji: '💡', label: '霓虹燈牌', price: 40, pos: 'left-[40%] top-[4%]' },
   { id: 'cat', emoji: '🐈', label: '路過的貓', price: 50, pos: 'right-[30%] bottom-[12%]' },
 ];
-const WALLS = ['#FFE7EF', '#E6F4FF', '#E8F8EF', '#FFF4D6', '#EDE6FF'];
+const WALLS = ['#FBE1D6', '#FFF0C8', '#E5F0D2', '#F3E1CF', '#EBD6E0'];
 
 export function Room() {
   const room = useGame((s) => s.room);
@@ -33,7 +33,7 @@ export function Room() {
   const owned = Object.values(dolls).filter((p) => p.level > 0);
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#FFD6E6] to-cream">
+    <div className="flex h-full flex-col mauve-bg">
       <TopBar title="我的 UX 小房間" />
       <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-28">
         {/* the room */}
@@ -95,7 +95,7 @@ export function Room() {
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[13px] font-extrabold">{d.label}</div>
                   {has ? (
-                    <button type="button" onClick={() => toggleDecor(d.id)} className="text-[12px] font-bold text-[#e2457a] underline">
+                    <button type="button" onClick={() => toggleDecor(d.id)} className="text-[12px] font-bold text-[#A9454A] underline">
                       {on ? '收起來' : '擺出來'}
                     </button>
                   ) : (
@@ -129,7 +129,7 @@ export function Room() {
                   <div className="text-[14px] font-bold">{c.title}</div>
                   <div className="font-mono text-[12px]">{c.code}</div>
                 </div>
-                <ToyButton color={c.used ? '#e5e5e5' : '#B7E8D0'} disabled={c.used} onClick={() => redeem(c.id)}>
+                <ToyButton color={c.used ? '#e5e5e5' : '#BFDDA0'} disabled={c.used} onClick={() => redeem(c.id)}>
                   {c.used ? '已使用' : '出示核銷'}
                 </ToyButton>
               </div>

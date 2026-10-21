@@ -12,7 +12,7 @@ function El({ el }: { el: MockEl }) {
     case 'text':
       return <div className="text-[14px] text-ink/80">{el.label}</div>;
     case 'button':
-      return <div className="rounded-xl border-2 border-ink bg-[#FF8FB1] py-2.5 text-center text-[15px] font-bold shadow-toy">{el.label}</div>;
+      return <div className="rounded-xl border-2 border-ink bg-[#DE8A86] py-2.5 text-center text-[15px] font-bold shadow-toy">{el.label}</div>;
     case 'ghost-button':
       return <div className="rounded-xl bg-[#f1eef6] py-2.5 text-center text-[15px] font-bold text-[#c8c2d4]">{el.label}</div>;
     case 'link':
@@ -47,10 +47,10 @@ export function HotspotChallenge({ c, onSubmit, locked }: { c: HotspotDef } & Ch
     <div className="flex flex-col gap-3">
       <div className="mx-auto w-full max-w-[300px] rounded-[30px] border-[3px] border-ink bg-white p-2.5 shadow-soft">
         <div className="mx-auto mb-2 h-1.5 w-14 rounded-full bg-ink/80" />
-        <div className="flex flex-col gap-2.5 rounded-[20px] bg-[#FAFAFF] p-3">
+        <div className="flex flex-col gap-2.5 rounded-[20px] bg-[#FFFBF3] p-3">
           {c.els.map((el) => {
             const on = sel.includes(el.id);
-            const ring = locked ? (el.correct ? 'ring-4 ring-[#3fbf86]' : on ? 'ring-4 ring-[#f08080]' : '') : on ? 'ring-4 ring-sakura' : '';
+            const ring = locked ? (el.correct ? 'ring-4 ring-[#6FA33F]' : on ? 'ring-4 ring-[#f08080]' : '') : on ? 'ring-4 ring-sakura' : '';
             return (
               <button
                 key={el.id}

@@ -32,7 +32,7 @@ export function CompareChallenge({ c, onSubmit, locked }: { c: CompareDef } & Ch
         {(['a', 'b'] as const).map((k) => {
           const M = k === 'a' ? A : B;
           const sel = choice === k;
-          const mark = locked ? (c.correct === k ? 'ring-4 ring-[#3fbf86]' : '') : sel ? 'ring-4 ring-sakura' : '';
+          const mark = locked ? (c.correct === k ? 'ring-4 ring-[#6FA33F]' : '') : sel ? 'ring-4 ring-sakura' : '';
           return (
             <button
               key={k}
@@ -47,7 +47,7 @@ export function CompareChallenge({ c, onSubmit, locked }: { c: CompareDef } & Ch
               className={`rounded-3xl bg-cream/70 p-1.5 pb-2 transition ${mark}`}
             >
               <M />
-              <div className={`font-display mt-1.5 text-center text-lg font-extrabold ${sel ? 'text-[#e2457a]' : ''}`}>
+              <div className={`font-display mt-1.5 text-center text-lg font-extrabold ${sel ? 'text-[#A9454A]' : ''}`}>
                 {k.toUpperCase()} 版 {sel ? '✓' : ''}
               </div>
             </button>
@@ -60,7 +60,7 @@ export function CompareChallenge({ c, onSubmit, locked }: { c: CompareDef } & Ch
           <div className="flex flex-col gap-1.5">
             {c.reasons.map((r, i) => {
               const on = reasons.includes(i);
-              const tone = locked ? (r.correct ? 'bg-mint' : on ? 'bg-[#FFC9C9]' : 'bg-white') : on ? 'bg-butter' : 'bg-white';
+              const tone = locked ? (r.correct ? 'bg-mint' : on ? 'bg-[#F5C2B8]' : 'bg-white') : on ? 'bg-butter' : 'bg-white';
               return (
                 <button
                   key={r.label}

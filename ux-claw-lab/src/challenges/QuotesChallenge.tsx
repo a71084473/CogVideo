@@ -24,7 +24,7 @@ export function QuotesChallenge({ c, onSubmit, locked }: { c: QuotesDef } & Chal
           <div className="flex flex-col gap-1.5">
             {p.lines.map((l) => {
               const on = sel.includes(l.id);
-              const tone = locked ? (l.pain ? 'bg-mint' : on ? 'bg-[#FFC9C9]' : 'bg-cream') : on ? 'bg-butter' : 'bg-cream';
+              const tone = locked ? (l.pain ? 'bg-mint' : on ? 'bg-[#F5C2B8]' : 'bg-cream') : on ? 'bg-butter' : 'bg-cream';
               return (
                 <button
                   key={l.id}

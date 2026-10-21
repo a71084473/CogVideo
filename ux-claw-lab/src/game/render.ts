@@ -47,16 +47,25 @@ export function renderMachine(ctx: CanvasRenderingContext2D, eng: ClawEngine, th
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, CW, CH);
 
-  // twinkly back-wall pattern
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  for (let i = 0; i < 18; i++) {
-    const px = (i * 73) % CW;
-    const py = 20 + ((i * 41) % (FLOOR_BACK - 50));
-    const tw = 0.5 + 0.5 * Math.sin(t * 2 + i);
-    ctx.globalAlpha = 0.25 + tw * 0.5;
-    star(ctx, px, py, 2 + (i % 3));
+  // radial speed lines on the back wall (comic "VS" energy)
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, CW, FLOOR_BACK);
+  ctx.clip();
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  const cx0 = CW / 2;
+  const cy0 = FLOOR_BACK * 0.55;
+  const spin = t * 0.05;
+  for (let i = 0; i < 28; i++) {
+    const a0 = spin + (i / 28) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx0, cy0);
+    ctx.lineTo(cx0 + Math.cos(a0) * 600, cy0 + Math.sin(a0) * 600);
+    ctx.lineTo(cx0 + Math.cos(a0 + 0.045) * 600, cy0 + Math.sin(a0 + 0.045) * 600);
+    ctx.closePath();
+    ctx.fill();
   }
-  ctx.globalAlpha = 1;
+  ctx.restore();
 
   // floor
   const fl = [project(0, 0, 0), project(W, 0, 0), project(W, 0, D), project(0, 0, D)];
@@ -73,7 +82,7 @@ export function renderMachine(ctx: CanvasRenderingContext2D, eng: ClawEngine, th
   quad(ctx, [{ sx: CW, sy: 0 }, project(W, RAIL_Y + 30, 0), fl[1], fl[2], { sx: CW, sy: CH }]);
   ctx.fill();
   // floor dots
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.fillStyle = 'rgba(62,42,31,0.08)';
   for (let x = 20; x < W; x += 40)
     for (let z = 10; z < D; z += 30) {
       const p = project(x + ((z / 30) % 2) * 20, 0, z);
@@ -86,8 +95,8 @@ export function renderMachine(ctx: CanvasRenderingContext2D, eng: ClawEngine, th
   const hole = [project(CHUTE.x0 + 4, 0, CHUTE.z0), project(CHUTE.x1, 0, CHUTE.z0), project(CHUTE.x1, 0, CHUTE.z1), project(CHUTE.x0 + 4, 0, CHUTE.z1)];
   quad(ctx, hole);
   const hg = ctx.createLinearGradient(0, hole[0].sy, 0, hole[2].sy);
-  hg.addColorStop(0, '#2a2140');
-  hg.addColorStop(1, '#4a3a70');
+  hg.addColorStop(0, '#2A1D15');
+  hg.addColorStop(1, '#5a3d2c');
   ctx.fillStyle = hg;
   ctx.fill();
   // chute back + side acrylic walls
@@ -112,7 +121,7 @@ export function renderMachine(ctx: CanvasRenderingContext2D, eng: ClawEngine, th
     if (d.state !== 'chute') {
       const p = project(d.x, 0, d.z);
       const lift = Math.max(0, d.y);
-      ctx.fillStyle = `rgba(53,70,92,${0.22 * Math.max(0.25, 1 - lift / 200)})`;
+      ctx.fillStyle = `rgba(62,42,31,${0.22 * Math.max(0.25, 1 - lift / 200)})`;
       ctx.beginPath();
       ctx.ellipse(p.sx, p.sy, d.r * p.s * (1.05 - Math.min(0.5, lift / 400)), d.r * p.s * 0.32, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -123,7 +132,7 @@ export function renderMachine(ctx: CanvasRenderingContext2D, eng: ClawEngine, th
   {
     const p = project(tip.x, 0, tip.z);
     const hgt = Math.max(0, tip.y);
-    ctx.fillStyle = `rgba(53,70,92,${0.12 + 0.2 * (1 - hgt / 260)})`;
+    ctx.fillStyle = `rgba(62,42,31,${0.12 + 0.2 * (1 - hgt / 260)})`;
     ctx.beginPath();
     ctx.ellipse(p.sx, p.sy, 18 * p.s * (0.7 + hgt / 600), 6 * p.s, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -137,7 +146,7 @@ export function renderMachine(ctx: CanvasRenderingContext2D, eng: ClawEngine, th
       ctx.lineTo(p.sx, p.sy);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.strokeStyle = '#FFA9C5';
+      ctx.strokeStyle = '#E9A29B';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.ellipse(p.sx, p.sy, 10 * p.s, 3.5 * p.s, 0, 0, Math.PI * 2);
@@ -231,14 +240,14 @@ function drawClaw(ctx: CanvasRenderingContext2D, eng: ClawEngine, theme: Theme, 
   // gantry rail across the machine at the claw's depth
   const r0 = project(0, RAIL_Y, c.z);
   const r1 = project(W, RAIL_Y, c.z);
-  ctx.strokeStyle = 'rgba(53,70,92,0.55)';
+  ctx.strokeStyle = 'rgba(62,42,31,0.55)';
   ctx.lineWidth = 4 * r0.s;
   ctx.beginPath();
   ctx.moveTo(r0.sx, r0.sy);
   ctx.lineTo(r1.sx, r1.sy);
   ctx.stroke();
   const anchor = project(c.x, RAIL_Y, c.z);
-  ctx.fillStyle = '#35465C';
+  ctx.fillStyle = '#3E2A1F';
   ctx.beginPath();
   ctx.roundRect(anchor.sx - 12 * anchor.s, anchor.sy - 6 * anchor.s, 24 * anchor.s, 12 * anchor.s, 4);
   ctx.fill();
@@ -262,9 +271,9 @@ function drawClaw(ctx: CanvasRenderingContext2D, eng: ClawEngine, theme: Theme, 
     ctx.save();
     ctx.translate(side * 10 * s, 8 * s);
     ctx.rotate(-side * (0.05 + open * 0.5));
-    ctx.strokeStyle = '#35465C';
+    ctx.strokeStyle = '#3E2A1F';
     ctx.lineWidth = 2 * s;
-    ctx.fillStyle = '#c9c4d6';
+    ctx.fillStyle = '#D8CBB8';
     ctx.beginPath();
     ctx.moveTo(-3 * s, 0);
     ctx.quadraticCurveTo(side * 10 * s, 18 * s, side * 2 * s, 32 * s);
@@ -277,7 +286,7 @@ function drawClaw(ctx: CanvasRenderingContext2D, eng: ClawEngine, theme: Theme, 
   }
   // body (cute claw head like the reference)
   ctx.fillStyle = theme.claw;
-  ctx.strokeStyle = '#35465C';
+  ctx.strokeStyle = '#3E2A1F';
   ctx.lineWidth = 2 * s;
   ctx.beginPath();
   ctx.roundRect(-17 * s, -12 * s, 34 * s, 24 * s, 8 * s);
@@ -291,13 +300,13 @@ function drawClaw(ctx: CanvasRenderingContext2D, eng: ClawEngine, theme: Theme, 
     ctx.arc(side * 8 * s, -2 * s, 6 * s, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    ctx.fillStyle = '#35465C';
+    ctx.fillStyle = '#3E2A1F';
     ctx.beginPath();
     ctx.arc(side * 8 * s + look * s, -1 * s, 3 * s, 0, Math.PI * 2);
     ctx.fill();
   }
   // bolt
-  ctx.fillStyle = '#FFA9C5';
+  ctx.fillStyle = '#E9A29B';
   ctx.beginPath();
   ctx.arc(0, 8 * s, 2.5 * s, 0, Math.PI * 2);
   ctx.fill();

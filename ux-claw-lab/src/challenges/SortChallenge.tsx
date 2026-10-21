@@ -58,7 +58,7 @@ export function SortChallenge({ c, onSubmit, locked }: { c: SortDef } & Challeng
         }}
         className={`relative touch-none rounded-xl border-2 border-ink px-2.5 py-2 text-left text-[13px] font-bold leading-snug shadow-toy ${
           picked === id ? 'bg-butter ring-4 ring-sakura' : 'bg-white'
-        } ${locked && place[id] ? (ok ? 'bg-mint' : 'bg-[#FFC9C9]') : ''}`}
+        } ${locked && place[id] ? (ok ? 'bg-mint' : 'bg-[#F5C2B8]') : ''}`}
         aria-pressed={picked === id}
         aria-label={`${label}${picked === id ? '（已選取，點選分類放入）' : ''}`}
       >

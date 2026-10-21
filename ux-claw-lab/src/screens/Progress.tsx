@@ -3,6 +3,7 @@ import { DollAvatar } from '../components/DollAvatar';
 import { ToyButton, TopBar } from '../components/ui';
 import { DOLLS, dollById } from '../data/dolls';
 import { TOPICS } from '../data/topics';
+import { HeartBar } from '../components/Deco';
 import { dueForReview, today, useGame } from '../store/useGame';
 
 const DAY = 86_400_000;
@@ -34,7 +35,7 @@ export function Progress() {
   }).filter((x) => x.total > 0);
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#B7E8D0] to-cream">
+    <div className="flex h-full flex-col potato-bg">
       <TopBar title="UX 學習進度" />
       <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-28">
         <div className="grid grid-cols-2 gap-2.5">
@@ -50,7 +51,7 @@ export function Progress() {
               <div key={w.key} className="flex flex-1 flex-col items-center gap-1">
                 <div className="relative flex h-20 w-full items-end">
                   <motion.div initial={{ height: 0 }} animate={{ height: `${(w.all / maxDay) * 100}%` }} className="flex w-full flex-col justify-end overflow-hidden rounded-t-lg border-2 border-ink bg-sky">
-                    <div className="w-full bg-[#7fcfa6]" style={{ height: `${w.all ? (w.ok / w.all) * 100 : 0}%` }} />
+                    <div className="w-full bg-[#9DBF6A]" style={{ height: `${w.all ? (w.ok / w.all) * 100 : 0}%` }} />
                   </motion.div>
                 </div>
                 <span className="text-[11px] font-bold">{w.label}</span>
@@ -58,8 +59,8 @@ export function Progress() {
             ))}
           </div>
           <div className="mt-2 flex gap-3 text-[11px] font-bold text-ink/70">
-            <span>🟩 答對</span>
-            <span>🟦 作答次數</span>
+            <span className="flex items-center gap-1"><i className="h-3 w-3 rounded-sm border border-ink bg-[#9DBF6A]" />答對</span>
+            <span className="flex items-center gap-1"><i className="h-3 w-3 rounded-sm border border-ink bg-sky" />作答次數</span>
           </div>
         </Card>
 
@@ -70,11 +71,8 @@ export function Progress() {
                 <span>
                   {t.emoji} {t.zh}
                 </span>
-                <span>{Math.round(pct * 100)}%</span>
               </div>
-              <div className="h-3 overflow-hidden rounded-full border-2 border-ink bg-white">
-                <motion.div initial={{ width: 0 }} animate={{ width: `${pct * 100}%` }} className="h-full" style={{ background: t.color }} />
-              </div>
+              <HeartBar value={pct} color={t.color} label={`${t.zh} 掌握度`} />
             </div>
           ))}
           <p className="text-[11px] text-ink/60">掌握度＝該分類娃娃等級總和 ÷ 滿級。等級完全由答題表現決定。</p>
@@ -93,7 +91,7 @@ export function Progress() {
                     <div className="text-[14px] font-extrabold">{d.zh}</div>
                     <div className="text-[11px] text-ink/60">{!p.lastChallengeOk ? '情境挑戰尚未通過' : '已到複習時間（間隔複習）'}</div>
                   </div>
-                  <ToyButton color="#FFE49A" onClick={() => startReview(d.id)}>
+                  <ToyButton color="#FFCE55" onClick={() => startReview(d.id)}>
                     複習
                   </ToyButton>
                 </div>

@@ -148,7 +148,7 @@ const initial = () => ({
     haptics: true,
     reducedMotion: typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
   },
-  room: { shelf: [null, null, null, null, null, null], decor: [], placed: [], wall: '#FFE7EF' },
+  room: { shelf: [null, null, null, null, null, null], decor: [], placed: [], wall: '#FBE1D6' },
   coupons: [] as Coupon[],
   brandStats: { impressions: 0, plays: 0, completions: 0, couponsClaimed: 0, couponsRedeemed: 0 },
   learn: null as LearnSession | null,
@@ -349,7 +349,7 @@ export const useGame = create<GameState>()(
           coins: 120,
           dolls,
           attempts,
-          room: { shelf: ['a11y', 'empathy', 'persona', null, null, null], decor: ['lamp', 'plant'], placed: ['lamp', 'plant'], wall: '#E6F4FF' },
+          room: { shelf: ['a11y', 'empathy', 'persona', null, null, null], decor: ['lamp', 'plant'], placed: ['lamp', 'plant'], wall: '#FFF0C8' },
           brandStats: { impressions: 1280, plays: 342, completions: 211, couponsClaimed: 96, couponsRedeemed: 41 },
         });
       },

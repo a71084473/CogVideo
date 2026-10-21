@@ -52,11 +52,11 @@ export function Shell({
             </div>
             <div className="mt-3 flex gap-2">
               {!verdict.ok && (
-                <ToyButton color="#FFF9F0" className="flex-1" onClick={onRetry}>
+                <ToyButton color="#FFF4E0" className="flex-1" onClick={onRetry}>
                   再練一次
                 </ToyButton>
               )}
-              <ToyButton color="#FFA9C5" className="flex-1" onClick={onContinue}>
+              <ToyButton color="#E9A29B" className="flex-1" onClick={onContinue}>
                 {verdict.ok ? '收下娃娃 →' : '先這樣，繼續 →'}
               </ToyButton>
             </div>
@@ -70,7 +70,7 @@ export function Shell({
 
 export function CheckButton({ disabled, onClick, children = '送出答案' }: { disabled?: boolean; onClick: () => void; children?: ReactNode }) {
   return (
-    <ToyButton big color="#FFE49A" className="w-full" disabled={disabled} onClick={onClick}>
+    <ToyButton big color="#FFCE55" className="w-full" disabled={disabled} onClick={onClick}>
       {children}
     </ToyButton>
   );

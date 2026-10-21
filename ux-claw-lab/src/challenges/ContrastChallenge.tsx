@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { sfx } from '../lib/sfx';
 import { CheckButton, ChallengeProps } from './Shell';
 
-const BG = '#FF9EBB';
-const TEXTS = ['#FFFFFF', '#FFE6EE', '#B04A6A', '#5A2238', '#35465C'];
+const BG = '#F2B66A';
+const TEXTS = ['#FFFFFF', '#FFF4E0', '#C47A2C', '#8A4B2A', '#3E2A1F'];
 
 /** WCAG relative luminance + contrast ratio. */
 export function contrast(a: string, b: string) {
@@ -71,13 +71,13 @@ export function ContrastChallenge({ onSubmit, locked }: ChallengeProps) {
       <div className="rounded-2xl bg-white/70 p-3">
         <label className="flex items-center justify-between text-[14px] font-bold" htmlFor="size">
           <span>① 按鈕大小</span>
-          <span className={okSize ? 'text-[#2c9a6a]' : ''}>{size}px {okSize ? '✓' : ''}</span>
+          <span className={okSize ? 'text-[#5B8A2F]' : ''}>{size}px {okSize ? '✓' : ''}</span>
         </label>
-        <input id="size" type="range" min={24} max={64} value={size} disabled={locked} onChange={(e) => setSize(+e.target.value)} className="mt-1 w-full accent-[#FF6F9C]" />
+        <input id="size" type="range" min={24} max={64} value={size} disabled={locked} onChange={(e) => setSize(+e.target.value)} className="mt-1 w-full accent-[#C75B5F]" />
 
         <div className="mt-3 flex items-center justify-between text-[14px] font-bold">
           <span>② 文字顏色</span>
-          <span className={okRatio ? 'text-[#2c9a6a]' : ''}>對比 {ratio.toFixed(1)}:1 {okRatio ? '✓ AA' : ''}</span>
+          <span className={okRatio ? 'text-[#5B8A2F]' : ''}>對比 {ratio.toFixed(1)}:1 {okRatio ? '✓ AA' : ''}</span>
         </div>
         <div className="mt-1.5 flex gap-2" role="radiogroup" aria-label="文字顏色">
           {TEXTS.map((t) => (
@@ -100,7 +100,7 @@ export function ContrastChallenge({ onSubmit, locked }: ChallengeProps) {
 
         <label className="mt-3 flex min-h-[44px] items-center justify-between text-[14px] font-bold">
           <span>③ 錯誤提示加上圖示與文字說明</span>
-          <input type="checkbox" checked={iconLabel} disabled={locked} onChange={(e) => setIconLabel(e.target.checked)} className="h-6 w-6 accent-[#FF6F9C]" />
+          <input type="checkbox" checked={iconLabel} disabled={locked} onChange={(e) => setIconLabel(e.target.checked)} className="h-6 w-6 accent-[#C75B5F]" />
         </label>
       </div>
       {!locked && <CheckButton onClick={check} />}

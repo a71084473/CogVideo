@@ -83,7 +83,7 @@ export function FittsChallenge({ onSubmit, locked }: ChallengeProps) {
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 600, damping: 20 }}
             onClick={hit}
-            className="absolute rounded-full border-2 border-ink bg-[#FF6F9C] shadow-toy"
+            className="absolute rounded-full border-2 border-ink bg-[#C75B5F] shadow-toy"
             style={{ left: `${TRIALS[i].x}%`, top: `${TRIALS[i].y}%`, width: TRIALS[i].size, height: TRIALS[i].size, marginLeft: -TRIALS[i].size / 2, marginTop: -TRIALS[i].size / 2 }}
           />
         )}
@@ -91,8 +91,8 @@ export function FittsChallenge({ onSubmit, locked }: ChallengeProps) {
           <div className="absolute inset-0 flex flex-col justify-center gap-3 bg-white/90 p-5">
             <div className="text-center text-[14px] font-extrabold">你的實驗結果</div>
             {[
-              { k: '大而近', v: avg.big, m: avg.missBig, c: '#B7E8D0' },
-              { k: '小而遠', v: avg.small, m: avg.missSmall, c: '#FFA9C5' },
+              { k: '大而近', v: avg.big, m: avg.missBig, c: '#BFDDA0' },
+              { k: '小而遠', v: avg.small, m: avg.missSmall, c: '#E9A29B' },
             ].map((r) => (
               <div key={r.k}>
                 <div className="flex justify-between text-[13px] font-bold">
@@ -132,7 +132,7 @@ export function FittsChallenge({ onSubmit, locked }: ChallengeProps) {
                 setAnswer(k);
               }}
               className={`mb-1.5 min-h-[44px] w-full rounded-xl border-2 border-ink px-3 py-2 text-left text-[14px] ${
-                locked ? (k === 'near' ? 'bg-mint' : answer === k ? 'bg-[#FFC9C9]' : 'bg-white') : answer === k ? 'bg-butter' : 'bg-white'
+                locked ? (k === 'near' ? 'bg-mint' : answer === k ? 'bg-[#F5C2B8]' : 'bg-white') : answer === k ? 'bg-butter' : 'bg-white'
               }`}
             >
               {label}

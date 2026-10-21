@@ -11,7 +11,7 @@ export function Settings() {
   const loadDemo = useGame((s) => s.loadDemo);
   const [confirm, setConfirm] = useState(false);
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#c8b6f5] to-cream">
+    <div className="flex h-full flex-col potato-bg">
       <TopBar title="設定" onBack={() => go('home')} />
       <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-6">
         <section className="glass rounded-3xl p-4">
@@ -19,7 +19,7 @@ export function Settings() {
             <span>🔊 音效音量</span>
             <span>{Math.round(settings.sfx * 100)}%</span>
           </label>
-          <input id="vol" type="range" min={0} max={1} step={0.05} value={settings.sfx} onChange={(e) => setSettings({ sfx: +e.target.value })} onPointerUp={() => sfx.pop()} className="mt-2 w-full accent-[#FF6F9C]" />
+          <input id="vol" type="range" min={0} max={1} step={0.05} value={settings.sfx} onChange={(e) => setSettings({ sfx: +e.target.value })} onPointerUp={() => sfx.pop()} className="mt-2 w-full accent-[#C75B5F]" />
           <Toggle label="📳 震動回饋" checked={settings.haptics} onChange={(v) => setSettings({ haptics: v })} />
           <Toggle label="🐢 減少動態效果" hint="關閉閃爍、旋轉光芒與大幅動畫" checked={settings.reducedMotion} onChange={(v) => setSettings({ reducedMotion: v })} />
         </section>
@@ -29,7 +29,7 @@ export function Settings() {
           <p className="mb-3 text-[13px] text-ink/70">載入示範進度（8 隻娃娃、各種等級、一週學習紀錄、品牌數據），方便展示與測試。</p>
           <div className="flex gap-2">
             <ToyButton
-              color="#B7E8D0"
+              color="#BFDDA0"
               className="flex-1"
               onClick={() => {
                 loadDemo();
@@ -51,7 +51,7 @@ export function Settings() {
                 確定重設？
               </ToyButton>
             ) : (
-              <ToyButton color="#FFF9F0" className="flex-1" onClick={() => setConfirm(true)}>
+              <ToyButton color="#FFF4E0" className="flex-1" onClick={() => setConfirm(true)}>
                 重設所有進度
               </ToyButton>
             )}
@@ -60,7 +60,7 @@ export function Settings() {
 
         <section className="glass mt-3 rounded-3xl p-4">
           <h2 className="mb-2 text-[15px] font-extrabold">合作夥伴</h2>
-          <ToyButton color="#FFE49A" className="w-full" onClick={() => go('brand')}>
+          <ToyButton color="#FFCE55" className="w-full" onClick={() => go('brand')}>
             📊 品牌活動後台（示範）
           </ToyButton>
         </section>

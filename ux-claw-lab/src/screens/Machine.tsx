@@ -22,10 +22,10 @@ export const BRAND = {
 };
 
 function themeFor(key: TopicId | 'all' | 'brand'): Theme {
-  if (key === 'brand') return { wallTop: '#6b4a3a', wallBottom: '#d9a77f', floor: '#f3dcc0', light: '#ffcf9a', claw: '#FFE49A' };
-  if (key === 'all') return { wallTop: '#8a72d8', wallBottom: '#f2b8d6', floor: '#fbe3ef', light: '#FFA9C5', claw: '#FFE49A' };
+  if (key === 'brand') return { wallTop: '#6b4a3a', wallBottom: '#d9a77f', floor: '#f3dcc0', light: '#ffcf9a', claw: '#FFCE55' };
+  if (key === 'all') return { wallTop: '#B5676B', wallBottom: '#F7BF45', floor: '#FFF0D6', light: '#E9A29B', claw: '#FFCE55' };
   const t = topicById(key);
-  return { wallTop: '#7a63c9', wallBottom: t.color, floor: '#FFF4F8', light: t.color, claw: '#FFE49A' };
+  return { wallTop: '#B5676B', wallBottom: t.color, floor: '#FFF4E0', light: t.color, claw: '#FFCE55' };
 }
 
 function buildSpawns(key: TopicId | 'all' | 'brand', count: number, exclude: string[] = []): DollSpawn[] {
@@ -248,7 +248,7 @@ export function Machine() {
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-3 pb-3">
         {/* cabinet */}
-        <div className="relative w-full max-w-[400px] rounded-[30px] border-[3px] border-ink p-2 shadow-soft" style={{ background: key === 'brand' ? '#c98d63' : '#FFA9C5' }}>
+        <div className="relative w-full max-w-[400px] rounded-[30px] border-[3px] border-ink p-2 shadow-soft" style={{ background: key === 'brand' ? '#c98d63' : '#E9A29B' }}>
           <div className="mb-1.5 flex items-center justify-between rounded-2xl bg-ink px-3 py-1.5">
             <span className="font-display neon text-lg font-extrabold tracking-wide text-white">UX CLAW LAB</span>
             <div className="flex gap-1.5">
@@ -296,7 +296,7 @@ export function Machine() {
               whileTap={{ scale: 0.88 }}
               animate={ready && !reduced ? { scale: [1, 1.05, 1] } : { scale: 1 }}
               transition={ready ? { duration: 1.4, repeat: Infinity } : undefined}
-              className="toy-btn font-display grid h-[84px] w-[84px] place-items-center rounded-full bg-[#FF6F9C] text-2xl font-extrabold text-white disabled:opacity-50"
+              className="toy-btn font-display grid h-[84px] w-[84px] place-items-center rounded-full bg-[#C75B5F] text-2xl font-extrabold text-white disabled:opacity-50"
               aria-label="放下夾爪"
             >
               GO!
@@ -320,7 +320,7 @@ export function Machine() {
                   </p>
                 </div>
               </div>
-              <ToyButton className="mt-3 w-full" color="#FFE49A" onClick={() => setFeedback(null)} big>
+              <ToyButton className="mt-3 w-full" color="#FFCE55" onClick={() => setFeedback(null)} big>
                 再夾一次！
               </ToyButton>
             </motion.div>
@@ -426,7 +426,7 @@ function Joystick({ inputRef, disabled }: { inputRef: React.MutableRefObject<{ x
       <span className="pointer-events-none absolute left-1 text-[10px] font-bold text-ink/60">左</span>
       <span className="pointer-events-none absolute right-1 text-[10px] font-bold text-ink/60">右</span>
       <div
-        className="pointer-events-none h-11 w-11 rounded-full border-[3px] border-ink bg-[#FF6F9C] shadow-toy"
+        className="pointer-events-none h-11 w-11 rounded-full border-[3px] border-ink bg-[#C75B5F] shadow-toy"
         style={{ transform: `translate(${knob.x}px, ${knob.y}px)` }}
       />
     </div>
@@ -443,7 +443,7 @@ function Reveal({ ids, onOpen, reduced }: { ids: string[]; onOpen: () => void; r
       {rare && !reduced && (
         <motion.div
           className="absolute h-[420px] w-[420px] rounded-full"
-          style={{ background: `conic-gradient(from 0deg, ${def.rarity === 'legendary' ? '#FFD45E55, transparent, #FFA9C555, transparent, #A9D9F855, transparent, #FFD45E55' : '#ffffff40, transparent, #ffffff40, transparent, #ffffff40'})` }}
+          style={{ background: `conic-gradient(from 0deg, ${def.rarity === 'legendary' ? '#FFD45E55, transparent, #E9A29B55, transparent, #F3D3A855, transparent, #FFD45E55' : '#ffffff40, transparent, #ffffff40, transparent, #ffffff40'})` }}
           animate={{ rotate: 360 }}
           transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
         />
@@ -462,7 +462,7 @@ function Reveal({ ids, onOpen, reduced }: { ids: string[]; onOpen: () => void; r
         ))}
       <motion.div initial={{ scale: 0, rotate: -20 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 12, delay: 0.15 }} className="relative">
         <div className="relative rounded-[36px] border-[3px] border-ink bg-cream p-4 shadow-soft">
-          {isNew && <span className="font-display absolute -right-3 -top-3 rotate-12 rounded-full bg-[#FF6F9C] px-3 py-1 text-sm font-extrabold text-white">NEW!</span>}
+          {isNew && <span className="font-display absolute -right-3 -top-3 rotate-12 rounded-full bg-[#C75B5F] px-3 py-1 text-sm font-extrabold text-white">NEW!</span>}
           <DollAvatar id={def.id} size={160} level={Math.max(1, owned?.level ?? 1)} face="happy" animate={!reduced} />
         </div>
       </motion.div>
@@ -475,7 +475,7 @@ function Reveal({ ids, onOpen, reduced }: { ids: string[]; onOpen: () => void; r
         <p className="mt-1 text-sm text-white/80">{isNew ? '打開知識卡，完成小任務後正式加入圖鑑！' : '又見面了！趁機複習一下，讓它升級吧。'}</p>
       </motion.div>
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8 }} className="relative mt-5">
-        <ToyButton big color="#FFE49A" onClick={onOpen}>
+        <ToyButton big color="#FFCE55" onClick={onOpen}>
           打開知識卡 🃏
         </ToyButton>
       </motion.div>

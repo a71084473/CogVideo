@@ -26,12 +26,12 @@ export async function shareDollCard(def: DollDef, level: number) {
   cv.height = H;
   const ctx = cv.getContext('2d')!;
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#8a72d8');
-  g.addColorStop(1, '#FFD9E6');
+  g.addColorStop(0, '#B5676B');
+  g.addColorStop(1, '#FFE3B8');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = '#FFF9F0';
-  ctx.strokeStyle = '#35465C';
+  ctx.fillStyle = '#FFF4E0';
+  ctx.strokeStyle = '#3E2A1F';
   ctx.lineWidth = 6;
   ctx.beginPath();
   ctx.roundRect(40, 40, W - 80, H - 80, 40);
@@ -42,7 +42,7 @@ export async function shareDollCard(def: DollDef, level: number) {
   ctx.arc(W / 2, 250, 150, 0, Math.PI * 2);
   ctx.fill();
   drawDoll(ctx, def, { x: W / 2, y: 370, r: 95, level, face: 'happy' });
-  ctx.fillStyle = '#35465C';
+  ctx.fillStyle = '#3E2A1F';
   ctx.textAlign = 'center';
   ctx.font = '800 44px "Baloo 2", "Noto Sans TC", sans-serif';
   ctx.fillText(`${def.dollName}・${def.zh}`, W / 2, 470);
@@ -51,7 +51,7 @@ export async function shareDollCard(def: DollDef, level: number) {
   ctx.font = '500 26px "Noto Sans TC", sans-serif';
   wrap(ctx, def.oneLiner, W / 2, 570, W - 160, 38);
   ctx.font = '800 24px "Baloo 2", sans-serif';
-  ctx.fillStyle = '#FF6F9C';
+  ctx.fillStyle = '#C75B5F';
   ctx.fillText('UX CLAW LAB｜UX 夾娃娃研究所', W / 2, H - 80);
 
   const blob: Blob | null = await new Promise((r) => cv.toBlob(r, 'image/png'));

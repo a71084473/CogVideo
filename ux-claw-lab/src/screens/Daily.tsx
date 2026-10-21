@@ -24,7 +24,7 @@ export function Daily() {
   const canClaim = daily.played && daily.learned && daily.challenged && !daily.claimed;
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#3d3470] via-[#7a63c9] to-[#f2a9c9]">
+    <div className="flex h-full flex-col mauve-bg">
       <TopBar title="After Work Mode" />
       <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-28">
         <div className="flex items-center gap-3">
@@ -74,7 +74,7 @@ export function Daily() {
                 <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
                   <ToyButton
                     big
-                    color="#FFE49A"
+                    color="#FFCE55"
                     className="w-full"
                     onClick={() => {
                       claim();
@@ -88,7 +88,7 @@ export function Daily() {
               )}
             </AnimatePresence>
             {!daily.claimed && (
-              <ToyButton big color="#FFA9C5" className="w-full" onClick={() => openMachine('all')}>
+              <ToyButton big color="#E9A29B" className="w-full" onClick={() => openMachine('all')}>
                 {daily.played ? '繼續今天的任務 🕹️' : '開始今天的 3 分鐘 🕹️'}
               </ToyButton>
             )}

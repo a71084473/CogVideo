@@ -6,6 +6,7 @@ import { UXI } from '../components/UXI';
 import { DOLLS, dollById } from '../data/dolls';
 import { topicById } from '../data/topics';
 import { shareDollCard } from '../lib/share';
+import { HeartBar } from '../components/Deco';
 import { OUTFITS, collectedCount, useGame } from '../store/useGame';
 
 export function Collection() {
@@ -13,7 +14,7 @@ export function Collection() {
   const [open, setOpen] = useState<string | null>(null);
   const count = collectedCount(dolls);
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#A9D9F8] to-cream">
+    <div className="flex h-full flex-col potato-bg">
       <TopBar title="UX 娃娃圖鑑" />
       <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-28">
         <div className="glass mb-3 flex items-center gap-3 rounded-3xl p-3">
@@ -22,9 +23,7 @@ export function Collection() {
             <span className="text-lg text-ink/50">/{DOLLS.length}</span>
           </div>
           <div className="flex-1">
-            <div className="h-3 overflow-hidden rounded-full border-2 border-ink bg-white">
-              <motion.div className="h-full bg-sakura" initial={{ width: 0 }} animate={{ width: `${(count / DOLLS.length) * 100}%` }} />
-            </div>
+            <HeartBar value={count / DOLLS.length} color="#FFC94A" label="收集進度" />
             <div className="mt-1 text-[12px] font-bold text-ink/70">點娃娃看知識、複習升級、放進展示櫃</div>
           </div>
         </div>
@@ -129,7 +128,7 @@ function DollSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
               </div>
               <div className="flex gap-2">
                 <ToyButton
-                  color="#FFA9C5"
+                  color="#E9A29B"
                   className="flex-1"
                   onClick={() => {
                     onClose();
@@ -138,7 +137,7 @@ function DollSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
                 >
                   {lv < 3 ? '複習升級 🎯' : '再挑戰一次'}
                 </ToyButton>
-                <ToyButton color="#A9D9F8" className="flex-1" onClick={() => void shareDollCard(def, lv)}>
+                <ToyButton color="#F3D3A8" className="flex-1" onClick={() => void shareDollCard(def, lv)}>
                   分享 📤
                 </ToyButton>
               </div>
@@ -165,7 +164,7 @@ function DollSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
           )}
           {!lv && (
             <ToyButton
-              color="#FFE49A"
+              color="#FFCE55"
               onClick={() => {
                 onClose();
                 openMachine(def.topic);

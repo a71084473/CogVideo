@@ -17,7 +17,7 @@ export function Brand() {
   ];
   const max = Math.max(1, ...funnel.map((f) => f.v));
   return (
-    <div className="flex h-full flex-col bg-[#f4f1fb]">
+    <div className="flex h-full flex-col bg-[#FBF3E6]">
       <TopBar title="品牌活動後台" onBack={() => go('settings')} />
       <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-6">
         <div className="rounded-3xl border-[3px] border-ink bg-white p-4">
