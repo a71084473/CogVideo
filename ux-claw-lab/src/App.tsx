@@ -1,6 +1,6 @@
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { useEffect } from 'react';
-import { BottomNav, ToastHost } from './components/ui';
+import { BottomNav, SharePreview, ToastHost } from './components/ui';
 import { Brand } from './screens/Brand';
 import { Collection } from './screens/Collection';
 import { Daily } from './screens/Daily';
@@ -82,6 +82,7 @@ export default function App() {
             </div>
           )}
           <ToastHost />
+          <SharePreview />
         </div>
       </div>
     </MotionConfig>

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ReactNode, useEffect } from 'react';
 import { create } from 'zustand';
+import { useSharePreview } from '../lib/share';
 import { sfx } from '../lib/sfx';
 import { useGame } from '../store/useGame';
 
@@ -175,3 +176,24 @@ export function LevelPips({ level }: { level: number }) {
 }
 
 export const LEVEL_NAMES = ['未收集', 'Lv1 認識', 'Lv2 理解', 'Lv3 應用'];
+
+export function SharePreview() {
+  const { url, name } = useSharePreview();
+  const close = () => {
+    if (url) URL.revokeObjectURL(url);
+    useSharePreview.setState({ url: null });
+  };
+  return (
+    <AnimatePresence>
+      {url && (
+        <motion.div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-ink/70 p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={close} role="dialog" aria-label="分享卡片">
+          <img src={url} alt={`${name} 收藏卡`} className="max-h-[70%] rounded-3xl border-[3px] border-ink" onClick={(e) => e.stopPropagation()} />
+          <p className="text-center text-[14px] font-bold text-white">長按（手機）或右鍵（電腦）另存圖片，就能分享到社群 📤</p>
+          <ToyButton color="#FFE49A" onClick={close}>
+            關閉
+          </ToyButton>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

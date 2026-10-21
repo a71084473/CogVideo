@@ -1,4 +1,4 @@
-import { useToast } from '../components/ui';
+import { create } from 'zustand';
 import type { DollDef } from '../data/types';
 import { drawDoll } from '../game/drawDoll';
 
@@ -15,7 +15,9 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, x: number, y: number,
   return y;
 }
 
-/** Render a collectible card image and share it (or download as fallback). */
+export const useSharePreview = create<{ url: string | null; name: string }>(() => ({ url: null, name: '' }));
+
+/** Render a collectible card image and share it (or preview it in-page as fallback). */
 export async function shareDollCard(def: DollDef, level: number) {
   const W = 600;
   const H = 800;
@@ -65,10 +67,6 @@ export async function shareDollCard(def: DollDef, level: number) {
     /* user cancelled → fall back silently */
     return;
   }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = file.name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  useToast.getState().show('卡片圖片已下載，可以分享到社群囉！', '📤');
+  // downloads can be blocked (e.g. sandboxed hosting), so show the card in-page: long-press / right-click to save
+  useSharePreview.setState({ url: URL.createObjectURL(blob), name: def.zh });
 }
