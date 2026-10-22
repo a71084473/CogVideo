@@ -4,6 +4,8 @@
 
 一款 Mobile First 的網頁遊戲 MVP：用**真的有物理判定的夾娃娃機**夾回 12 隻 UX 知識娃娃，每隻娃娃都附帶一張互動知識卡與一個 15–30 秒的 UX 情境挑戰。收藏、升級、裝飾小房間，下班 3–5 分鐘輕鬆玩。
 
+🎬 **10 秒試玩影片**：[docs/gameplay-10s.mp4](docs/gameplay-10s.mp4)（遊樂場 → 搖桿瞄準 → 夾起 → 送進出口 → 獲得娃娃）
+
 | 遊樂場 | 夾娃娃機 | 獲得娃娃 | 知識卡 | 情境挑戰 |
 | --- | --- | --- | --- | --- |
 | ![](docs/screenshots/home.jpg) | ![](docs/screenshots/machine.jpg) | ![](docs/screenshots/reveal.jpg) | ![](docs/screenshots/card.jpg) | ![](docs/screenshots/challenge.jpg) |
