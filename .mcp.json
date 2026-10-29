@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "minimax": {
+      "command": "uvx",
+      "args": ["minimax-mcp", "-y"],
+      "env": {
+        "MINIMAX_API_KEY": "${MINIMAX_API_KEY}",
+        "MINIMAX_API_HOST": "${MINIMAX_API_HOST:-https://api.minimax.io}",
+        "MINIMAX_MCP_BASE_PATH": "${MINIMAX_MCP_BASE_PATH:-/home/user/CogVideo/outputs/minimax}",
+        "MINIMAX_API_RESOURCE_MODE": "url"
+      }
+    }
+  }
+}
