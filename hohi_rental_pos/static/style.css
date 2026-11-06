@@ -64,3 +64,5 @@ dl { display:grid; grid-template-columns:90px 1fr; gap:6px 10px; margin:0; } dt 
 .paste textarea { margin-top:4px; }
 .paste-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px; }
 .autofilled { background:#fff7ed; border-color:var(--accent) !important; }
+.chan { display:inline-block; padding:1px 8px; border-radius:4px; font-size:12px; font-weight:700; vertical-align:middle; }
+.c-line { background:#dcfce7; color:#15803d; } .c-shopee { background:#ffedd5; color:#c2410c; } .c-other { background:#e7e5e4; color:#57534e; }

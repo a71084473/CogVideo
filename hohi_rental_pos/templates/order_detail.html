@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% from "_status.html" import badge with context %}
+{% extends "base.html" %}{% from "_status.html" import badge, chan with context %}
 {% block title %}訂單 {{ order.order_no }}{% endblock %}
 {% block content %}
 <div class="row-between">
@@ -34,6 +34,7 @@
       <dt>聯絡人</dt><dd>{{ order.contact }}</dd>
       <dt>信箱</dt><dd><a href="mailto:{{ order.email }}">{{ order.email }}</a></dd>
       <dt>電話</dt><dd><a href="tel:{{ order.phone }}">{{ order.phone }}</a></dd>
+      <dt>社群管道</dt><dd>{{ chan(order.channel) or '—' }}</dd>
       <dt>備註</dt><dd class="pre">{{ order.note or '—' }}</dd>
     </dl>
   </section>

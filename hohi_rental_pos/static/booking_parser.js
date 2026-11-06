@@ -1,7 +1,7 @@
 /* 預約文字辨識：把客戶傳來的 LINE / Email / 表單文字轉成出租單欄位。
  * parseBooking(text, equipment, today)
  *   equipment: [{id, name}]   today: "YYYY-MM-DD"
- * 回傳 { fields: {company, contact, email, phone, rental_start, rental_end, pickup_at, return_at, note},
+ * 回傳 { fields: {company, contact, email, phone, channel, rental_start, rental_end, pickup_at, return_at, note},
  *        items: [{equipment_id, qty, source}], unmatched: [文字片段] }
  * 只會回傳辨識到的欄位；沒辨識到的不會出現在 fields 裡。
  */
@@ -107,6 +107,7 @@
     ["return", /^(歸還時間|歸還日期|歸還|還貨時間|還貨|退還|回收時間|收回時間|還件)/i],
     ["period", /^(租借日期|租借期間|租借時間|租期|出租時間|出租日期|出租期間|使用日期|使用時間|活動日期|活動時間|日期|時間)/i],
     ["items", /^(租借設備|租借項目|租借品項|出租設備|設備清單|設備|品項|項目|器材|需求設備|商品|租借內容|內容)/i],
+    ["channel", /^(社群管道|預約管道|來源管道|管道|來源|平台)/i],
     ["note", /^(備註|其他需求|其他|特殊需求|說明|附註|留言)/i],
   ];
 
@@ -199,6 +200,12 @@
     const ph = phoneSrc.match(/(?:\+?886[\s\-]?|0)9\d{2}[\s\-]?\d{3}[\s\-]?\d{3}|\(0\d{1,2}\)\s?\d{3,4}[\s\-]?\d{4}|0\d{1,2}[\s\-]\d{3,4}[\s\-]?\d{4}(?:\s*(?:#|分機|ext\.?)\s*\d+)?/);
     if (ph) fields.phone = ph[0].replace(/^\+?886[\s\-]?/, "0").trim();
     else if (labeled.phone) fields.phone = labeled.phone;
+
+    // 社群管道：標籤優先，其次全文關鍵字
+    const chSrc = labeled.channel || text;
+    if (/蝦皮|shopee|虾皮/i.test(chSrc)) fields.channel = "蝦皮";
+    else if (/\bLINE\b|line@|LINE官方/i.test(chSrc)) fields.channel = "LINE";
+    else if (labeled.channel) fields.channel = "其他";
 
     if (labeled.company) fields.company = labeled.company;
     if (labeled.contact) fields.contact = labeled.contact.replace(/\s*(先生|小姐|女士)?\s*[\d\-()\s]{8,}$/, "").trim();

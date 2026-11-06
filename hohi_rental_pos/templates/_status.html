@@ -1,1 +1,2 @@
 {% macro badge(s) %}<span class="badge s-{{ s }}">{{ STATUS_LABELS[s] }}</span>{% endmacro %}
+{% macro chan(c) %}{% if c %}<span class="chan c-{{ {'LINE':'line','蝦皮':'shopee'}.get(c, 'other') }}">{{ c }}</span>{% endif %}{% endmacro %}

@@ -22,7 +22,7 @@ def client(app):
 
 
 def order_data(**kw):
-    d = dict(company="好好公司", contact="王小明", email="ming@example.com", phone="0912345678",
+    d = dict(company="好好公司", contact="王小明", email="ming@example.com", phone="0912345678", channel="LINE",
              rental_start="2026-12-01", rental_end="2026-12-03",
              pickup_at="2026-12-01T10:00", return_at="2026-12-03T18:00", note="需要延長線",
              equipment_id=["1", "2"], qty=["2", "1"], action="confirm")
@@ -74,6 +74,16 @@ def test_validation(client):
     r = client.post("/orders/new", data=order_data(email="bad", company=""), follow_redirects=True)
     t = r.get_data(as_text=True)
     assert "信箱格式不正確" in t and "請填寫公司名" in t
+
+
+def test_channel_required_and_filter(app, client):
+    r = client.post("/orders/new", data=order_data(channel=""), follow_redirects=True)
+    assert "請選擇社群管道" in r.get_data(as_text=True)
+    client.post("/orders/new", data=order_data(channel="蝦皮", action="save"))
+    with app.app_context():
+        assert get_db().execute("SELECT channel FROM orders").fetchone()[0] == "蝦皮"
+    assert "蝦皮" in client.get("/orders?channel=蝦皮").get_data(as_text=True)
+    assert "好好公司" not in client.get("/orders?channel=LINE").get_data(as_text=True)
 
 
 def test_smtp_send(app, client, monkeypatch):

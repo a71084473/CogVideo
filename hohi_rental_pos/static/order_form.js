@@ -88,7 +88,7 @@
       .map((o) => ({ id: o.value, name: o.textContent.split('｜').pop() }));
     const fieldEl = (k) => form.elements[k];
     const LABEL = { company: '公司名', contact: '聯絡人', email: '信箱', phone: '電話', rental_start: '出租起日',
-      rental_end: '出租迄日', pickup_at: '取貨時間', return_at: '歸還時間', note: '備註' };
+      rental_end: '出租迄日', pickup_at: '取貨時間', return_at: '歸還時間', note: '備註', channel: '社群管道' };
     pasteBtn.onclick = () => {
       const text = $('paste-text').value;
       const out = $('paste-result');

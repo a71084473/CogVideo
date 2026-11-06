@@ -50,3 +50,8 @@ console.log(`parser ok (${n} cases)`);
 check("casual times", `我是晨光國小的張老師，12/10-11 要用
 混音器一台，早上9點半去取，最後一天晚上8點前還`, { company: "晨光國小", contact: "張老師", pickup_at: "2026-12-10T09:30", return_at: "2026-12-11T20:00" }, [[3, 1]]);
 console.log("casual ok");
+
+check("channel shopee", `蝦皮訊息：想租投影機 1台 12/1`, { channel: "蝦皮" });
+check("channel line", `從LINE官方帳號預約\n電話 0911222333`, { channel: "LINE" });
+check("channel label", `管道：朋友介紹`, { channel: "其他" });
+console.log("channel ok");

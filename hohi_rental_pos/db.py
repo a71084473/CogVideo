@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS orders (
     contact TEXT NOT NULL,
     email TEXT NOT NULL,
     phone TEXT NOT NULL,
+    channel TEXT NOT NULL DEFAULT '',  -- 社群管道：LINE / 蝦皮 / 其他
     rental_start TEXT NOT NULL,      -- 出租起日 YYYY-MM-DD
     rental_end TEXT NOT NULL,        -- 出租迄日 YYYY-MM-DD
     pickup_at TEXT NOT NULL,         -- 預計取貨時間 YYYY-MM-DDTHH:MM
@@ -54,6 +55,9 @@ CREATE TABLE IF NOT EXISTS email_log (
 # 會佔用庫存的訂單狀態
 RESERVING_STATUSES = ("confirmed", "picked_up")
 
+# 社群管道（客戶從哪裡來預約）
+CHANNELS = ("LINE", "蝦皮", "其他")
+
 STATUS_LABELS = {
     "draft": "待確認",
     "confirmed": "已確認",
@@ -78,8 +82,13 @@ def close_db(_exc=None):
 
 
 def init_db():
-    get_db().executescript(SCHEMA)
-    get_db().commit()
+    db = get_db()
+    db.executescript(SCHEMA)
+    # 舊資料庫升級：補上社群管道欄位
+    cols = {r["name"] for r in db.execute("PRAGMA table_info(orders)")}
+    if "channel" not in cols:
+        db.execute("ALTER TABLE orders ADD COLUMN channel TEXT NOT NULL DEFAULT ''")
+    db.commit()
 
 
 def parse_date(s):

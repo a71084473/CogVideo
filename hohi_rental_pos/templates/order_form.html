@@ -43,6 +43,10 @@
       <label>聯絡人*<input name="contact" value="{{ form.contact }}" required></label>
       <label>信箱*<input type="email" name="email" value="{{ form.email }}" required></label>
       <label>電話*<input type="tel" name="phone" value="{{ form.phone }}" required></label>
+      <label>社群管道*<select name="channel" required>
+        <option value="">請選擇</option>
+        {% for c in CHANNELS %}<option value="{{ c }}" {% if form.channel == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select></label>
       <label class="wide">備註<textarea name="note" rows="3">{{ form.note }}</textarea></label>
     </div>
   </div>

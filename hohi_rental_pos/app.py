@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 from flask import Flask, abort, flash, jsonify, redirect, render_template, request, url_for
 
 import db as store
-from db import STATUS_LABELS, get_db, get_order, get_order_items
+from db import CHANNELS, STATUS_LABELS, get_db, get_order, get_order_items
 from mailer import send_confirmation, smtp_config_from_env
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -39,7 +39,7 @@ def create_app(test_config=None):
 
     @app.context_processor
     def inject_globals():
-        return {"STATUS_LABELS": STATUS_LABELS, "shop": app.config, "today": date.today().isoformat()}
+        return {"STATUS_LABELS": STATUS_LABELS, "CHANNELS": CHANNELS, "shop": app.config, "today": date.today().isoformat()}
 
     @app.template_filter("money")
     def money(v):
@@ -57,7 +57,7 @@ def create_app(test_config=None):
 def parse_order_form(form):
     data = {k: (form.get(k) or "").strip() for k in (
         "company", "contact", "email", "phone", "rental_start", "rental_end",
-        "pickup_at", "return_at", "note")}
+        "pickup_at", "return_at", "note", "channel")}
     errors = []
     labels = {"company": "公司名", "contact": "聯絡人", "email": "信箱", "phone": "電話",
               "rental_start": "出租起日", "rental_end": "出租迄日",
@@ -65,6 +65,8 @@ def parse_order_form(form):
     for k, label in labels.items():
         if not data[k]:
             errors.append(f"請填寫{label}")
+    if data["channel"] not in CHANNELS:
+        errors.append("請選擇社群管道（LINE / 蝦皮 / 其他）")
     if data["email"] and not EMAIL_RE.match(data["email"]):
         errors.append("信箱格式不正確")
     try:
@@ -102,7 +104,7 @@ def parse_order_form(form):
 
 def save_order(data, items, order_id=None):
     db = get_db()
-    cols = ("company", "contact", "email", "phone", "rental_start", "rental_end",
+    cols = ("company", "contact", "email", "phone", "channel", "rental_start", "rental_end",
             "pickup_at", "return_at", "note")
     if order_id:
         db.execute(f"UPDATE orders SET {', '.join(c + ' = ?' for c in cols)} WHERE id = ?",
@@ -248,8 +250,12 @@ def register_routes(app):
     @app.route("/orders")
     def orders():
         status = request.args.get("status", "")
+        channel = request.args.get("channel", "")
         q = request.args.get("q", "").strip()
         sql, params = "SELECT * FROM orders WHERE 1=1", []
+        if channel:
+            sql += " AND channel = ?"
+            params.append(channel)
         if status:
             sql += " AND status = ?"
             params.append(status)
@@ -257,7 +263,7 @@ def register_routes(app):
             sql += " AND (company LIKE ? OR contact LIKE ? OR phone LIKE ? OR email LIKE ? OR order_no LIKE ?)"
             params += [f"%{q}%"] * 5
         rows = get_db().execute(sql + " ORDER BY rental_start DESC, id DESC", params).fetchall()
-        return render_template("orders.html", orders=rows, status=status, q=q)
+        return render_template("orders.html", orders=rows, status=status, channel=channel, q=q)
 
     def order_form(order=None, items=None, form=None):
         initial = [{"equipment_id": i["equipment_id"], "qty": i["qty"]} for i in (items or [])]
