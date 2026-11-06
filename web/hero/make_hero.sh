@@ -7,6 +7,7 @@
 #   STAB=1        防手震（vidstab 兩階段），0 關閉            預設 1
 #   SPEED=0.6     播放速度，<1 為慢動作（以光流補幀到 30fps）   預設 0.6
 #   LOOP=boomerang  循環方式：boomerang（正放+倒放，無縫）或 fade（頭尾淡入淡出）
+#   STYLE=bright  色調：bright（明亮產品攝影）或 dark（暗調精品）   預設 bright
 #   CRF_MP4=23 CRF_AV1=36  畫質/檔案大小（數字越大檔案越小）
 set -euo pipefail
 export SVT_LOG=1  # SVT-AV1 只顯示錯誤
@@ -14,7 +15,7 @@ export SVT_LOG=1  # SVT-AV1 只顯示錯誤
 IN="${1:?請提供輸入影片路徑}"
 OUT="${2:-media}"; SS="${3:-0}"; DUR="${4:-}"
 STAB="${STAB:-1}"; SPEED="${SPEED:-0.6}"; LOOP="${LOOP:-boomerang}"
-CRF_MP4="${CRF_MP4:-23}"; CRF_AV1="${CRF_AV1:-36}"
+STYLE="${STYLE:-bright}"; CRF_MP4="${CRF_MP4:-23}"; CRF_AV1="${CRF_AV1:-36}"
 mkdir -p "$OUT"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 FF=(ffmpeg -y -hide_banner -loglevel error)
@@ -49,19 +50,28 @@ else
   FADE="fade=t=in:st=0:d=0.8,fade=t=out:st=$(awk "BEGIN{print $L-0.8}"):d=0.8"
 fi
 
-# ── 2. 質感調色（Premium / 精品設備風）──────────────────────────
-# · 降噪後輕銳化 → 機身與螢幕細節清楚
-# · 降飽和、壓暗中間調、提高對比 → 背景沉下去，設備浮出來
-# · 中間調/亮部去橘偏冷 → 修正室內燈泡的黃色偏，白色機身更乾淨
-# · S 曲線保留亮部 → 螢幕依然明亮通透
-# · 暗角 + 細顆粒 → 電影感聚焦，並避免壓縮色帶
-GRADE="hqdn3d=1.5:1.5:6:6,\
+# ── 2. 調色 ────────────────────────────────────────────────
+if [ "$STYLE" = bright ]; then
+  # 明亮產品攝影風：
+  # · 全區間去橘偏藍 → 修正室內燈泡黃光，白色機身回到乾淨的白
+  # · gamma 提亮 + 曲線拉高中間調，黑位維持 → 明亮但不灰霧
+  # · 輕微降飽和、加強銳化 → 乾淨俐落、細節清楚，無暗角、無顆粒
+  GRADE="hqdn3d=1.5:1.5:6:6,\
+colorbalance=rs=-0.08:gs=-0.02:bs=0.09:rm=-0.10:gm=-0.01:bm=0.09:rh=-0.05:bh=0.05,\
+eq=contrast=1.04:saturation=0.9:gamma=1.3,\
+curves=all='0/0.02 0.25/0.36 0.6/0.76 0.9/0.97 1/1',\
+unsharp=5:5:0.6:5:5:0"
+  GRAIN="null"
+else
+  # 暗調精品風：壓暗背景、去橘偏冷、S 曲線、暗角、細顆粒
+  GRADE="hqdn3d=1.5:1.5:6:6,\
 unsharp=5:5:0.4:5:5:0,\
 eq=contrast=1.12:brightness=-0.03:saturation=0.78:gamma=0.95,\
 colorbalance=rs=-0.06:gs=-0.02:bs=0.04:rm=-0.04:bm=0.03:rh=-0.02:bh=0.02,\
 curves=all='0/0.015 0.2/0.14 0.5/0.48 0.8/0.86 1/1',\
 vignette=angle=PI/4.5"
-GRAIN="noise=alls=3:allf=t"
+  GRAIN="noise=alls=3:allf=t"
+fi
 
 encode () { # $1=高度
   local H="$1"
