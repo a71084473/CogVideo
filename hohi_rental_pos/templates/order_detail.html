@@ -1,0 +1,73 @@
+{% extends "base.html" %}{% from "_status.html" import badge with context %}
+{% block title %}訂單 {{ order.order_no }}{% endblock %}
+{% block content %}
+<div class="row-between">
+  <h1>訂單 {{ order.order_no }} {{ badge(order.status) }}</h1>
+  <div class="actions no-print">
+    <form method="post" action="{{ url_for('order_action', order_id=order.id) }}" class="inline">
+      {% if order.status == 'draft' %}
+        <button class="btn primary" name="action" value="confirm">確認出租並寄信</button>
+      {% endif %}
+      {% if order.status == 'confirmed' %}
+        <button class="btn primary" name="action" value="pickup">登記取貨</button>
+      {% endif %}
+      {% if order.status == 'picked_up' %}
+        <button class="btn primary" name="action" value="return">登記歸還</button>
+      {% endif %}
+      {% if order.status in ('confirmed', 'picked_up') %}
+        <button class="btn" name="action" value="resend">重寄確認信</button>
+      {% endif %}
+      {% if order.status in ('draft', 'confirmed') %}
+        <a class="btn" href="{{ url_for('order_edit', order_id=order.id) }}">編輯</a>
+        <button class="btn danger" name="action" value="cancel" onclick="return confirm('確定取消此訂單？')">取消訂單</button>
+      {% endif %}
+      <button type="button" class="btn" onclick="print()">列印</button>
+    </form>
+  </div>
+</div>
+
+<div class="two-col">
+  <section class="panel">
+    <h2>客戶資料</h2>
+    <dl>
+      <dt>公司名</dt><dd>{{ order.company }}</dd>
+      <dt>聯絡人</dt><dd>{{ order.contact }}</dd>
+      <dt>信箱</dt><dd><a href="mailto:{{ order.email }}">{{ order.email }}</a></dd>
+      <dt>電話</dt><dd><a href="tel:{{ order.phone }}">{{ order.phone }}</a></dd>
+      <dt>備註</dt><dd class="pre">{{ order.note or '—' }}</dd>
+    </dl>
+  </section>
+  <section class="panel">
+    <h2>時間</h2>
+    <dl>
+      <dt>出租時間</dt><dd>{{ order.rental_start }} ~ {{ order.rental_end }}（{{ days }} 天）</dd>
+      <dt>取貨時間</dt><dd>{{ order.pickup_at|dt }}{% if order.actual_pickup_at %}<br><small class="muted">實際：{{ order.actual_pickup_at|dt }}</small>{% endif %}</dd>
+      <dt>歸還時間</dt><dd>{{ order.return_at|dt }}{% if order.actual_return_at %}<br><small class="muted">實際：{{ order.actual_return_at|dt }}</small>{% endif %}</dd>
+      <dt>建立時間</dt><dd>{{ order.created_at }}</dd>
+      <dt>確認時間</dt><dd>{{ order.confirmed_at or '—' }}</dd>
+    </dl>
+  </section>
+</div>
+
+<section class="panel">
+  <h2>出租設備</h2>
+  <table class="table">
+    <thead><tr><th>設備</th><th>數量</th><th>日租金</th><th>天數</th><th>小計</th></tr></thead>
+    <tbody>
+    {% for i in items %}
+      <tr><td>{{ i.equipment_name }}</td><td>{{ i.qty }}</td><td>{{ i.unit_price|money }}</td><td>{{ days }}</td><td>{{ (i.qty * i.unit_price * days)|money }}</td></tr>
+    {% endfor %}
+    </tbody>
+    <tfoot><tr><th colspan="4">合計</th><th>{{ total|money }}</th></tr></tfoot>
+  </table>
+</section>
+
+<section class="panel no-print">
+  <h2>寄信紀錄</h2>
+  {% for e in emails %}
+    <div class="list-item">{{ e.created_at }} → {{ e.to_addr }}
+      <span class="badge m-{{ e.status }}">{{ {'sent':'已寄出','failed':'寄送失敗','logged':'僅記錄'}[e.status] }}</span>
+      {% if e.error %}<small class="muted">{{ e.error }}</small>{% endif %}</div>
+  {% else %}<p class="muted">尚未寄信</p>{% endfor %}
+</section>
+{% endblock %}

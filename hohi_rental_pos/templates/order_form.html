@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ '編輯訂單' if order else '新增出租' }}{% endblock %}
+{% block content %}
+<h1>{{ '編輯訂單 ' ~ order.order_no if order else '新增出租' }}</h1>
+<form method="post" id="order-form" data-exclude="{{ order.id if order else '' }}">
+  <div class="panel">
+    <h2>出租時間</h2>
+    <div class="form-grid">
+      <label>出租起日*<input type="date" name="rental_start" id="rental_start" value="{{ form.rental_start or today }}" required></label>
+      <label>出租迄日*<input type="date" name="rental_end" id="rental_end" value="{{ form.rental_end or today }}" required></label>
+      <label>取貨時間*<input type="datetime-local" name="pickup_at" id="pickup_at" value="{{ form.pickup_at }}" required></label>
+      <label>歸還時間*<input type="datetime-local" name="return_at" id="return_at" value="{{ form.return_at }}" required></label>
+    </div>
+    <p class="muted">出租天數：<b id="days">1</b> 天</p>
+  </div>
+
+  <div class="panel">
+    <h2>出租設備</h2>
+    <table class="table" id="items">
+      <thead><tr><th>設備</th><th>期間可租數量</th><th>數量</th><th>日租金</th><th>小計</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button type="button" class="btn" id="add-row">＋ 加入設備</button>
+    <p class="total">預估金額：<b id="grand">NT$ 0</b></p>
+  </div>
+
+  <div class="panel">
+    <h2>客戶資料</h2>
+    <div class="form-grid">
+      <label>公司名*<input name="company" value="{{ form.company }}" required></label>
+      <label>聯絡人*<input name="contact" value="{{ form.contact }}" required></label>
+      <label>信箱*<input type="email" name="email" value="{{ form.email }}" required></label>
+      <label>電話*<input type="tel" name="phone" value="{{ form.phone }}" required></label>
+      <label class="wide">備註<textarea name="note" rows="3">{{ form.note }}</textarea></label>
+    </div>
+  </div>
+
+  <div class="actions">
+    {% if not order or order.status == 'draft' %}
+      <button class="btn" name="action" value="save">儲存為待確認</button>
+    {% endif %}
+    {% if not order %}
+      <button class="btn primary" name="action" value="confirm">確認出租並寄信給客戶</button>
+    {% else %}
+      <button class="btn primary" name="action" value="save">儲存修改</button>
+    {% endif %}
+  </div>
+</form>
+
+<template id="row-tpl">
+  <tr>
+    <td><select name="equipment_id" class="eq">
+      <option value="">— 選擇設備 —</option>
+      {% for e in equipment %}<option value="{{ e.id }}" data-price="{{ e.daily_price }}" data-total="{{ e.total_qty }}">{{ e.category ~ '｜' if e.category }}{{ e.name }}</option>{% endfor %}
+    </select></td>
+    <td class="avail">-</td>
+    <td><input type="number" name="qty" class="qty" min="1" value="1"></td>
+    <td class="price">-</td>
+    <td class="sub">-</td>
+    <td><button type="button" class="btn danger del">✕</button></td>
+  </tr>
+</template>
+<script>
+  window.INITIAL_ITEMS = {{ initial_items|tojson }};
+</script>
+<script src="{{ url_for('static', filename='order_form.js') }}"></script>
+{% endblock %}

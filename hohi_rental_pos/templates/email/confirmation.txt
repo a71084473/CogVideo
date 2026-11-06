@@ -1,0 +1,24 @@
+{{ order.contact }} 您好，
+
+感謝 {{ order.company }} 向 {{ shop.SHOP_NAME }} 租借設備，您的訂單已確認，明細如下：
+
+訂單編號：{{ order.order_no }}
+出租時間：{{ order.rental_start }} ~ {{ order.rental_end }}（共 {{ days }} 天）
+取貨時間：{{ order.pickup_at|dt }}
+歸還時間：{{ order.return_at|dt }}
+
+出租設備：
+{% for i in items %}- {{ i.equipment_name }} × {{ i.qty }}（{{ i.unit_price|money }}/日）小計 {{ (i.qty * i.unit_price * days)|money }}
+{% endfor %}
+合計：{{ total|money }}
+
+聯絡人：{{ order.contact }}
+電話：{{ order.phone }}
+{% if order.note %}備註：{{ order.note }}
+{% endif %}
+請於取貨時間準時取件，並於歸還時間前歸還設備。如需異動請直接回覆此信或與我們聯繫。
+
+{{ shop.SHOP_NAME }}
+{% if shop.SHOP_PHONE %}電話：{{ shop.SHOP_PHONE }}
+{% endif %}{% if shop.SHOP_ADDRESS %}地址：{{ shop.SHOP_ADDRESS }}
+{% endif %}{{ shop.SHOP_URL }}

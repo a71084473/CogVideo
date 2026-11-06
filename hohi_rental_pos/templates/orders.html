@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% from "_status.html" import badge with context %}
+{% block title %}訂單{% endblock %}
+{% block content %}
+<div class="row-between">
+  <h1>出租訂單</h1>
+  <form class="inline" method="get">
+    <input name="q" value="{{ q }}" placeholder="搜尋公司 / 聯絡人 / 電話 / 信箱 / 單號">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">全部狀態</option>
+      {% for k, v in STATUS_LABELS.items() %}<option value="{{ k }}" {% if status == k %}selected{% endif %}>{{ v }}</option>{% endfor %}
+    </select>
+    <button class="btn">搜尋</button>
+  </form>
+</div>
+<table class="table">
+  <thead><tr><th>單號</th><th>公司名</th><th>聯絡人</th><th>電話</th><th>出租期間</th><th>取貨時間</th><th>歸還時間</th><th>狀態</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+  <tr onclick="location='{{ url_for('order_detail', order_id=o.id) }}'" class="clickable">
+    <td><a href="{{ url_for('order_detail', order_id=o.id) }}">{{ o.order_no }}</a></td>
+    <td>{{ o.company }}</td><td>{{ o.contact }}</td><td>{{ o.phone }}</td>
+    <td>{{ o.rental_start }} ~ {{ o.rental_end }}</td>
+    <td>{{ o.pickup_at|dt }}</td><td>{{ o.return_at|dt }}</td><td>{{ badge(o.status) }}</td>
+  </tr>
+  {% else %}<tr><td colspan="8" class="muted">沒有訂單</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

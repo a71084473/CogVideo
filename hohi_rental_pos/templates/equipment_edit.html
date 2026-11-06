@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}編輯設備{% endblock %}
+{% block content %}
+<h1>編輯設備</h1>
+<form method="post" class="panel form-grid">
+  <label>設備名稱*<input name="name" value="{{ eq.name }}" required></label>
+  <label>分類<input name="category" value="{{ eq.category }}"></label>
+  <label>總數量*<input type="number" name="total_qty" min="0" value="{{ eq.total_qty }}" required></label>
+  <label>每日租金<input type="number" name="daily_price" min="0" value="{{ eq.daily_price }}"></label>
+  <label class="wide">備註<input name="note" value="{{ eq.note }}"></label>
+  <label class="check"><input type="checkbox" name="active" {% if eq.active %}checked{% endif %}> 上架中</label>
+  <div class="wide"><button class="btn primary">儲存</button> <a class="btn" href="{{ url_for('equipment') }}">返回</a></div>
+</form>
+{% endblock %}

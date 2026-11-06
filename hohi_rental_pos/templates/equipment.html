@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}設備管理{% endblock %}
+{% block content %}
+<h1>設備管理</h1>
+<form method="post" class="panel form-grid">
+  <label>設備名稱*<input name="name" required></label>
+  <label>分類<input name="category" placeholder="例：音響、燈光、投影"></label>
+  <label>總數量*<input type="number" name="total_qty" min="0" value="1" required></label>
+  <label>每日租金<input type="number" name="daily_price" min="0" value="0"></label>
+  <label class="wide">備註<input name="note"></label>
+  <div class="wide"><button class="btn primary">新增設備</button></div>
+</form>
+<table class="table">
+  <thead><tr><th>分類</th><th>名稱</th><th>總數</th><th>今日剩餘</th><th>每日租金</th><th>備註</th><th>狀態</th><th></th></tr></thead>
+  <tbody>
+  {% for e in items %}
+  <tr class="{% if not e.active %}inactive{% endif %}">
+    <td>{{ e.category }}</td><td>{{ e.name }}</td><td>{{ e.total_qty }}</td>
+    <td>{{ remaining[e.id] }}</td>
+    <td>{{ e.daily_price|money }}</td><td>{{ e.note }}</td>
+    <td>{{ '上架' if e.active else '停用' }}</td>
+    <td><a href="{{ url_for('equipment_edit', eq_id=e.id) }}">編輯</a></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}寄信紀錄{% endblock %}
+{% block content %}
+<h1>寄信紀錄</h1>
+{% if not smtp_on %}
+<div class="flash error">尚未設定 SMTP（環境變數 SMTP_HOST 等），確認信目前只會記錄在這裡、不會真的寄出。設定方式請見 README。</div>
+{% endif %}
+{% for r in rows %}
+<details class="panel">
+  <summary>{{ r.created_at }} · {{ r.order_no or '—' }} → {{ r.to_addr }}
+    <span class="badge m-{{ r.status }}">{{ {'sent':'已寄出','failed':'寄送失敗','logged':'僅記錄'}[r.status] }}</span>
+    {% if r.error %}<small class="muted">{{ r.error }}</small>{% endif %}</summary>
+  <p><b>{{ r.subject }}</b></p>
+  <pre>{{ r.body }}</pre>
+</details>
+{% else %}<p class="muted">尚無紀錄</p>{% endfor %}
+{% endblock %}

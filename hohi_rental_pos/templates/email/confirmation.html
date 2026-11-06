@@ -1,0 +1,27 @@
+<div style="font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;max-width:600px;margin:auto;color:#222;line-height:1.6">
+  <h2 style="background:#111;color:#fff;padding:16px;margin:0">{{ shop.SHOP_NAME }}｜設備出租確認</h2>
+  <div style="padding:16px;border:1px solid #ddd;border-top:0">
+    <p>{{ order.contact }} 您好，</p>
+    <p>感謝 <b>{{ order.company }}</b> 向 {{ shop.SHOP_NAME }} 租借設備，您的訂單已確認。</p>
+    <table style="border-collapse:collapse;width:100%;margin:12px 0">
+      <tr><td style="padding:4px 0;color:#666;width:90px">訂單編號</td><td><b>{{ order.order_no }}</b></td></tr>
+      <tr><td style="padding:4px 0;color:#666">出租時間</td><td>{{ order.rental_start }} ~ {{ order.rental_end }}（共 {{ days }} 天）</td></tr>
+      <tr><td style="padding:4px 0;color:#666">取貨時間</td><td>{{ order.pickup_at|dt }}</td></tr>
+      <tr><td style="padding:4px 0;color:#666">歸還時間</td><td>{{ order.return_at|dt }}</td></tr>
+      <tr><td style="padding:4px 0;color:#666">聯絡電話</td><td>{{ order.phone }}</td></tr>
+      {% if order.note %}<tr><td style="padding:4px 0;color:#666">備註</td><td style="white-space:pre-line">{{ order.note }}</td></tr>{% endif %}
+    </table>
+    <table style="border-collapse:collapse;width:100%">
+      <tr style="background:#f3f3f3"><th style="text-align:left;padding:6px">設備</th><th style="padding:6px">數量</th><th style="text-align:right;padding:6px">小計</th></tr>
+      {% for i in items %}
+      <tr><td style="padding:6px;border-bottom:1px solid #eee">{{ i.equipment_name }}</td>
+          <td style="padding:6px;border-bottom:1px solid #eee;text-align:center">{{ i.qty }}</td>
+          <td style="padding:6px;border-bottom:1px solid #eee;text-align:right">{{ (i.qty * i.unit_price * days)|money }}</td></tr>
+      {% endfor %}
+      <tr><td colspan="2" style="padding:6px;text-align:right"><b>合計</b></td><td style="padding:6px;text-align:right"><b>{{ total|money }}</b></td></tr>
+    </table>
+    <p>請於取貨時間準時取件，並於歸還時間前歸還設備。如需異動請直接回覆此信或與我們聯繫。</p>
+    <p style="color:#666;font-size:13px">{{ shop.SHOP_NAME }}{% if shop.SHOP_PHONE %}｜{{ shop.SHOP_PHONE }}{% endif %}{% if shop.SHOP_ADDRESS %}｜{{ shop.SHOP_ADDRESS }}{% endif %}<br>
+      <a href="{{ shop.SHOP_URL }}">{{ shop.SHOP_URL }}</a></p>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}庫存日曆{% endblock %}
+{% block content %}
+<div class="row-between">
+  <h1>每日剩餘數量（14 天）</h1>
+  <form class="inline" method="get">
+    <a class="btn" href="?start={{ prev }}">◀</a>
+    <input type="date" name="start" value="{{ start.isoformat() }}" onchange="this.form.submit()">
+    <a class="btn" href="?start={{ next }}">▶</a>
+  </form>
+</div>
+<div class="scroll">
+<table class="grid">
+  <thead><tr><th>設備（總數）</th>
+    {% for d in days %}<th class="{% if d.weekday() >= 5 %}weekend{% endif %}">{{ d.strftime('%m/%d') }}<br><small>{{ '一二三四五六日'[d.weekday()] }}</small></th>{% endfor %}
+  </tr></thead>
+  <tbody>
+  {% for row in grid %}
+    <tr><th>{{ row.eq.name }}（{{ row.eq.total_qty }}）</th>
+    {% for c in row.cells %}
+      <td class="{% if c <= 0 %}out{% elif c < row.eq.total_qty %}part{% endif %}">{{ c }}</td>
+    {% endfor %}</tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="muted">只計算「已確認」與「已取貨」的訂單；待確認訂單不佔庫存。</p>
+{% endblock %}

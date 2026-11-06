@@ -1,0 +1,49 @@
+{% extends "base.html" %}{% from "_status.html" import badge with context %}
+{% block title %}今日總覽{% endblock %}
+{% block content %}
+<div class="row-between">
+  <h1>{{ day.isoformat() }} 設備剩餘數量</h1>
+  <form class="inline" method="get">
+    <a class="btn" href="?date={{ prev_day }}">◀</a>
+    <input type="date" name="date" value="{{ day.isoformat() }}" onchange="this.form.submit()">
+    <a class="btn" href="?date={{ next_day }}">▶</a>
+    <a class="btn" href="{{ url_for('dashboard') }}">今天</a>
+  </form>
+</div>
+
+{% if overdue %}
+<div class="flash error">⚠ 有 {{ overdue|length }} 筆訂單已超過預計歸還時間仍未歸還：
+  {% for o in overdue %}<a href="{{ url_for('order_detail', order_id=o.id) }}">{{ o.order_no }} {{ o.company }}</a>{% if not loop.last %}、{% endif %}{% endfor %}
+</div>
+{% endif %}
+
+<div class="cards">
+  {% for r in rows %}
+  <div class="card {% if r.remaining <= 0 %}out{% elif r.remaining * 4 <= r.eq.total_qty %}low{% endif %}">
+    <div class="muted">{{ r.eq.category or '未分類' }}</div>
+    <div class="card-title">{{ r.eq.name }}</div>
+    <div class="big">{{ r.remaining }}<span>/ {{ r.eq.total_qty }}</span></div>
+    <div class="muted">當日已出租 {{ r.booked }} · {{ r.eq.daily_price|money }}/日</div>
+  </div>
+  {% else %}
+  <p>尚未建立設備，請先到 <a href="{{ url_for('equipment') }}">設備管理</a> 新增。</p>
+  {% endfor %}
+</div>
+
+<div class="two-col">
+  <section>
+    <h2>當日取貨</h2>
+    {% for o in pickups %}
+      <a class="list-item" href="{{ url_for('order_detail', order_id=o.id) }}">
+        <b>{{ o.pickup_at|dt }}</b> {{ o.company }}（{{ o.contact }} {{ o.phone }}） {{ badge(o.status) }}</a>
+    {% else %}<p class="muted">無</p>{% endfor %}
+  </section>
+  <section>
+    <h2>當日歸還</h2>
+    {% for o in returns %}
+      <a class="list-item" href="{{ url_for('order_detail', order_id=o.id) }}">
+        <b>{{ o.return_at|dt }}</b> {{ o.company }}（{{ o.contact }} {{ o.phone }}） {{ badge(o.status) }}</a>
+    {% else %}<p class="muted">無</p>{% endfor %}
+  </section>
+</div>
+{% endblock %}
