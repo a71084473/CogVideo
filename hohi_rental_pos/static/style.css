@@ -61,3 +61,6 @@ dl { display:grid; grid-template-columns:90px 1fr; gap:6px 10px; margin:0; } dt 
 .grid th.weekend { background:#fff7ed; }
 .grid td.part { background:#fef9c3; } .grid td.out { background:#fecaca; font-weight:700; }
 @media print { .topbar, .no-print, .flash { display:none !important; } body { background:#fff; } .panel { border:0; } }
+.paste textarea { margin-top:4px; }
+.paste-bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px; }
+.autofilled { background:#fff7ed; border-color:var(--accent) !important; }

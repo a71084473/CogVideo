@@ -3,6 +3,18 @@
 {% block content %}
 <h1>{{ '編輯訂單 ' ~ order.order_no if order else '新增出租' }}</h1>
 <form method="post" id="order-form" data-exclude="{{ order.id if order else '' }}">
+  {% if not order %}
+  <div class="panel paste">
+    <h2>貼上預約內容，自動填入</h2>
+    <p class="muted">把客戶傳來的 LINE、Email 或表單文字整段貼上，系統會辨識公司、聯絡人、電話、信箱、日期時間和設備數量，填入下方欄位。送出前請再確認一次。</p>
+    <textarea id="paste-text" rows="6" placeholder="例：&#10;公司：好好活動有限公司&#10;聯絡人：王小明 0912-345-678&#10;信箱：ming@example.com&#10;租借日期：11/20~11/22&#10;取貨：11/20 早上10點　歸還：11/22 下午6點&#10;設備：無線麥克風x4、投影機 2台"></textarea>
+    <div class="paste-bar">
+      <button type="button" class="btn primary" id="paste-parse">辨識並填入</button>
+      <button type="button" class="btn" id="paste-clear">清除</button>
+      <span id="paste-result" class="muted" role="status"></span>
+    </div>
+  </div>
+  {% endif %}
   <div class="panel">
     <h2>出租時間</h2>
     <div class="form-grid">
@@ -63,5 +75,6 @@
 <script>
   window.INITIAL_ITEMS = {{ initial_items|tojson }};
 </script>
+<script src="{{ url_for('static', filename='booking_parser.js') }}"></script>
 <script src="{{ url_for('static', filename='order_form.js') }}"></script>
 {% endblock %}

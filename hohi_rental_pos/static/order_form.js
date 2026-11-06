@@ -81,6 +81,44 @@
   $('rental_end').addEventListener('change', () => { syncTimes(!form.dataset.exclude); loadAvail(); });
   $('add-row').onclick = () => { addRow(); recalc(); };
 
+  // ---- 貼上預約文字 → 自動填入
+  const pasteBtn = $('paste-parse');
+  if (pasteBtn && window.parseBooking) {
+    const equipment = [...tpl.content.querySelectorAll('.eq option')].filter((o) => o.value)
+      .map((o) => ({ id: o.value, name: o.textContent.split('｜').pop() }));
+    const fieldEl = (k) => form.elements[k];
+    const LABEL = { company: '公司名', contact: '聯絡人', email: '信箱', phone: '電話', rental_start: '出租起日',
+      rental_end: '出租迄日', pickup_at: '取貨時間', return_at: '歸還時間', note: '備註' };
+    pasteBtn.onclick = () => {
+      const text = $('paste-text').value;
+      const out = $('paste-result');
+      if (!text.trim()) { out.textContent = '請先貼上預約文字'; return; }
+      const r = window.parseBooking(text, equipment, ((d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`)(new Date()));
+      form.querySelectorAll('.autofilled').forEach((el) => el.classList.remove('autofilled'));
+      const filled = [];
+      Object.entries(r.fields).forEach(([k, v]) => {
+        const el = fieldEl(k);
+        if (!el || !v) return;
+        el.value = v; el.classList.add('autofilled'); filled.push(LABEL[k]);
+      });
+      if (r.items.length) {
+        tbody.innerHTML = '';
+        r.items.forEach((i) => addRow({ equipment_id: i.equipment_id, qty: i.qty }));
+        tbody.querySelectorAll('select, input').forEach((el) => el.classList.add('autofilled'));
+        filled.push(`設備 ${r.items.length} 項`);
+      }
+      const missing = Object.keys(LABEL).filter((k) => k !== 'note' && !fieldEl(k).value).map((k) => LABEL[k]);
+      out.innerHTML = '';
+      const parts = [filled.length ? `已填入：${filled.join('、')}` : '沒有辨識到可填入的內容'];
+      if (missing.length) parts.push(`尚缺：${missing.join('、')}`);
+      if (r.unmatched.length) parts.push(`找不到對應設備：${r.unmatched.join('、')}`);
+      out.textContent = parts.join('　');
+      loadAvail();
+    };
+    form.addEventListener('input', (e) => e.target.classList.remove('autofilled'));
+    $('paste-clear').onclick = () => { $('paste-text').value = ''; $('paste-result').textContent = ''; };
+  }
+
   (window.INITIAL_ITEMS.length ? window.INITIAL_ITEMS : [null]).forEach(addRow);
   syncTimes(false);
   loadAvail();
