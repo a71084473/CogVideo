@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero 影片示範</title>
+<!-- 預載海報圖，讓首屏第一時間就有畫面 -->
+<link rel="preload" as="image" href="media/hero-poster.webp" fetchpriority="high">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;500&family=Inter:wght@300;500&display=swap">
+<style>
+  :root{
+    --ink:#f4f2ee; --ink-dim:rgba(244,242,238,.66);
+    --gold:#c8a96a; --bg:#07080a;
+  }
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,"Noto Sans TC",system-ui,sans-serif;font-weight:300}
+
+  .hero{position:relative;height:100svh;min-height:560px;overflow:hidden;isolation:isolate;
+        background:#000 url(media/hero-poster.webp) center/cover no-repeat}
+  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;
+        opacity:0;transform:scale(1.06);transition:opacity 1.6s ease, transform 9s cubic-bezier(.2,.6,.2,1)}
+  .hero.is-ready video{opacity:1;transform:scale(1)}
+  /* 電影感遮罩：底部漸層壓暗 + 左側壓暗讓文字可讀 + 極細掃描紋理 */
+  .hero::before{content:"";position:absolute;inset:0;z-index:-1;
+        background:
+          linear-gradient(180deg,rgba(7,8,10,.55) 0%,rgba(7,8,10,0) 28%,rgba(7,8,10,0) 55%,rgba(7,8,10,.92) 100%),
+          linear-gradient(90deg,rgba(7,8,10,.7) 0%,rgba(7,8,10,0) 60%)}
+  .hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.035;
+        background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
+
+  .hero__nav{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
+        padding:28px clamp(16px,5vw,72px);font-size:13px;letter-spacing:.22em;text-transform:uppercase}
+  .hero__nav a{color:var(--ink-dim);text-decoration:none;margin-left:32px}
+  .hero__nav a:hover{color:var(--ink)}
+  .brand{font-weight:500;letter-spacing:.38em}
+
+  .hero__content{position:absolute;left:clamp(16px,5vw,72px);right:16px;bottom:clamp(56px,12vh,120px);max-width:720px}
+  .eyebrow{display:flex;align-items:center;gap:14px;color:var(--gold);font-size:12px;letter-spacing:.32em;text-transform:uppercase}
+  .eyebrow::before{content:"";width:40px;height:1px;background:var(--gold)}
+  h1{font-size:clamp(34px,6vw,76px);line-height:1.08;font-weight:300;letter-spacing:-.01em;margin:22px 0 20px}
+  h1 b{font-weight:500}
+  .lead{color:var(--ink-dim);font-size:clamp(15px,1.4vw,18px);line-height:1.8;max-width:520px}
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
+  .btn{padding:15px 30px;font-size:13px;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;
+        border:1px solid rgba(244,242,238,.35);color:var(--ink);transition:.4s}
+  .btn--solid{background:var(--ink);color:#0b0b0c;border-color:var(--ink)}
+  .btn:hover{background:var(--gold);border-color:var(--gold);color:#0b0b0c}
+
+  /* 進場動畫 */
+  .reveal{opacity:0;transform:translateY(18px);animation:up 1.2s cubic-bezier(.2,.7,.2,1) forwards}
+  .d1{animation-delay:.3s}.d2{animation-delay:.5s}.d3{animation-delay:.7s}.d4{animation-delay:.9s}
+  @keyframes up{to{opacity:1;transform:none}}
+
+  .scroll{position:absolute;right:clamp(16px,5vw,72px);bottom:40px;font-size:11px;letter-spacing:.3em;color:var(--ink-dim);
+        writing-mode:vertical-rl;display:flex;align-items:center;gap:12px}
+  .scroll::after{content:"";width:1px;height:56px;background:linear-gradient(var(--ink),transparent);animation:line 2.4s infinite}
+  @keyframes line{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  .toggle{position:absolute;right:clamp(16px,5vw,72px);top:84px;width:40px;height:40px;border-radius:50%;
+        border:1px solid rgba(244,242,238,.3);background:rgba(0,0,0,.25);backdrop-filter:blur(6px);color:var(--ink);cursor:pointer}
+
+  @media (max-width:640px){.hero__nav nav{display:none}.scroll{display:none}}
+  /* 使用者設定「減少動態」時只顯示靜態海報 */
+  @media (prefers-reduced-motion:reduce){.hero video{display:none}.reveal{animation:none;opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<section class="hero" id="hero">
+  <video id="heroVideo" muted playsinline loop autoplay preload="metadata" poster="media/hero-poster.webp" aria-hidden="true">
+    <!-- 手機載 720p，桌機載 1080p；AV1 優先，MP4 後備 -->
+    <source src="media/hero-720.webm"  type='video/webm; codecs="av01.0.05M.08"' media="(max-width: 900px)">
+    <source src="media/hero-720.mp4"   type="video/mp4" media="(max-width: 900px)">
+    <source src="media/hero-1080.webm" type='video/webm; codecs="av01.0.08M.08"'>
+    <source src="media/hero-1080.mp4"  type="video/mp4">
+  </video>
+
+  <header class="hero__nav">
+    <span class="brand">BRAND</span>
+    <nav><a href="#">產品</a><a href="#">技術</a><a href="#">案例</a><a href="#">聯絡</a></nav>
+  </header>
+
+  <div class="hero__content">
+    <p class="eyebrow reveal d1">Precision Engineering</p>
+    <h1 class="reveal d2">精準，<br><b>源自每一個細節</b></h1>
+    <p class="lead reveal d3">在這裡放一句品牌主張，例如：以工業級標準打造，為專業而生的高階設備。</p>
+    <div class="cta reveal d4">
+      <a class="btn btn--solid" href="#">探索產品</a>
+      <a class="btn" href="#">預約展示</a>
+    </div>
+  </div>
+
+  <button class="toggle" id="toggle" aria-label="暫停背景影片">❚❚</button>
+  <span class="scroll">SCROLL</span>
+</section>
+
+<script>
+  const hero = document.getElementById('hero');
+  const v = document.getElementById('heroVideo');
+  const btn = document.getElementById('toggle');
+  // 影片可以順暢播放時才淡入（避免卡頓的第一幀）
+  v.addEventListener('canplaythrough', () => hero.classList.add('is-ready'), { once: true });
+  if (v.readyState >= 4) hero.classList.add('is-ready');
+  // 開啟省流量模式時不播放影片
+  if (navigator.connection && navigator.connection.saveData) { v.removeAttribute('autoplay'); v.pause(); }
+  // 捲出畫面時暫停，省電省 CPU
+  new IntersectionObserver(([e]) => { if (!btn.dataset.paused) e.isIntersecting ? v.play().catch(()=>{}) : v.pause(); })
+    .observe(hero);
+  btn.addEventListener('click', () => {
+    if (v.paused) { v.play(); btn.textContent = '❚❚'; delete btn.dataset.paused; btn.setAttribute('aria-label','暫停背景影片'); }
+    else { v.pause(); btn.textContent = '▶'; btn.dataset.paused = 1; btn.setAttribute('aria-label','播放背景影片'); }
+  });
+</script>
+</body>
+</html>
