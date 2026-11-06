@@ -1,48 +1,85 @@
 #!/usr/bin/env bash
-# 將任意影片轉成「網站首頁 Hero 背景影片」：高級設備質感調色 + 多格式多解析度輸出
-# 用法: ./make_hero.sh <輸入影片> [輸出資料夾=out] [開始秒數=0] [長度秒數=12]
+# 將任意影片轉成「網站首頁 Hero 背景影片」：防手震 + 慢動作 + 高級設備質感調色 + 無縫循環
+#
+# 用法: ./make_hero.sh <輸入影片> [輸出資料夾=media] [開始秒數=0] [長度秒數=原片長度]
+#
+# 可用環境變數調整：
+#   STAB=1        防手震（vidstab 兩階段），0 關閉            預設 1
+#   SPEED=0.6     播放速度，<1 為慢動作（以光流補幀到 30fps）   預設 0.6
+#   LOOP=boomerang  循環方式：boomerang（正放+倒放，無縫）或 fade（頭尾淡入淡出）
+#   CRF_MP4=23 CRF_AV1=36  畫質/檔案大小（數字越大檔案越小）
 set -euo pipefail
-export SVT_LOG=1  # 只顯示錯誤
+export SVT_LOG=1  # SVT-AV1 只顯示錯誤
+
 IN="${1:?請提供輸入影片路徑}"
-OUT="${2:-out}"; SS="${3:-0}"; DUR="${4:-12}"
+OUT="${2:-media}"; SS="${3:-0}"; DUR="${4:-}"
+STAB="${STAB:-1}"; SPEED="${SPEED:-0.6}"; LOOP="${LOOP:-boomerang}"
+CRF_MP4="${CRF_MP4:-23}"; CRF_AV1="${CRF_AV1:-36}"
 mkdir -p "$OUT"
+TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+FF=(ffmpeg -y -hide_banner -loglevel error)
+TRIM=(-ss "$SS"); [ -n "$DUR" ] && TRIM+=(-t "$DUR")
 
-# ── 質感調色（Premium / 精品科技風）─────────────────────────
-# 1. 輕微壓暗中間調、提高對比 → 深邃、沉穩
-# 2. 降低飽和度 → 去除手機原生的艷麗感，偏金屬冷調
-# 3. 暗部偏冷藍、亮部偏暖 → 電影級 teal & orange（克制版）
-# 4. 柔和 S 曲線 + 暗角 → 視覺聚焦於主體
-# 5. 細微動態顆粒 → 避免壓縮色帶（banding），增加膠片質地
-# 6. 高品質降噪 + 銳化 → 設備細節更清晰
+# ── 1. 母帶：裁切片段 → 防手震 → 慢動作補幀 → 循環 ──────────────
+echo "▶ 製作母帶（防手震 / 慢動作 / 循環）"
+"${FF[@]}" "${TRIM[@]}" -i "$IN" -an -c:v libx264 -crf 10 -preset fast "$TMP/cut.mp4"
+
+PRE="null"
+if [ "$STAB" = 1 ]; then
+  "${FF[@]}" -i "$TMP/cut.mp4" -vf "vidstabdetect=shakiness=6:accuracy=15:result=$TMP/t.trf" -f null -
+  # smoothing 越大鏡頭越像滑軌般平穩；optzoom 自動放大裁掉晃動黑邊
+  PRE="vidstabtransform=input=$TMP/t.trf:smoothing=45:optzoom=1:zoom=2:interpol=bicubic"
+fi
+SLOW="null"
+if awk "BEGIN{exit !($SPEED != 1)}"; then
+  SLOW="setpts=PTS/${SPEED},minterpolate=fps=30:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1"
+fi
+"${FF[@]}" -i "$TMP/cut.mp4" -vf "${PRE},${SLOW},fps=30" -c:v libx264 -crf 10 -preset fast "$TMP/slow.mp4"
+
+if [ "$LOOP" = boomerang ]; then
+  # 正放 + 倒放（去掉重複的頭尾幀），首尾相接完全無縫
+  N=$(ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of csv=p=0 "$TMP/slow.mp4")
+  "${FF[@]}" -i "$TMP/slow.mp4" -filter_complex \
+    "[0]split[a][b];[b]reverse,trim=start_frame=1:end_frame=$((N-1)),setpts=PTS-STARTPTS[r];[a][r]concat=n=2:v=1" \
+    -c:v libx264 -crf 10 -preset fast "$TMP/master.mp4"
+  FADE="null"
+else
+  cp "$TMP/slow.mp4" "$TMP/master.mp4"
+  L=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$TMP/master.mp4")
+  FADE="fade=t=in:st=0:d=0.8,fade=t=out:st=$(awk "BEGIN{print $L-0.8}"):d=0.8"
+fi
+
+# ── 2. 質感調色（Premium / 精品設備風）──────────────────────────
+# · 降噪後輕銳化 → 機身與螢幕細節清楚
+# · 降飽和、壓暗中間調、提高對比 → 背景沉下去，設備浮出來
+# · 中間調/亮部去橘偏冷 → 修正室內燈泡的黃色偏，白色機身更乾淨
+# · S 曲線保留亮部 → 螢幕依然明亮通透
+# · 暗角 + 細顆粒 → 電影感聚焦，並避免壓縮色帶
 GRADE="hqdn3d=1.5:1.5:6:6,\
-eq=contrast=1.08:brightness=-0.03:saturation=0.82:gamma=0.97,\
-colorbalance=rs=-0.04:gs=-0.01:bs=0.05:rh=0.03:gh=0.01:bh=-0.03,\
-curves=all='0/0.02 0.25/0.21 0.5/0.5 0.75/0.79 1/0.98',\
-vignette=angle=PI/5:mode=forward,\
-unsharp=5:5:0.45:5:5:0,\
-noise=alls=3:allf=t"
+unsharp=5:5:0.4:5:5:0,\
+eq=contrast=1.12:brightness=-0.03:saturation=0.78:gamma=0.95,\
+colorbalance=rs=-0.06:gs=-0.02:bs=0.04:rm=-0.04:bm=0.03:rh=-0.02:bh=0.02,\
+curves=all='0/0.015 0.2/0.14 0.5/0.48 0.8/0.86 1/1',\
+vignette=angle=PI/4.5"
+GRAIN="noise=alls=3:allf=t"
 
-# 片頭片尾淡入淡出，搭配 loop 播放時銜接平順
-FADE="fade=t=in:st=0:d=0.8,fade=t=out:st=$(awk "BEGIN{print $DUR-0.8}"):d=0.8"
-
-encode () { # $1=高度 $2=後綴
-  local H="$1" S="$2"
-  local VF="scale=-2:${H}:flags=lanczos,fps=30,${GRADE},${FADE},format=yuv420p"
-  # H.264 MP4（全瀏覽器相容，faststart 可邊下載邊播）
-  ffmpeg -y -hide_banner -loglevel error -ss "$SS" -t "$DUR" -i "$IN" -an -vf "$VF" \
-    -c:v libx264 -preset slow -crf 23 -profile:v high -tune film \
-    -g 60 -movflags +faststart "$OUT/hero-${S}.mp4"
-  # AV1 WebM（同畫質檔案小 30–50%，現代瀏覽器優先載入）
-  ffmpeg -y -hide_banner -loglevel error -ss "$SS" -t "$DUR" -i "$IN" -an -vf "$VF" \
-    -c:v libsvtav1 -preset 6 -crf 36 -g 60 -svtav1-params tune=0 "$OUT/hero-${S}.webm"
+encode () { # $1=高度
+  local H="$1"
+  local VF="scale=-2:${H}:flags=lanczos,${GRADE},${GRAIN},${FADE},format=yuv420p"
+  echo "▶ 輸出 ${H}p"
+  # H.264 MP4：全瀏覽器相容，faststart 讓影片邊下載邊播
+  "${FF[@]}" -i "$TMP/master.mp4" -vf "$VF" -c:v libx264 -preset slow -crf "$CRF_MP4" \
+    -profile:v high -tune film -g 60 -movflags +faststart "$OUT/hero-${H}.mp4"
+  # AV1 WebM：同畫質檔案小 30–50%，現代瀏覽器優先使用
+  "${FF[@]}" -i "$TMP/master.mp4" -vf "$VF" -c:v libsvtav1 -preset 6 -crf "$CRF_AV1" \
+    -g 60 -svtav1-params tune=0 "$OUT/hero-${H}.webm"
 }
+encode 1080
+encode 720
 
-echo "▶ 輸出 1080p（桌機）"; encode 1080 1080
-echo "▶ 輸出 720p（手機）";  encode 720 720
-
-# 首幀海報圖（影片載入前顯示，避免黑畫面；也作為省電/減少動態模式的靜態圖）
-ffmpeg -y -hide_banner -loglevel error -ss "$(awk "BEGIN{print $SS+1}")" -i "$IN" -frames:v 1 \
-  -vf "scale=-2:1080:flags=lanczos,${GRADE%,noise*}" -c:v libwebp -quality 82 "$OUT/hero-poster.webp"
-ffmpeg -y -hide_banner -loglevel error -i "$OUT/hero-poster.webp" -q:v 3 "$OUT/hero-poster.jpg"
+# ── 3. 海報圖：影片載入前 / 減少動態模式時顯示 ────────────────────
+"${FF[@]}" -i "$TMP/master.mp4" -frames:v 1 -vf "scale=-2:1080:flags=lanczos,${GRADE}" \
+  -c:v libwebp -quality 82 "$OUT/hero-poster.webp"
+"${FF[@]}" -i "$OUT/hero-poster.webp" -q:v 3 "$OUT/hero-poster.jpg"
 
 echo "✔ 完成："; ls -lh "$OUT" | awk 'NR>1{print "  "$5"\t"$9}'

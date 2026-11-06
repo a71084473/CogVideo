@@ -26,8 +26,6 @@
         background:
           linear-gradient(180deg,rgba(7,8,10,.55) 0%,rgba(7,8,10,0) 28%,rgba(7,8,10,0) 55%,rgba(7,8,10,.92) 100%),
           linear-gradient(90deg,rgba(7,8,10,.7) 0%,rgba(7,8,10,0) 60%)}
-  .hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.035;
-        background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 
   .hero__nav{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
         padding:28px clamp(16px,5vw,72px);font-size:13px;letter-spacing:.22em;text-transform:uppercase}
@@ -60,7 +58,9 @@
   .toggle{position:absolute;right:clamp(16px,5vw,72px);top:84px;width:40px;height:40px;border-radius:50%;
         border:1px solid rgba(244,242,238,.3);background:rgba(0,0,0,.25);backdrop-filter:blur(6px);color:var(--ink);cursor:pointer}
 
-  @media (max-width:640px){.hero__nav nav{display:none}.scroll{display:none}}
+  @media (max-width:640px){.hero__nav nav{display:none}.scroll{display:none}
+    .eyebrow{letter-spacing:.2em;font-size:11px}.eyebrow::before{width:24px}
+    .hero::before{background:linear-gradient(180deg,rgba(7,8,10,.5) 0%,rgba(7,8,10,0) 25%,rgba(7,8,10,.35) 50%,rgba(7,8,10,.95) 82%)}}
   /* 使用者設定「減少動態」時只顯示靜態海報 */
   @media (prefers-reduced-motion:reduce){.hero video{display:none}.reveal{animation:none;opacity:1;transform:none}}
 </style>
@@ -81,9 +81,9 @@
   </header>
 
   <div class="hero__content">
-    <p class="eyebrow reveal d1">Precision Engineering</p>
-    <h1 class="reveal d2">精準，<br><b>源自每一個細節</b></h1>
-    <p class="lead reveal d3">在這裡放一句品牌主張，例如：以工業級標準打造，為專業而生的高階設備。</p>
+    <p class="eyebrow reveal d1">Smart Display Series</p>
+    <h1 class="reveal d2">隨處移動，<br><b>專屬你的大螢幕</b></h1>
+    <p class="lead reveal d3">可移動式智慧觸控螢幕，串流影音、視訊、工作一機完成。</p>
     <div class="cta reveal d4">
       <a class="btn btn--solid" href="#">探索產品</a>
       <a class="btn" href="#">預約展示</a>
