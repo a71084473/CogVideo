@@ -59,14 +59,17 @@ def parse_order_form(form):
         "company", "contact", "email", "phone", "rental_start", "rental_end",
         "pickup_at", "return_at", "note", "channel")}
     errors = []
-    labels = {"company": "公司名", "contact": "聯絡人", "email": "信箱", "phone": "電話",
-              "rental_start": "出租起日", "rental_end": "出租迄日",
-              "pickup_at": "取貨時間", "return_at": "歸還時間"}
-    for k, label in labels.items():
-        if not data[k]:
-            errors.append(f"請填寫{label}")
+    # 所有欄位都可以留空；日期沒填就用今天，時間沒填就用起日 10:00 / 迄日 18:00
     if data["channel"] not in CHANNELS:
-        errors.append("請選擇社群管道（LINE / 蝦皮 / 其他）")
+        data["channel"] = ""
+    if not data["rental_start"]:
+        data["rental_start"] = (data["pickup_at"] or date.today().isoformat())[:10]
+    if not data["rental_end"]:
+        data["rental_end"] = (data["return_at"] or data["rental_start"])[:10]
+    if not data["pickup_at"]:
+        data["pickup_at"] = data["rental_start"] + "T10:00"
+    if not data["return_at"]:
+        data["return_at"] = data["rental_end"] + "T18:00"
     if data["email"] and not EMAIL_RE.match(data["email"]):
         errors.append("信箱格式不正確")
     try:
@@ -89,7 +92,6 @@ def parse_order_form(form):
         except ValueError:
             q = 0
         if q <= 0:
-            errors.append("出租數量需大於 0")
             continue
         eq = get_db().execute("SELECT * FROM equipment WHERE id = ?", (eq_id,)).fetchone()
         if not eq:
@@ -97,8 +99,6 @@ def parse_order_form(form):
             continue
         items.append({"equipment_id": eq["id"], "qty": q, "unit_price": eq["daily_price"],
                       "equipment_name": eq["name"]})
-    if not items:
-        errors.append("請至少選擇一項設備")
     return data, items, errors
 
 
@@ -134,6 +134,8 @@ def confirm_order(order_id):
     db.execute("UPDATE orders SET status = 'confirmed', confirmed_at = datetime('now','localtime') "
                "WHERE id = ?", (order_id,))
     db.commit()
+    if not order["email"]:
+        return True, ["已確認出租（未填信箱，沒有寄確認信）"]
     status, err = send_confirmation(get_order(order_id))
     msg = {"sent": f"已確認出租，確認信已寄至 {order['email']}",
            "logged": "已確認出租（尚未設定 SMTP，確認信僅記錄於寄信紀錄）",
@@ -348,6 +350,8 @@ def register_routes(app):
             db.execute("UPDATE orders SET status='cancelled' WHERE id=?", (order_id,))
             db.commit()
             flash("訂單已取消", "ok")
+        elif action == "resend" and not order["email"]:
+            flash("這張訂單沒有填信箱，請先編輯訂單補上信箱", "error")
         elif action == "resend":
             status, err = send_confirmation(order)
             flash({"sent": "確認信已重新寄出", "logged": "未設定 SMTP，已記錄於寄信紀錄",

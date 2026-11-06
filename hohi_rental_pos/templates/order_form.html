@@ -18,10 +18,10 @@
   <div class="panel">
     <h2>出租時間</h2>
     <div class="form-grid">
-      <label>出租起日*<input type="date" name="rental_start" id="rental_start" value="{{ form.rental_start or today }}" required></label>
-      <label>出租迄日*<input type="date" name="rental_end" id="rental_end" value="{{ form.rental_end or today }}" required></label>
-      <label>取貨時間*<input type="datetime-local" name="pickup_at" id="pickup_at" value="{{ form.pickup_at }}" required></label>
-      <label>歸還時間*<input type="datetime-local" name="return_at" id="return_at" value="{{ form.return_at }}" required></label>
+      <label>出租起日<input type="date" name="rental_start" id="rental_start" value="{{ form.rental_start or today }}"></label>
+      <label>出租迄日<input type="date" name="rental_end" id="rental_end" value="{{ form.rental_end or today }}"></label>
+      <label>取貨時間<input type="datetime-local" name="pickup_at" id="pickup_at" value="{{ form.pickup_at }}"></label>
+      <label>歸還時間<input type="datetime-local" name="return_at" id="return_at" value="{{ form.return_at }}"></label>
     </div>
     <p class="muted">出租天數：<b id="days">1</b> 天</p>
   </div>
@@ -39,12 +39,12 @@
   <div class="panel">
     <h2>客戶資料</h2>
     <div class="form-grid">
-      <label>公司名*<input name="company" value="{{ form.company }}" required></label>
-      <label>聯絡人*<input name="contact" value="{{ form.contact }}" required></label>
-      <label>信箱*<input type="email" name="email" value="{{ form.email }}" required></label>
-      <label>電話*<input type="tel" name="phone" value="{{ form.phone }}" required></label>
-      <label>社群管道*<select name="channel" required>
-        <option value="">請選擇</option>
+      <label>公司名<input name="company" value="{{ form.company }}"></label>
+      <label>聯絡人<input name="contact" value="{{ form.contact }}"></label>
+      <label>信箱<input type="email" name="email" value="{{ form.email }}"></label>
+      <label>電話<input type="tel" name="phone" value="{{ form.phone }}"></label>
+      <label>社群管道<select name="channel">
+        <option value="">未選擇</option>
         {% for c in CHANNELS %}<option value="{{ c }}" {% if form.channel == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
       </select></label>
       <label class="wide">備註<textarea name="note" rows="3">{{ form.note }}</textarea></label>

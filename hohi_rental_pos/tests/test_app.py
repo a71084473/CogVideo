@@ -71,14 +71,21 @@ def test_draft_does_not_reserve_and_lifecycle(app, client):
 
 
 def test_validation(client):
-    r = client.post("/orders/new", data=order_data(email="bad", company=""), follow_redirects=True)
+    r = client.post("/orders/new", data=order_data(email="bad"), follow_redirects=True)
+    assert "信箱格式不正確" in r.get_data(as_text=True)
+
+
+def test_all_fields_optional(app, client):
+    r = client.post("/orders/new", data={"action": "confirm"}, follow_redirects=True)
     t = r.get_data(as_text=True)
-    assert "信箱格式不正確" in t and "請填寫公司名" in t
+    assert "未填信箱，沒有寄確認信" in t
+    with app.app_context():
+        o = get_db().execute("SELECT * FROM orders").fetchone()
+        assert o["status"] == "confirmed" and o["company"] == "" and o["pickup_at"].endswith("T10:00")
+        assert get_db().execute("SELECT COUNT(*) FROM email_log").fetchone()[0] == 0
 
 
-def test_channel_required_and_filter(app, client):
-    r = client.post("/orders/new", data=order_data(channel=""), follow_redirects=True)
-    assert "請選擇社群管道" in r.get_data(as_text=True)
+def test_channel_saved_and_filter(app, client):
     client.post("/orders/new", data=order_data(channel="蝦皮", action="save"))
     with app.app_context():
         assert get_db().execute("SELECT channel FROM orders").fetchone()[0] == "蝦皮"

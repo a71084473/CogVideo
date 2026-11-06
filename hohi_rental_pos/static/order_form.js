@@ -110,7 +110,7 @@
       const missing = Object.keys(LABEL).filter((k) => k !== 'note' && !fieldEl(k).value).map((k) => LABEL[k]);
       out.innerHTML = '';
       const parts = [filled.length ? `已填入：${filled.join('、')}` : '沒有辨識到可填入的內容'];
-      if (missing.length) parts.push(`尚缺：${missing.join('、')}`);
+      if (missing.length) parts.push(`未辨識到：${missing.join('、')}`);
       if (r.unmatched.length) parts.push(`找不到對應設備：${r.unmatched.join('、')}`);
       out.textContent = parts.join('　');
       loadAvail();

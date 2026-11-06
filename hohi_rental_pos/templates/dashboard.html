@@ -13,7 +13,7 @@
 
 {% if overdue %}
 <div class="flash error">⚠ 有 {{ overdue|length }} 筆訂單已超過預計歸還時間仍未歸還：
-  {% for o in overdue %}<a href="{{ url_for('order_detail', order_id=o.id) }}">{{ o.order_no }} {{ o.company }}</a>{% if not loop.last %}、{% endif %}{% endfor %}
+  {% for o in overdue %}<a href="{{ url_for('order_detail', order_id=o.id) }}">{{ o.order_no }} {{ o.company or '（未填公司）' }}</a>{% if not loop.last %}、{% endif %}{% endfor %}
 </div>
 {% endif %}
 
@@ -35,14 +35,14 @@
     <h2>當日取貨</h2>
     {% for o in pickups %}
       <a class="list-item" href="{{ url_for('order_detail', order_id=o.id) }}">
-        <b>{{ o.pickup_at|dt }}</b> {{ o.company }}（{{ o.contact }} {{ o.phone }}） {{ chan(o.channel) }} {{ badge(o.status) }}</a>
+        <b>{{ o.pickup_at|dt }}</b> {{ o.company or '（未填公司）' }}（{{ o.contact }} {{ o.phone }}） {{ chan(o.channel) }} {{ badge(o.status) }}</a>
     {% else %}<p class="muted">無</p>{% endfor %}
   </section>
   <section>
     <h2>當日歸還</h2>
     {% for o in returns %}
       <a class="list-item" href="{{ url_for('order_detail', order_id=o.id) }}">
-        <b>{{ o.return_at|dt }}</b> {{ o.company }}（{{ o.contact }} {{ o.phone }}） {{ chan(o.channel) }} {{ badge(o.status) }}</a>
+        <b>{{ o.return_at|dt }}</b> {{ o.company or '（未填公司）' }}（{{ o.contact }} {{ o.phone }}） {{ chan(o.channel) }} {{ badge(o.status) }}</a>
     {% else %}<p class="muted">無</p>{% endfor %}
   </section>
 </div>

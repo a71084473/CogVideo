@@ -22,7 +22,7 @@
   {% for o in orders %}
   <tr onclick="location='{{ url_for('order_detail', order_id=o.id) }}'" class="clickable">
     <td><a href="{{ url_for('order_detail', order_id=o.id) }}">{{ o.order_no }}</a></td>
-    <td>{{ o.company }}</td><td>{{ o.contact }}</td><td>{{ o.phone }}</td><td>{{ chan(o.channel) }}</td>
+    <td>{{ o.company or '（未填公司）' }}</td><td>{{ o.contact }}</td><td>{{ o.phone }}</td><td>{{ chan(o.channel) }}</td>
     <td>{{ o.rental_start }} ~ {{ o.rental_end }}</td>
     <td>{{ o.pickup_at|dt }}</td><td>{{ o.return_at|dt }}</td><td>{{ badge(o.status) }}</td>
   </tr>

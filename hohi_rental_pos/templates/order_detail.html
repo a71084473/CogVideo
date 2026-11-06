@@ -14,7 +14,7 @@
       {% if order.status == 'picked_up' %}
         <button class="btn primary" name="action" value="return">登記歸還</button>
       {% endif %}
-      {% if order.status in ('confirmed', 'picked_up') %}
+      {% if order.status in ('confirmed', 'picked_up') and order.email %}
         <button class="btn" name="action" value="resend">重寄確認信</button>
       {% endif %}
       {% if order.status in ('draft', 'confirmed') %}
@@ -30,7 +30,7 @@
   <section class="panel">
     <h2>客戶資料</h2>
     <dl>
-      <dt>公司名</dt><dd>{{ order.company }}</dd>
+      <dt>公司名</dt><dd>{{ order.company or '—' }}</dd>
       <dt>聯絡人</dt><dd>{{ order.contact }}</dd>
       <dt>信箱</dt><dd><a href="mailto:{{ order.email }}">{{ order.email }}</a></dd>
       <dt>電話</dt><dd><a href="tel:{{ order.phone }}">{{ order.phone }}</a></dd>
